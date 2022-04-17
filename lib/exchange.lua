@@ -22,49 +22,57 @@ local Num2port = {}
 local Port2num = {}
 
 function beduino.lib.set_input(nvm, port, val)
-	port = (port or 0) % 8
-	nvm.input = nvm.input or {}
-	nvm.input[port] = val
+	print("set_input", port, val)
+	if port and port < 8 then
+		nvm.input = nvm.input or {}
+		nvm.input[port] = val
+	end
 end
 
 function beduino.lib.get_input(nvm, port)
-	port = (port or 0) % 8
-	nvm.input = nvm.input or {}
-	print("get_input", port, nvm.input[port] or 0)
-	return nvm.input[port] or 0
+	print("get_input", port)
+	if port and port < 8 then
+		nvm.input = nvm.input or {}
+		return nvm.input[port] or 0
+	end
 end
 
 function beduino.lib.set_output(nvm, port, val)
-	port = (port or 0) % 8
-	nvm.output = nvm.output or {}
-	if nvm.output[port] ~= val then
-		nvm.output[port] = val
-		return true
+	print("set_output", port, val)
+	if port and port < 8 then
+		nvm.output = nvm.output or {}
+		if nvm.output[port] ~= val then
+			nvm.output[port] = val
+			return true
+		end
 	end
 end
 
 function beduino.lib.get_output(nvm, port)
-	port = (port or 0) % 8
-	nvm.output = nvm.output or {}
-	return nvm.output[port] or 0
+	print("get_output", port)
+	if port and port < 8 then
+		nvm.output = nvm.output or {}
+		return nvm.output[port] or 0
+	end
 end
 
 -- techage/tubelib like numbers
 function beduino.lib.add_node_data(pos, port, number)
-	local hash = H(pos)
-	port = (port or 0) % 8
-	Num2port[hash] = Num2port[hash] or {}
-	Port2num[hash] = Port2num[hash] or {}
-	NodeInfo[hash] = NodeInfo[hash] or {}
-	
-	if number and number:match("[%d]+") then
-		Num2port[hash][number] = port
-		Port2num[hash][port] = number
-		local info = beduino.lib.get_node_info(number)
-		if info then
-			local ndef = minetest.registered_nodes[info.name]
-			if ndef and ndef.description then
-				NodeInfo[hash][port] = {pos = pos, name = ndef.description}
+	if port and port < 8 then
+		local hash = H(pos)
+		Num2port[hash] = Num2port[hash] or {}
+		Port2num[hash] = Port2num[hash] or {}
+		NodeInfo[hash] = NodeInfo[hash] or {}
+		
+		if number and number:match("[%d]+") then
+			Num2port[hash][number] = port
+			Port2num[hash][port] = number
+			local info = beduino.lib.get_node_info(number)
+			if info then
+				local ndef = minetest.registered_nodes[info.name]
+				if ndef and ndef.description then
+					NodeInfo[hash][port] = {pos = pos, name = ndef.description}
+				end
 			end
 		end
 	end

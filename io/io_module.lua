@@ -49,10 +49,15 @@ local function on_input(pos, address)
 end
 
 local function on_output(pos, address, value)
+	local meta = M(pos)
 	local nvm = lib.get_nvm(pos)
-	local baseaddr = M(pos):get_int("baseaddr")
+	local baseaddr = meta:get_int("baseaddr")
+	local own_num = meta:set_string("own_number")
 	local port = address - baseaddr
+	local number = lib.get_node_number(pos, port)
+	local topic = lib.get_text_cmnd(value)
 	lib.set_output(nvm, port, value)
+	lib.send_single(own_num, number, topic, nil)
 end
 
 local function formspec_place(pos)
@@ -241,9 +246,13 @@ beduino.lib.register_node({"beduino:io_module"}, {
 		if val then
 			local nvm = lib.get_nvm(pos)
 			local port = lib.get_node_port(pos, src)
+			print("on_recv_message", src, port)
 			lib.set_input(nvm, port, val)
 		else
 			return "unsupported"
 		end
+	end,
+	on_node_load = function(pos)
+		store_exchange_data(pos)
 	end,
 })

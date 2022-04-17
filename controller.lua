@@ -87,12 +87,18 @@ end
 
 -- CPU definition
 local cpu_def = {
-	is_beduino = true,
 	cycle_time = 1, -- timer cycle time
 	instr_per_cycle = 100000,
 	input_costs = 1000,  -- number of instructions
 	output_costs = 5000, -- number of instructions
 	system_costs = 2000, -- number of instructions
+	startup_code = {
+		"call init",
+		"@loop:",
+		"call loop",
+		"nop",
+		"jump @loop",
+	},
 	-- Called for each 'input' instruction.
 	on_input = function(pos, address)
 		local hash = H(pos)
@@ -196,7 +202,7 @@ minetest.register_node("beduino:controller", {
 })
 
 minetest.register_lbm({
-	label = "beduino Load Controller",
+	label = "Beduino Load Controller",
 	name = "beduino:load_controller",
 	nodenames = {"beduino:controller"},
 	run_at_every_load = true,
@@ -205,6 +211,7 @@ minetest.register_lbm({
 		local prog_pos = S2P(M(pos):get_string("prog_pos"))
 		if M(pos):get_int("running") == 1 then
 			vm16.load_cpu(pos, prog_pos, cpu_def)
+			cpu_def.on_init(pos, prog_pos)
 		end
 	end
 })
