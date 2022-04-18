@@ -28,6 +28,8 @@ local DESCRIPTION = "Beduino I/O Module"
 
 local Num2addr = {}
 
+local BaseAddr2Idx = {[0]=1, [8]=2, [16]=3, [24]=4, [32]=5, [40]=6, [48]=7, [56]=8}
+
 local function get_node_name(pos, lbl, port)
 	if lbl and lbl ~= "" and lbl ~= "-" then
 		return lbl
@@ -57,13 +59,20 @@ local function on_output(pos, address, value)
 	local number = lib.get_node_number(pos, port)
 	local topic = lib.get_text_cmnd(value)
 	lib.set_output(nvm, port, value)
-	lib.send_single(own_num, number, topic, nil)
+	local resp = lib.send_single(own_num, number, topic, nil)
+	local val = lib.get_num_cmnd(resp) or 0xffff
+	lib.set_input(nvm, port, val)
 end
 
 local function formspec_place(pos)
+	local baseaddr = M(pos):get_int("baseaddr")
+	local val = BaseAddr2Idx[baseaddr] or 0
+		
 	return "size[4,2]"..
-		"field[0.2,0.8;3.8,1;addr;I/O port: (1 - 65535);]"..
-		"button_exit[1.0,1.2;2,1;exit;Save]"
+		--"field[0.2,0.8;3.8,1;addr;I/O port: (1 - 65535);]"..
+		"label[0.1,0.0;I/O base port:]"..
+		"dropdown[0.1,0.6;1.5;baseaddr;0,8,16,24,32,40,48,56;"..val.."]".. 
+		"button_exit[2.0,0.55;2,1;exit;Save]"
 end
 
 local function formspec_help()
@@ -167,7 +176,10 @@ local function on_receive_fields(pos, formname, fields, player)
 	elseif fields.tab == "2" then
 		nvm.in_use = false
 		meta:set_string("formspec", formspec_use(pos))
-	elseif fields.tab == "1" or fields.save then
+	elseif fields.tab == "1" then
+		nvm.in_use = true
+		meta:set_string("formspec", formspec_use(pos))
+	elseif fields.save then
 		Num2addr[H(pos)] = {}
 		nvm.in_use = true
 		store_settings(pos, meta, fields)
@@ -175,9 +187,9 @@ local function on_receive_fields(pos, formname, fields, player)
 		meta:set_string("formspec", formspec_use(pos))
 	elseif fields.update then
 		meta:set_string("formspec", formspec_use(pos))
-	elseif fields.exit and fields.addr then
-		local address = tonumber(fields.addr) or 1
-		meta:set_int("baseaddr", address)
+	elseif fields.exit and fields.baseaddr then
+		local baseaddr = tonumber(fields.baseaddr) or 1
+		meta:set_int("baseaddr", baseaddr)
 		lib.infotext(meta, DESCRIPTION)
 		meta:set_string("formspec", formspec_use(pos))
 	end
@@ -219,7 +231,7 @@ minetest.register_node("beduino:io_module", {
 		meta:set_string("own_number", own_num)  -- for tubelib
 		meta:set_string("owner", placer:get_player_name())
 		lib.infotext(meta, DESCRIPTION)
-		meta:set_string("formspec", formspec_place())
+		meta:set_string("formspec", formspec_place(pos))
 	end,
 
 	on_receive_fields = on_receive_fields,
@@ -256,3 +268,4 @@ beduino.lib.register_node({"beduino:io_module"}, {
 		store_exchange_data(pos)
 	end,
 })
+

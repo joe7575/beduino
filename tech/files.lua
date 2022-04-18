@@ -15,34 +15,6 @@
 local lib = beduino.lib
 local io  = beduino.io
 
-local iom_c = [[
-func read(port, cmnd) {
-  output(port, cmnd);
-  return input(port); 
-}
-
-func send_cmnd(port, ident, add_data, resp) {
-  system(SEND_CMND1, port, ident);
-  system(SEND_CMND2, port, add_data);
-  system(SEND_CMND3, port, resp);
-}
-]]
-
-local comm_c = [[
-const SEND_MSG = 1;
-const RECV_MSG = 2;
-
-static var buff[64];
-
-func send_msg(dst_addr, ptr) {
-  return system(SEND_MSG, dst_addr, ptr);
-}
-
-func recv_msg(ptr) {
-  return system(RECV_MSG, ptr);
-}
-]]
-
 local example1_asm = [[
 ; Read button on input #1 and
 ; control demo lamp on output #1.
@@ -152,7 +124,7 @@ func main() {
 ]]
 
 function beduino.lib.add_ro_files(prog_pos)
-	vm16.add_ro_file(prog_pos, "command.c",    lib.get_command_file())
+	vm16.add_ro_file(prog_pos, "iom.c",    lib.get_command_file())
 	vm16.add_ro_file(prog_pos, "example1.c",   example1_c)
 	vm16.add_ro_file(prog_pos, "example2.c",   example2_c)
 	vm16.add_ro_file(prog_pos, "example3.c",   example3_c)

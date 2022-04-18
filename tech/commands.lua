@@ -1,44 +1,3 @@
---[[
-
-	Beduino
-	=======
-
-	Copyright (C) 2022 Joachim Stolberg
-
-	AGPL v3
-	See LICENSE.txt for more information
-
-	Key/value store for string/number command conversion
-
-]]--
-
-local lNum2str = {[0] = "off"}
-local lNum2const = {[0] = "OFF"}
-local tStr2num = {off = 0}
-
-function beduino.lib.register_cmnd(command, const)
-	const = const or command:upper()
-	lNum2str[#lNum2str + 1] = command
-	lNum2const[#lNum2const + 1] = const
-	tStr2num[command] = #lNum2str
-end
-
-function beduino.lib.get_description()
-	local out = {"   Beduino I/O Commands", ""}
-	for idx = 0, #lNum2str, 2 do
-		out[#out + 1] = string.format("%3d - %-16s | %3d - %-16s", idx, lNum2str[idx], idx + 1, lNum2str[idx + 1] or "")
-	end
-	return table.concat(out, ",")
-end
-
-function beduino.lib.get_command_file()
-	local out = {"// Beduino I/O Command Constants", ""}
-	for idx, const in ipairs(lNum2const) do
-		out[#out + 1] = string.format("const %-16s = %d;", const, idx)
-	end
-	return table. concat(out, "\n")
-end
-
 if minetest.global_exists("techage") then
 
 	-- "off" is zero by default
@@ -88,12 +47,4 @@ elseif minetest.global_exists("tubelib") then
 	beduino.lib.register_cmnd("full")
 	beduino.lib.register_cmnd("empty")
 
-end
-
-function beduino.lib.get_text_cmnd(num)
-	return lNum2str[num]
-end
-
-function beduino.lib.get_num_cmnd(str)
-	return tStr2num[str]
 end

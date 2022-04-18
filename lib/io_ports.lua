@@ -8,7 +8,7 @@
 	AGPL v3
 	See LICENSE.txt for more information
 
-	Data/command exchange between I/O modules an other nodes
+	I(O port handling I/O modules
 
 ]]--
 

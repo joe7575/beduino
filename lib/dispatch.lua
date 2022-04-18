@@ -8,7 +8,7 @@
 	AGPL v3
 	See LICENSE.txt for more information
 
-   System Handlers
+   System Call Dispatcher
    
 ]]--
 
@@ -33,9 +33,9 @@ function beduino.io.register_SystemHandler(address, func, desc)
 	end
 end
 
-function beduino.io.on_system(pos, address, val1, val2)
+function beduino.io.on_system(pos, address, val1, val2, val3)
 	if SystemHandlers[address] then
-		local sts, resp = pcall(SystemHandlers[address], pos, address, val1, val2)
+		local sts, resp = pcall(SystemHandlers[address], pos, address, val1, val2, val3)
 		if sts then
 			return resp
 		else

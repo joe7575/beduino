@@ -117,13 +117,13 @@ local cpu_def = {
 		end
 	end,
 	-- Called for each 'system' instruction.
-	on_system = function(pos, address, val1, val2)
+	on_system = function(pos, address, val1, val2, val3)
 		if address == 0 then
 			-- stdout
 			local prog_pos = S2P(M(pos):get_string("prog_pos"))
 			return vm16.putchar(prog_pos, val1) or 0xffff, 500
 		else
-			return io.on_system(pos, address, val1, val2) or 0xffff
+			return io.on_system(pos, address, val1, val2, val3) or 0xffff
 		end
 	end,
 	-- Called when CPU stops.
