@@ -12,15 +12,21 @@
 
 ]]--
 
-local lNum2str = {[0] = "off"}
-local lNum2const = {[0] = "IO_OFF"}
-local tStr2num = {off = 0}
+local lNum2str = {}
+local lNum2const = {}
+local tStr2num = {}
 
 function beduino.lib.register_cmnd(command, const)
 	const = const or command:upper()
-	lNum2str[#lNum2str + 1] = command
-	lNum2const[#lNum2const + 1] = "IO_" .. const
-	tStr2num[command] = #lNum2str
+	if not next(lNum2str) then
+		table.insert(lNum2str, 0, command)
+		table.insert(lNum2const, 0, "IO_" .. const)
+		tStr2num[command] = 0
+	else
+		table.insert(lNum2str, command)
+		table.insert(lNum2const, "IO_" .. const)
+		tStr2num[command] = #lNum2str
+	end
 end
 
 function beduino.lib.get_description()
@@ -28,20 +34,13 @@ function beduino.lib.get_description()
 	for idx = 0, #lNum2str do
 		out[#out + 1] = minetest.formspec_escape(string.format('%-16s = "%s"', lNum2const[idx], lNum2str[idx]))
 	end
-	out[#out + 1] = ""
-	out[#out + 1] = minetest.formspec_escape("value = input(port);")
-	out[#out + 1] = minetest.formspec_escape("output(port, value);")
-	out[#out + 1] = minetest.formspec_escape("state = read(port, IO_STATE);  // read machine state")
-	out[#out + 1] = minetest.formspec_escape("send_cmnd(port, ident, add_data, resp); // see manual")
-	
 	return table.concat(out, ",")
 end
 
 function beduino.lib.get_command_file()
 	local out = {"// Beduino I/O Command Constants", ""}
-	out[#out + 1] = string.format("const %-16s = %d;", lNum2const[0], 0)
-	for idx, const in ipairs(lNum2const) do
-		out[#out + 1] = string.format("const %-16s = %d;", const, idx)
+	for idx = 0, #lNum2str do
+		out[#out + 1] = string.format("const %-16s = %d;", lNum2const[idx], idx)
 	end
 	return table.concat(out, "\n")
 end

@@ -17,17 +17,27 @@ end
 
 beduino = {}
 beduino.lib = {}
-beduino.io = {}
+beduino.comm = {}
+beduino.tech = {}
 
 local MP = minetest.get_modpath("beduino")
 
 dofile(MP.."/lib/lib.lua")
-dofile(MP.."/lib/command.lua")
-dofile(MP.."/lib/wrapper.lua")
-dofile(MP.."/lib/files.lua")
-dofile(MP.."/lib/exchange.lua")
+dofile(MP.."/lib/kv_store.lua")
+dofile(MP.."/lib/dispatch.lua")
+dofile(MP.."/lib/os.lua")
+
+dofile(MP.."/com/router.lua")
+dofile(MP.."/com/broker.lua")
+
 dofile(MP.."/controller.lua")
-dofile(MP.."/io/system.lua")
-dofile(MP.."/io/io_module.lua")
-dofile(MP.."/io/sys_calls.lua")
-dofile(MP.."/recipes.lua")
+
+if minetest.global_exists("techage") or minetest.global_exists("tubelib") then
+	dofile(MP.."/tech/io_ports.lua")
+	dofile(MP.."/tech/wrapper.lua")
+	dofile(MP.."/tech/commands.lua")
+	dofile(MP.."/tech/io_module.lua")
+	dofile(MP.."/tech/sys_calls.lua")
+	dofile(MP.."/tech/files.lua")
+	dofile(MP.."/tech/recipes.lua")
+end

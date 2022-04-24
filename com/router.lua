@@ -8,7 +8,7 @@
 	AGPL v3
 	See LICENSE.txt for more information
 
-	I/O Module
+	Broker
 
 ]]--
 
@@ -21,7 +21,7 @@ local S2P = function(s) return minetest.string_to_pos(s) end
 local lib = beduino.lib
 local io  = beduino.io
 
-local DESCRIPTION = "Beduino Router"
+local DESCRIPTION = "Beduino Broker"
 
 local Num2addr = {}
 
@@ -39,7 +39,7 @@ local function get_node_name(pos, lbl, port)
 end
 
 local function formspec(pos)
-	Zeigt die empfangenen Nachrichten an
+	--Zeigt die empfangenen Nachrichten an
 --	local numbers = S2T(M(pos):get_string("numbers"))
 --	local labels  = S2T(M(pos):get_string("labels"))
 --	local baseaddr = M(pos):get_int("baseaddr")
@@ -87,13 +87,13 @@ local function formspec(pos)
 end
 
 local function on_send_msg(pos, dst_addr, msg)
-	local dest_pos = ...
-	local mem = lib.get_mem(pos)
-	mem.rx_msgs = mem.rx_msgs or {}
-	table.insert(mem.rx_msgs, {src_addr = src_addr, data = msg})
-	if #mem.rx_msgs > 3 then
-		table.remove(mem.rx_msgs, 1)
-	end
+--	local dest_pos = ...
+--	local mem = lib.get_mem(pos)
+--	mem.rx_msgs = mem.rx_msgs or {}
+--	table.insert(mem.rx_msgs, {src_addr = src_addr, data = msg})
+--	if #mem.rx_msgs > 3 then
+--		table.remove(mem.rx_msgs, 1)
+--	end
 end
 
 local function on_recv_msg(pos)
@@ -167,65 +167,65 @@ local function on_rightclick(pos, node, clicker, itemstack, pointed_thing)
 	end
 end
 
-minetest.register_node("beduino:io_module", {
-	description = DESCRIPTION,
-	inventory_image = "beduino_iom_inventory.png",
-	wield_image = "beduino_iom_inventory.png",
-	tiles = {
-		"beduino_controller_side.png",
-		"beduino_controller_side.png",
-		"beduino_controller_side.png",
-		"beduino_controller_side.png",
-		"beduino_controller_side.png",
-		"beduino_controller_side.png^beduino_iom.png",
-	},
-	drawtype = "nodebox",
-	node_box = {
-		type = "fixed",
-		fixed = {
-			{-6/32, -6/32, 12/32,  6/32,  6/32, 16/32},
-		},
-	},
+--minetest.register_node("beduino:io_module", {
+--	description = DESCRIPTION,
+--	inventory_image = "beduino_iom_inventory.png",
+--	wield_image = "beduino_iom_inventory.png",
+--	tiles = {
+--		"beduino_controller_side.png",
+--		"beduino_controller_side.png",
+--		"beduino_controller_side.png",
+--		"beduino_controller_side.png",
+--		"beduino_controller_side.png",
+--		"beduino_controller_side.png^beduino_iom.png",
+--	},
+--	drawtype = "nodebox",
+--	node_box = {
+--		type = "fixed",
+--		fixed = {
+--			{-6/32, -6/32, 12/32,  6/32,  6/32, 16/32},
+--		},
+--	},
 
-	after_place_node = function(pos, placer)
-		local meta = M(pos)
-		local own_num = lib.add_node(pos, "beduino:io_module")
-		meta:set_string("node_number", own_num)  -- for techage
-		meta:set_string("own_number", own_num)  -- for tubelib
-		meta:set_string("owner", placer:get_player_name())
-		lib.infotext(meta, DESCRIPTION)
-		meta:set_string("formspec", formspec_place())
-	end,
+--	after_place_node = function(pos, placer)
+--		local meta = M(pos)
+--		local own_num = lib.add_node(pos, "beduino:io_module")
+--		meta:set_string("node_number", own_num)  -- for techage
+--		meta:set_string("own_number", own_num)  -- for tubelib
+--		meta:set_string("owner", placer:get_player_name())
+--		lib.infotext(meta, DESCRIPTION)
+--		meta:set_string("formspec", formspec_place())
+--	end,
 
-	on_receive_fields = on_receive_fields,
-	on_init_io = on_init_io,
-	on_start_io = on_start_io,
-	on_receive_fields = on_receive_fields,
-	on_rightclick = on_rightclick,
+--	on_receive_fields = on_receive_fields,
+--	on_init_io = on_init_io,
+--	on_start_io = on_start_io,
+--	on_receive_fields = on_receive_fields,
+--	on_rightclick = on_rightclick,
 
-	paramtype = "light",
-	use_texture_alpha = "clip",
-	sunlight_propagates = true,
-	paramtype2 = "facedir",
-	groups = {choppy=2, cracky=2, crumbly=2},
-	is_ground_content = false,
-})
+--	paramtype = "light",
+--	use_texture_alpha = "clip",
+--	sunlight_propagates = true,
+--	paramtype2 = "facedir",
+--	groups = {choppy=2, cracky=2, crumbly=2},
+--	is_ground_content = false,
+--})
 
-beduino.register_io_nodes({"beduino:io_module"})
-beduino.lib.register_node({"beduino:io_module"}, {
-	on_recv_message = function(pos, src, topic, payload)
-		if lib.tubelib then
-			pos, src, topic = pos, topic, src
-		end
-		local val = lib.get_num_cmnd(topic)
-		if val then
-			local nvm = lib.get_nvm(pos)
-			local port = lib.get_node_port(pos, src)
-			lib.set_input(nvm, port, val)
-		else
-			return "unsupported"
-		end
-	end,
-})
+--beduino.register_io_nodes({"beduino:io_module"})
+--beduino.lib.register_node({"beduino:io_module"}, {
+--	on_recv_message = function(pos, src, topic, payload)
+--		if lib.tubelib then
+--			pos, src, topic = pos, topic, src
+--		end
+--		local val = lib.get_num_cmnd(topic)
+--		if val then
+--			local nvm = lib.get_nvm(pos)
+--			local port = lib.get_node_port(pos, src)
+--			lib.set_input(nvm, port, val)
+--		else
+--			return "unsupported"
+--		end
+--	end,
+--})
 
-lbm: broker mit pos und number registrieren
+--lbm: broker mit pos und number registrieren

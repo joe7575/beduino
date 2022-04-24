@@ -15,6 +15,137 @@
 local lib = beduino.lib
 local io  = beduino.io
 
+if minetest.global_exists("techage") then
+
+local iom_c = [[
+func event() {
+  var ptr = 2;
+  var res = *ptr;
+  *ptr = 0; 
+  return res;
+}
+
+func read(port, cmnd) {
+  output(port, cmnd);
+  return input(port); 
+}
+
+func send_cmnd(address, ident, add_data) {
+  system(0x100, address, ident, add_data);
+}
+
+func request_data(address, ident, add_data, resp) {
+  system(0x101, address, resp);
+  system(0x102, address, ident, add_data);
+}
+]]
+vm16.register_ro_file("beduino", "ta_iom.c", iom_c)
+vm16.register_ro_file("beduino", "ta_cmnd.c", lib.get_command_file())
+
+elseif minetest.global_exists("tubelib") then
+
+local iom_c = [[
+func event() {
+  var ptr = 2;
+  var res = *ptr;
+  *ptr = 0; 
+  return res;
+}
+
+func read(port, cmnd) {
+  output(port, cmnd);
+  return input(port); 
+}
+
+func send_cmnd(address, ident, add_data) {
+  system(0x120, address, ident, add_data);
+}
+
+func request_data(address, ident, add_data, resp) {
+  system(0x121, address, resp);
+  system(0x122, address, ident, add_data);
+}
+]]
+vm16.register_ro_file("beduino", "tp_iom.c", iom_c)
+vm16.register_ro_file("beduino", "tp_cmnd.c", lib.get_command_file())
+
+end
+
+local stdlib_asm = [[
+;===================================
+; stdlib v1.0
+; - itoa(c, str)
+; - itoha(c, str)
+;===================================
+
+global itoa
+global itoha
+
+  .code
+
+;===================================
+; [01] itoa(val, str)
+; val: [SP+2]
+; str: [SP+1]
+;===================================
+itoa:
+  move A, [SP+2]
+  move X, [SP+1]  
+  move D, X      ; return val
+  push #0        ; end-of-string
+
+loop01:
+  move B, A
+  div  B, #10    ; rest in B
+  move C, A
+  mod  C, #10    ; digit in C
+  add  C, #48
+  push C         ; store on stack
+  move A, B
+  bnze A, loop01 ; next digit
+
+output01:
+  pop  B
+  move [X]+, B
+  bnze B, output01
+
+exit01:
+  move A, D
+  ret
+
+;===================================
+; [02] itoha(val, str)
+; val: [SP+2]
+; str: [SP+1]
+;===================================
+itoha:
+  move A, [SP+2]
+  move X, [SP+1]  
+  move D, X      ; return val
+  push #0        ; end-of-string
+  move C, #4     ; num digits
+
+loop02:
+  move B, A
+  div  B, #$10   ; rest in B
+  mod  A, #$10   ; digit in C
+  sklt A, #10    ; C < 10 => jmp +2
+  add  A, #7     ; A-F offset
+  add  A, #48    ; 0-9 offset
+  push A         ; store on stack
+  move A, B
+  dbnz C, loop02 ; next digit
+
+output02:
+  pop  B
+  move [X]+, B
+  bnze B, output02
+
+exit02:
+  move A, D
+  ret
+]]
+
 local example1_asm = [[
 ; Read button on input #1 and
 ; control demo lamp on output #1.
@@ -33,7 +164,7 @@ loop:
 ]]
 
 local example1_c = [[
-// Read button on input #1 and
+// Read button on input #0 and
 // control demo lamp on output #1.
 
 static var idx = 0;
@@ -44,7 +175,7 @@ func init() {
 }
 
 func loop() {
-  if(input(1) == 1) {
+  if(input(0) == 1) {
     output(1, idx);
     idx = (idx + 1) % 64;
   } else {
@@ -123,11 +254,14 @@ func main() {
 }
 ]]
 
-function beduino.lib.add_ro_files(prog_pos)
-	vm16.add_ro_file(prog_pos, "iom.c",    lib.get_command_file())
-	vm16.add_ro_file(prog_pos, "example1.c",   example1_c)
-	vm16.add_ro_file(prog_pos, "example2.c",   example2_c)
-	vm16.add_ro_file(prog_pos, "example3.c",   example3_c)
-	vm16.add_ro_file(prog_pos, "example4.c",   example4_c)
-	vm16.add_ro_file(prog_pos, "example1.asm", example1_asm)
-end
+vm16.register_ro_file("beduino", "stdio.asm",  vm16.libc.stdio_asm)
+vm16.register_ro_file("beduino", "mem.asm",    vm16.libc.mem_asm)
+vm16.register_ro_file("beduino", "string.asm", vm16.libc.string_asm)
+vm16.register_ro_file("beduino", "math.asm",   vm16.libc.math_asm)
+vm16.register_ro_file("beduino", "stdlib.asm", stdlib_asm)
+
+vm16.register_ro_file("beduino", "example1.c",   example1_c)
+vm16.register_ro_file("beduino", "example2.c",   example2_c)
+vm16.register_ro_file("beduino", "example3.c",   example3_c)
+vm16.register_ro_file("beduino", "example4.c",   example4_c)
+vm16.register_ro_file("beduino", "example1.asm", example1_asm)

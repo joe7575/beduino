@@ -21,24 +21,24 @@ local NodeInfo = {}    -- [pos_hash][port] = {....}
 local Num2port = {}
 local Port2num = {}
 
-function beduino.lib.set_input(nvm, port, val)
-	print("set_input", port, val)
+function beduino.tech.set_input(nvm, port, val)
+	--print("set_input", port, val)
 	if port and port < 8 then
 		nvm.input = nvm.input or {}
 		nvm.input[port] = val
 	end
 end
 
-function beduino.lib.get_input(nvm, port)
-	print("get_input", port)
+function beduino.tech.get_input(nvm, port)
+	--print("get_input", port)
 	if port and port < 8 then
 		nvm.input = nvm.input or {}
 		return nvm.input[port] or 0
 	end
 end
 
-function beduino.lib.set_output(nvm, port, val)
-	print("set_output", port, val)
+function beduino.tech.set_output(nvm, port, val)
+	--print("set_output", port, val)
 	if port and port < 8 then
 		nvm.output = nvm.output or {}
 		if nvm.output[port] ~= val then
@@ -48,8 +48,8 @@ function beduino.lib.set_output(nvm, port, val)
 	end
 end
 
-function beduino.lib.get_output(nvm, port)
-	print("get_output", port)
+function beduino.tech.get_output(nvm, port)
+	--print("get_output", port)
 	if port and port < 8 then
 		nvm.output = nvm.output or {}
 		return nvm.output[port] or 0
@@ -57,7 +57,7 @@ function beduino.lib.get_output(nvm, port)
 end
 
 -- techage/tubelib like numbers
-function beduino.lib.add_node_data(pos, port, number)
+function beduino.tech.add_node_data(pos, port, number)
 	if port and port < 8 then
 		local hash = H(pos)
 		Num2port[hash] = Num2port[hash] or {}
@@ -67,7 +67,7 @@ function beduino.lib.add_node_data(pos, port, number)
 		if number and number:match("[%d]+") then
 			Num2port[hash][number] = port
 			Port2num[hash][port] = number
-			local info = beduino.lib.get_node_info(number)
+			local info = beduino.tech.get_node_info(number)
 			if info then
 				local ndef = minetest.registered_nodes[info.name]
 				if ndef and ndef.description then
@@ -78,25 +78,25 @@ function beduino.lib.add_node_data(pos, port, number)
 	end
 end
 
-function beduino.lib.get_node_data(pos, port)
+function beduino.tech.get_node_data(pos, port)
 	local hash = H(pos)
 	NodeInfo[hash] = NodeInfo[hash] or {}
 	return NodeInfo[hash][port]
 end
 
-function beduino.lib.get_node_number(pos, port)
+function beduino.tech.get_node_number(pos, port)
 	local hash = H(pos)
 	Port2num[hash] = Port2num[hash] or {}
 	return Port2num[hash][port]
 end
 
-function beduino.lib.get_node_port(pos, number)
+function beduino.tech.get_node_port(pos, number)
 	local hash = H(pos)
 	Num2port[hash] = Num2port[hash] or {}
 	return Num2port[hash][number]
 end
 
-function beduino.lib.reset_node_data(pos)
+function beduino.tech.reset_node_data(pos)
 	local hash = H(pos)
 	NodeInfo[hash] = {}
 	Num2port[hash] = {}

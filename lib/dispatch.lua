@@ -12,34 +12,21 @@
    
 ]]--
 
--- for lazy programmers
-local M = minetest.get_meta
-local H = minetest.hash_node_position
-local P2S = function(pos) if pos then return minetest.pos_to_string(pos) end end
-local S2P = function(s) return minetest.string_to_pos(s) end
-
-local SystemHandlers = {}  -- on startup generated: t[address] = func
+local SystemHandlers = {}  -- on startup generated: t[number] = func
 
 beduino.SysDesc = ""
 
-function beduino.io.register_SystemHandler(address, func, desc)
-	SystemHandlers[address] = func
-	if desc then
-		desc = desc:gsub(",", "\\,")
-		desc = desc:gsub("\n", ",")
-		desc = desc:gsub("#", "\\#")
-		desc = desc:gsub(";", "\\;")
-		beduino.SysDesc = beduino.SysDesc..","..desc
-	end
+function beduino.lib.register_SystemHandler(number, func)
+	SystemHandlers[number] = func
 end
 
-function beduino.io.on_system(pos, address, val1, val2, val3)
+function beduino.lib.on_system(cpu_pos, address, regA, regB, regC)
 	if SystemHandlers[address] then
-		local sts, resp = pcall(SystemHandlers[address], pos, address, val1, val2, val3)
+		local sts, resp = pcall(SystemHandlers[address], cpu_pos, address, regA, regB, regC)
 		if sts then
 			return resp
 		else
-			minetest.log("warning", "[beduino] pcall exception: "..resp)
+			minetest.log("warning", "[Beduino] pcall exception: " .. resp)
 		end
 	end
 	return 0xFFFF

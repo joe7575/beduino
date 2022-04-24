@@ -87,12 +87,17 @@ end
 
 -- CPU definition
 local cpu_def = {
-	cycle_time = 1, -- timer cycle time
-	instr_per_cycle = 100000,
+	cpu_type = "beduino",
+	cycle_time = 0.2, -- timer cycle time
+	instr_per_cycle = 10000,
 	input_costs = 1000,  -- number of instructions
 	output_costs = 5000, -- number of instructions
 	system_costs = 2000, -- number of instructions
 	startup_code = {
+		-- Reserved area 0002 - 0007:
+		"jump 8",
+		".org 8",
+		"call @init",
 		"call init",
 		"@loop:",
 		"call loop",
@@ -117,26 +122,19 @@ local cpu_def = {
 		end
 	end,
 	-- Called for each 'system' instruction.
-	on_system = function(pos, address, val1, val2, val3)
-		if address == 0 then
-			-- stdout
-			local prog_pos = S2P(M(pos):get_string("prog_pos"))
-			return vm16.putchar(prog_pos, val1) or 0xffff, 500
-		else
-			return io.on_system(pos, address, val1, val2, val3) or 0xffff
-		end
-	end,
+	on_system = lib.on_system,
 	-- Called when CPU stops.
 	on_update = function(pos, resp)
 		local prog_pos = S2P(M(pos):get_string("prog_pos"))
 		vm16.update_programmer(pos, prog_pos, resp)
 	end,
 	-- Called when the programmers info/splash screen is displayed
-	on_init = function(pos, prog_pos)
+	on_init = function(pos, prog_pos, server_pos)
 		M(pos):set_string("prog_pos", P2S(prog_pos))
-		local s = on_init_cpu(pos)
-		vm16.add_ro_file(prog_pos, "info.txt",     Info .. s)
-		lib.add_ro_files(prog_pos)
+		if server_pos then
+			local s = on_init_cpu(pos)
+			vm16.write_file(server_pos, "info.txt", Info .. s)
+		end
 	end,
 	on_mem_size = function(pos)
 		return 5  -- 2048 words
@@ -216,6 +214,11 @@ minetest.register_lbm({
 	end
 })
 
+lib.register_SystemHandler(0, function(cpu_pos, address, regA, regB, regC)
+	local prog_pos = S2P(M(cpu_pos):get_string("prog_pos"))
+	return vm16.putchar(prog_pos, regA) or 0xffff, 500
+end)
+
 -------------------------------------------------------------------------------
 -- API for I/O nodes
 -------------------------------------------------------------------------------
@@ -226,15 +229,32 @@ function beduino.register_io_nodes(names)
 end
 
 function beduino.register_input_address(pos, cpu_pos, address, on_input)
-	assert(pos and cpu_pos and address and on_input)
-	local hash = H(cpu_pos)
-	Inputs[hash] = Inputs[hash] or {}
-	Inputs[hash][address] = {pos = pos, input = on_input}
+	if pos and cpu_pos and address and on_input then
+		local hash = H(cpu_pos)
+		Inputs[hash] = Inputs[hash] or {}
+		Inputs[hash][address] = {pos = pos, input = on_input}
+	end
 end
 
 function beduino.register_output_address(pos, cpu_pos, address, on_output)
-	assert(pos and cpu_pos and address and on_output)
-	local hash = H(cpu_pos)
-	Outputs[hash] = Outputs[hash] or {}
-	Outputs[hash][address] = {pos = pos, output = on_output}
+	if pos and cpu_pos and address and on_output then
+		local hash = H(cpu_pos)
+		Outputs[hash] = Outputs[hash] or {}
+		Outputs[hash][address] = {pos = pos, output = on_output}
+	end
+end
+
+function beduino.unregister_address(pos, cpu_pos, address)
+	if pos and cpu_pos and address then
+		local hash = H(cpu_pos)
+		Inputs[hash] = Inputs[hash] or {}
+		Inputs[hash][address] = nil
+	end
+end
+
+function beduino.set_event(cpu_pos, address)
+	if cpu_pos and address then
+		-- Set event variable on address 2
+		vm16.poke(cpu_pos, 0x0002, address)
+	end
 end

@@ -12,6 +12,16 @@
 
 ]]--
 
+local HELP = minetest.formspec_escape([[
+
+
+value = input(port);
+output(port, value);
+state = read(port, IO_STATE);
+send_cmnd(port, ident, add_data);
+request_data(port, ident, add_data, resp_buff);
+]]):gsub("\n", ",")
+
 -- for lazy programmers
 local M = minetest.get_meta
 local H = minetest.hash_node_position
@@ -22,7 +32,7 @@ local T2S = function(t) return minetest.serialize(t) or 'return {}' end
 local S   = function(s) return tostring(s or "-") end
 
 local lib = beduino.lib
-local io  = beduino.io
+local tech = beduino.tech
 
 local DESCRIPTION = "Beduino I/O Module"
 
@@ -35,7 +45,7 @@ local function get_node_name(pos, lbl, port)
 		return lbl
 	end
 	if port then
-		local data = lib.get_node_data(pos, port)
+		local data = tech.get_node_data(pos, port)
 		if data then
 			return data.name
 		end
@@ -44,24 +54,24 @@ local function get_node_name(pos, lbl, port)
 end
 
 local function on_input(pos, address)
-	local nvm = lib.get_nvm(pos)
+	local nvm = tech.get_nvm(pos)
 	local baseaddr = M(pos):get_int("baseaddr")
 	local port = address - baseaddr
-	return lib.get_input(nvm, port)
+	return tech.get_input(nvm, port)
 end
 
 local function on_output(pos, address, value)
 	local meta = M(pos)
-	local nvm = lib.get_nvm(pos)
+	local nvm = tech.get_nvm(pos)
 	local baseaddr = meta:get_int("baseaddr")
-	local own_num = meta:set_string("own_number")
+	local own_num = meta:get_string("own_number")
 	local port = address - baseaddr
-	local number = lib.get_node_number(pos, port)
+	local number = tech.get_node_number(pos, port)
 	local topic = lib.get_text_cmnd(value)
-	lib.set_output(nvm, port, value)
-	local resp = lib.send_single(own_num, number, topic, nil)
+	tech.set_output(nvm, port, value)
+	local resp = tech.send_single(own_num, number, topic, nil)
 	local val = lib.get_num_cmnd(resp) or 0xffff
-	lib.set_input(nvm, port, val)
+	tech.set_input(nvm, port, val)
 end
 
 local function formspec_place(pos)
@@ -80,7 +90,7 @@ local function formspec_help()
 		"real_coordinates[true]"..
 		"tabheader[0,0;tab;I/O,config,help;3;;true]"..
 		"style_type[table;font=mono]"..
-		"table[0.35,0.25;12.3,9;help;"..lib.get_description()..";1]"
+		"table[0.35,0.25;12.3,9;help;"..lib.get_description().. HELP .. ";1]"
 end
 
 
@@ -89,7 +99,7 @@ local function formspec_use(pos)
 	local labels  = S2T(M(pos):get_string("labels"))
 	local baseaddr = M(pos):get_int("baseaddr")
 	local running = M(pos):get_int("running") == 1
-	local nvm = lib.get_nvm(pos)
+	local nvm = tech.get_nvm(pos)
 	local lines = {}
 	local buttons
 	local tab = nvm.in_use and 1 or 2
@@ -102,8 +112,8 @@ local function formspec_use(pos)
 	for i = 0,7 do
 		local y = i * 0.8 + 1
 		lines[#lines+1] = "label[0.5,"..y..";#"..S(i + baseaddr).."]"
-		lines[#lines+1] = "label[5.0,"..y..";"..S(lib.get_output(nvm, i)).."]"
-		lines[#lines+1] = "label[6.7,"..y..";"..S(lib.get_input(nvm, i)).."]"
+		lines[#lines+1] = "label[5.0,"..y..";"..S(tech.get_output(nvm, i)).."]"
+		lines[#lines+1] = "label[6.7,"..y..";"..S(tech.get_input(nvm, i)).."]"
 		if nvm.in_use then
 			lines[#lines+1] = "label[2.0,"..y..";"..S(numbers[i]).."]"
 			lines[#lines+1] = "label[8.4,"..y..";"..get_node_name(pos, labels[i], i).."]"
@@ -134,18 +144,23 @@ local function store_exchange_data(pos)
 	local baseaddr = meta:get_int("baseaddr")
 
 	for port = 0,7 do
-		lib.add_node_data(pos, port, numbers[port])
+		tech.add_node_data(pos, port, numbers[port])
 	end
 end
 
 local function on_init_io(pos, cpu_pos)
-	M(pos):set_int("running", 0)
-	local baseaddr = M(pos):get_int("baseaddr")
+	local meta = M(pos)
+	meta:set_int("running", 0)
+	meta:set_string("cpu_pos", P2S(cpu_pos))
+	store_exchange_data(pos)
+	local baseaddr = meta:get_int("baseaddr")
+	local own_num = meta:get_string("own_number")
 	for addr = baseaddr, baseaddr + 8 do
 		beduino.register_input_address(pos, cpu_pos, addr, on_input)
 		beduino.register_output_address(pos, cpu_pos, addr, on_output)
+		local dest_num = tech.get_node_number(pos, addr - baseaddr)
+		tech.register_system_address(cpu_pos, addr, own_num, dest_num)
 	end
-	store_exchange_data(pos)
 	return baseaddr
 end
 
@@ -170,7 +185,7 @@ local function on_receive_fields(pos, formname, fields, player)
 	end
 	
 	local meta = M(pos)
-	local nvm = lib.get_nvm(pos)
+	local nvm = tech.get_nvm(pos)
 	if fields.tab == "3" then
 		meta:set_string("formspec", formspec_help())
 	elseif fields.tab == "2" then
@@ -226,12 +241,22 @@ minetest.register_node("beduino:io_module", {
 
 	after_place_node = function(pos, placer)
 		local meta = M(pos)
-		local own_num = lib.add_node(pos, "beduino:io_module")
+		local own_num = tech.add_node(pos, "beduino:io_module")
 		meta:set_string("node_number", own_num)  -- for techage
 		meta:set_string("own_number", own_num)  -- for tubelib
 		meta:set_string("owner", placer:get_player_name())
 		lib.infotext(meta, DESCRIPTION)
 		meta:set_string("formspec", formspec_place(pos))
+	end,
+	after_dig_node = function(pos)
+		local meta = M(pos)
+		tech.reset_node_data(pos)
+		local cpu_pos = S2P(meta:get_string("cpu_pos"))
+		local baseaddr = meta:get_int("baseaddr")
+		for addr = baseaddr, baseaddr + 8 do
+			beduino.unregister_address(pos, cpu_pos, addr)
+		end
+		tech.del_mem(pos)
 	end,
 
 	on_receive_fields = on_receive_fields,
@@ -249,17 +274,20 @@ minetest.register_node("beduino:io_module", {
 })
 
 beduino.register_io_nodes({"beduino:io_module"})
-beduino.lib.register_node({"beduino:io_module"}, {
+beduino.tech.register_node({"beduino:io_module"}, {
 	on_recv_message = function(pos, src, topic, payload)
-		if lib.tubelib then
+		--print("on_recv_message1", src, topic, payload)
+		if tech.tubelib then
 			pos, src, topic = pos, topic, src
 		end
 		local val = lib.get_num_cmnd(topic)
 		if val then
-			local nvm = lib.get_nvm(pos)
-			local port = lib.get_node_port(pos, src)
-			print("on_recv_message", src, port)
-			lib.set_input(nvm, port, val)
+			local nvm = tech.get_nvm(pos)
+			local port = tech.get_node_port(pos, src)
+			--print("on_recv_message2", src, port, val)
+			tech.set_input(nvm, port, val)
+			local cpu_pos = S2P(M(pos):get_string("cpu_pos"))
+			beduino.set_event(cpu_pos, port)
 		else
 			return "unsupported"
 		end

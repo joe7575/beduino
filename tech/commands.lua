@@ -1,6 +1,21 @@
+--[[
+
+	Beduino
+	=======
+
+	Copyright (C) 2022 Joachim Stolberg
+
+	AGPL v3
+	See LICENSE.txt for more information
+
+	Techage/TechPack commands and states
+
+]]--
+
+
 if minetest.global_exists("techage") then
 
-	-- "off" is zero by default
+	beduino.lib.register_cmnd("off")
 	beduino.lib.register_cmnd("on")
 	beduino.lib.register_cmnd("green")
 	beduino.lib.register_cmnd("amber")
@@ -30,7 +45,7 @@ if minetest.global_exists("techage") then
 
 elseif minetest.global_exists("tubelib") then
 
-	-- "off" is zero by default
+	beduino.lib.register_cmnd("off")
 	beduino.lib.register_cmnd("on")
 	beduino.lib.register_cmnd("green")
 	beduino.lib.register_cmnd("amber")
