@@ -33,6 +33,7 @@ if minetest.global_exists("techage") then
 	beduino.lib.register_cmnd("fault")
 	beduino.lib.register_cmnd("stopped")
 	beduino.lib.register_cmnd("unloaded")
+	beduino.lib.register_cmnd("inactive")
 	beduino.lib.register_cmnd("empty")
 	beduino.lib.register_cmnd("loaded")
 	beduino.lib.register_cmnd("full")

@@ -25,6 +25,12 @@ func event() {
   return res;
 }
 
+func halt() {
+  _asm_{
+    halt
+  }
+}
+
 func read(port, cmnd) {
   output(port, cmnd);
   return input(port); 
@@ -39,8 +45,120 @@ func request_data(address, ident, add_data, resp) {
   system(0x102, address, ident, add_data);
 }
 ]]
-vm16.register_ro_file("beduino", "ta_iom.c", iom_c)
-vm16.register_ro_file("beduino", "ta_cmnd.c", lib.get_command_file())
+
+local example1_c = [[
+// Output some characters on the
+// programmer status line (system #0).
+import "ta_iom.c"
+
+const MAX = 32;
+
+func bin_to_ascii(i) {
+  return 0x40 + i;
+}
+
+func init() {
+  var i;
+
+  for(i = 0; i < MAX; i++) {
+    system(0, bin_to_ascii(i));
+  }
+}
+
+func loop() {
+  halt(); // abort execution
+}
+]]
+
+local example2_c = [[
+// Read button on input #0 and
+// control signal tower on output #1.
+import "ta_cmnd.c"
+import "ta_iom.c"
+
+static var idx = 0;
+
+func init() {
+  output(1, IO_OFF);
+}
+
+func loop() {
+  if(input(0) == 1) {
+    output(1, IO_GREEN + idx);
+    idx = (idx + 1) % 3;
+  } else {
+    output(1, 0);
+  }
+}
+]]
+
+local example3_c = [[
+// SmartLine Display/Player Detector example
+// Connect detector to port #0 and display to port #1
+// The detector event is used to read the detector input
+// and output the player name to the display (row 3)
+
+import "stdlib.asm"
+import "ta_cmnd.c"
+import "ta_iom.c"
+import "string.asm"
+
+static var buff[80];
+
+func init() {
+  send_cmnd(1, "clear", "");
+  send_cmnd(1, "set", "2:Hello");
+}
+
+func loop() {
+  var sts;
+
+  if(event()) {
+    if(input(0) == 1) {
+      strcpy(buff, "3:");
+      request_data(0, "name", "", buff + 1);
+      send_cmnd(1, "set", buff);
+    } else {
+      send_cmnd(1, "set", "3:~");
+    }
+  }
+}
+]]
+
+local example4_c = [[
+// Block/machine state example
+// Output the block state on the signal tower
+// Connect block to port #0 and tower to port #1
+import "ta_cmnd.c"
+import "ta_iom.c"
+
+func init() {
+  output(1, IO_OFF);
+}
+
+func loop() {
+  var sts = read(0, IO_STATE);
+  if(sts > IO_FAULT) {
+    output(1, IO_OFF);
+  }
+  else if(sts > IO_STANDBY) {
+    output(1, IO_RED);
+  }
+  else if(sts > IO_RUNNING) {
+    output(1, IO_AMBER);
+  }
+  else {
+    output(1, IO_GREEN);
+  }
+}
+]]
+
+vm16.register_ro_file("beduino", "ta_iom.c",   iom_c)
+vm16.register_ro_file("beduino", "ta_cmnd.c",  lib.get_command_file())
+vm16.register_ro_file("beduino", "example1.c", example1_c)
+vm16.register_ro_file("beduino", "example2.c", example2_c)
+vm16.register_ro_file("beduino", "example3.c", example3_c)
+vm16.register_ro_file("beduino", "example4.c", example4_c)
 
 elseif minetest.global_exists("tubelib") then
 
@@ -50,6 +168,12 @@ func event() {
   var res = *ptr;
   *ptr = 0; 
   return res;
+}
+
+func halt() {
+  _asm_{
+    halt
+  }
 }
 
 func read(port, cmnd) {
@@ -66,8 +190,120 @@ func request_data(address, ident, add_data, resp) {
   system(0x122, address, ident, add_data);
 }
 ]]
-vm16.register_ro_file("beduino", "tp_iom.c", iom_c)
-vm16.register_ro_file("beduino", "tp_cmnd.c", lib.get_command_file())
+
+local example1_c = [[
+// Output some characters on the
+// programmer status line (system #0).
+import "tp_iom.c"
+
+const MAX = 32;
+
+func bin_to_ascii(i) {
+  return 0x40 + i;
+}
+
+func init() {
+  var i;
+
+  for(i = 0; i < MAX; i++) {
+    system(0, bin_to_ascii(i));
+  }
+}
+
+func loop() {
+  halt(); // abort execution
+}
+]]
+
+local example2_c = [[
+// Read button on input #0 and
+// control signal tower on output #1.
+import "tp_cmnd.c"
+import "tp_iom.c"
+
+static var idx = 0;
+
+func init() {
+  output(1, IO_OFF);
+}
+
+func loop() {
+  if(input(0) == 1) {
+    output(1, IO_GREEN + idx);
+    idx = (idx + 1) % 3;
+  } else {
+    output(1, 0);
+  }
+}
+]]
+
+local example3_c = [[
+// SmartLine Display/Player Detector example
+// Connect display to port #0 and detector to port #1
+// The detector event is used to read the detector input
+// and output the player name to the display (row 5)
+
+import "stdlib.asm"
+import "tp_cmnd.c"
+import "tp_iom.c"
+import "string.asm"
+
+static var buff[80];
+
+func init() {
+  send_cmnd(0, "clear", "");
+  send_cmnd(0, "row", "3:Hello");
+}
+
+func loop() {
+  var sts;
+
+  if(event()) {
+    if(input(1) == 1) {
+      strcpy(buff, "5:");
+      request_data(1, "name", "", buff + 1);
+      send_cmnd(0, "row", buff);
+    } else {
+      send_cmnd(0, "row", "5:~");
+    }
+  }
+}
+]]
+
+local example4_c = [[
+// Block/machine state example
+// Output the block state on the signal tower
+// Connect block to port #0 and tower to port #1
+import "tp_cmnd.c"
+import "tp_iom.c"
+
+func init() {
+  output(1, IO_OFF);
+}
+
+func loop() {
+  var sts = read(0, IO_STATE);
+  if(sts == IO_STOPPED) {
+    output(1, IO_OFF);
+  }
+  else if(sts > IO_STANDBY) {
+    output(1, IO_RED);
+  }
+  else if(sts > IO_RUNNING) {
+    output(1, IO_AMBER);
+  }
+  else {
+    output(1, IO_GREEN);
+  }
+}
+]]
+
+vm16.register_ro_file("beduino", "tp_iom.c",   iom_c)
+vm16.register_ro_file("beduino", "tp_cmnd.c",  lib.get_command_file())
+vm16.register_ro_file("beduino", "example1.c", example1_c)
+vm16.register_ro_file("beduino", "example2.c", example2_c)
+vm16.register_ro_file("beduino", "example3.c", example3_c)
+vm16.register_ro_file("beduino", "example4.c", example4_c)
 
 end
 
@@ -146,122 +382,8 @@ exit02:
   ret
 ]]
 
-local example1_asm = [[
-; Read button on input #1 and
-; control demo lamp on output #1.
-
-  move A, #00  ; color value in A
-
-loop:
-  nop          ; 100 ms delay
-  nop          ; 100 ms delay
-  in   B, #1   ; read switch value
-  bze  B, loop
-  and  A, #$3F ; values from 1 to 64
-  add  A, #01
-  out  #01, A  ; output color value
-  jump loop
-]]
-
-local example1_c = [[
-// Read button on input #0 and
-// control demo lamp on output #1.
-
-static var idx = 0;
-
-func init() {
-  system(0, 'In');
-  system(0, 'it');
-}
-
-func loop() {
-  if(input(0) == 1) {
-    output(1, idx);
-    idx = (idx + 1) % 64;
-  } else {
-    output(1, 0);
-  }
-}
-]]
-
-local example2_c = [[
-// Output some characters on the
-// programmer status line (system #0).
-
-var max = 32;
-
-func get_char(i) {
-  return 0x40 + i;
-}
-
-func main() {
-  var i;
-
-  for(i = 0; i < max; i++) {
-    system(0, get_char(i));
-  }
-}
-]]
-
-local example3_c = [[
-// Example with inline assembler
-
-func main() {
-  var idx = 0;
-
-  while(1){
-    if(input(1) == 1) {
-      output(1, idx);
-      //idx = (idx + 1) % 64;
-      _asm_{
-        add [SP+0], #1
-        mod [SP+0], #64
-      }
-    } else {
-      output(1, 0);
-    }
-    sleep(2);
-  }
-}
-
-]]
-
-local example4_c = [[
-// Show the use of library functions
-
-import "stdio.asm"
-import "mem.asm"
-
-var arr1[4] = {1, 2, 3, 4};
-var arr2[4];
-var str[] = "Hello world!";
-
-
-func main() {
-  var i;
-
-  memcpy(arr2, arr1, 4);
-  for(i = 0; i < 4; i++) {
-    putnum(arr2[i]);
-  }
-
-  putchar('  ');
-  putstr(str);
-  putchar('  ');
-  puthex(0x321);
-
-  return;
-}
-]]
-
 vm16.register_ro_file("beduino", "stdio.asm",  vm16.libc.stdio_asm)
 vm16.register_ro_file("beduino", "mem.asm",    vm16.libc.mem_asm)
 vm16.register_ro_file("beduino", "string.asm", vm16.libc.string_asm)
 vm16.register_ro_file("beduino", "math.asm",   vm16.libc.math_asm)
 vm16.register_ro_file("beduino", "stdlib.asm", stdlib_asm)
-
-vm16.register_ro_file("beduino", "example1.c",   example1_c)
-vm16.register_ro_file("beduino", "example2.c",   example2_c)
-vm16.register_ro_file("beduino", "example3.c",   example3_c)
-vm16.register_ro_file("beduino", "example4.c",   example4_c)
-vm16.register_ro_file("beduino", "example1.asm", example1_asm)

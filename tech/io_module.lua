@@ -287,7 +287,7 @@ beduino.tech.register_node({"beduino:io_module"}, {
 			--print("on_recv_message2", src, port, val)
 			tech.set_input(nvm, port, val)
 			local cpu_pos = S2P(M(pos):get_string("cpu_pos"))
-			beduino.set_event(cpu_pos, port)
+			beduino.set_event(cpu_pos, 1)
 		else
 			return "unsupported"
 		end
