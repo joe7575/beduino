@@ -8,224 +8,147 @@
 	AGPL v3
 	See LICENSE.txt for more information
 
-	Broker
+	Router for controller to controller communication
 
 ]]--
 
 -- for lazy programmers
 local M = minetest.get_meta
-local H = minetest.hash_node_position
 local P2S = function(pos) if pos then return minetest.pos_to_string(pos) end end
 local S2P = function(s) return minetest.string_to_pos(s) end
+local S2T = function(s) return minetest.deserialize(s) or {} end
+local T2S = function(t) return minetest.serialize(t) or 'return {}' end
+
+local DESCRIPTION = "Beduino Router"
+local BASE_ADDR = 0x100
+local MAX_MSG_SIZE = 64
+local MAX_NUM_MSG = 5
 
 local lib = beduino.lib
-local io  = beduino.io
+local storage = minetest.get_mod_storage()
+local MsgQue = {}
 
-local DESCRIPTION = "Beduino Broker"
-
-local Num2addr = {}
-
-local function get_node_name(pos, lbl, port)
-	if lbl and lbl ~= "" and lbl ~= "-" then
-		return lbl
-	end
-	if port then
-		local data = lib.get_node_data(pos, port)
-		if data then
-			return data.name
-		end
-	end
-	return "-"
+local function get_next_address()
+	local addr = storage:get_int("RouterAddress") + 1
+	storage:set_int("RouterAddress", addr)
+	return addr
 end
 
-local function formspec(pos)
-	--Zeigt die empfangenen Nachrichten an
---	local numbers = S2T(M(pos):get_string("numbers"))
---	local labels  = S2T(M(pos):get_string("labels"))
---	local baseaddr = M(pos):get_int("baseaddr")
---	local running = M(pos):get_int("running") == 1
---	local nvm = lib.get_nvm(pos)
---	local lines = {}
---	local buttons
---	local tab = nvm.in_use and 1 or 2
---	if nvm.in_use then
---		buttons = "button[8.7,8.6;3.5,1.0;update;Update]"
---	else
---		buttons = "button[8.7,8.6;3.5,1.0;save;Save]"
---	end
-	
---	for i = 0,7 do
---		local y = i * 0.8 + 1
---		lines[#lines+1] = "label[0.5,"..y..";#"..S(i + baseaddr).."]"
---		lines[#lines+1] = "label[5.0,"..y..";"..S(lib.get_output(nvm, i)).."]"
---		lines[#lines+1] = "label[6.7,"..y..";"..S(lib.get_input(nvm, i)).."]"
---		if nvm.in_use then
---			lines[#lines+1] = "label[2.0,"..y..";"..S(numbers[i]).."]"
---			lines[#lines+1] = "label[8.4,"..y..";"..get_node_name(pos, labels[i], i).."]"
---		else
---			lines[#lines+1] = "field[2.0,"..(y-0.3)..";2.5,0.7;num"..S(i)..";;"..S(numbers[i]).."]"
---			lines[#lines+1] = "field[8.4,"..(y-0.3)..";3.5,0.7;lbl"..S(i)..";;"..S(labels[i]).."]"
---		end
---	end
-	
---	return "size[13,10]"..
---		"real_coordinates[true]"..
---		default.gui_bg..
---		default.gui_bg_img..
---		default.gui_slots..
---		"tabheader[0,0;tab;I/O,config,help;" .. tab .. ";;true]"..
---		"container[0.3,1]"..
---		"box[0.2,0.5;12,6.7;#333]"..
---		"label[0.5,0;Addr]"..
---		"label[2.0,0;Number]"..
---		"label[5.0,0;OUT]"..
---		"label[6.7,0;IN]"..
---		"label[8.4,0;Description]"..
---		table.concat(lines)..
---		"container_end[]"..
---		buttons
-end
-
-local function on_send_msg(pos, dst_addr, msg)
---	local dest_pos = ...
---	local mem = lib.get_mem(pos)
---	mem.rx_msgs = mem.rx_msgs or {}
---	table.insert(mem.rx_msgs, {src_addr = src_addr, data = msg})
---	if #mem.rx_msgs > 3 then
---		table.remove(mem.rx_msgs, 1)
---	end
-end
-
-local function on_recv_msg(pos)
-	local mem = lib.get_mem(pos)
-	mem.rx_msgs = mem.rx_msgs or {}
-	if #mem.rx_msgs > 0 then
-		local msg = table.remove(mem.rx_msgs, 1)
-		return msg.src_addr, msg.data
+local function send_msg(src_addr, dst_addr, msg)
+	MsgQue[dst_addr] = MsgQue[dst_addr] or {}
+	table.insert(MsgQue[dst_addr], {src_addr = src_addr, msg = msg})
+	if #MsgQue[dst_addr] > MAX_NUM_MSG then
+		table.remove(MsgQue[dst_addr], 1)
 	end
+	return 1
 end
 
-local function store_exchange_data(pos)
-	local meta = M(pos)
-	local numbers = S2T(meta:get_string("numbers"))
-	local baseaddr = meta:get_int("baseaddr")
-
-	for port = 0,7 do
-		lib.add_node_data(pos, port, numbers[port])
+local function receive_msg(dst_addr)
+	MsgQue[dst_addr] = MsgQue[dst_addr] or {}
+	local data = table.remove(MsgQue[dst_addr], 1)
+	if data then
+		return data.src_addr, data.msg
 	end
+	return 0, ""
 end
 
 local function on_init_io(pos, cpu_pos)
-	M(pos):set_int("running", 0)
-	local baseaddr = M(pos):get_int("baseaddr")
-	for addr = baseaddr, baseaddr + 8 do
-		beduino.register_input_address(pos, cpu_pos, addr, on_input)
-		beduino.register_output_address(pos, cpu_pos, addr, on_output)
-	end
-	store_exchange_data(pos)
-	return baseaddr
+	M(pos):set_string("cpu_pos", P2S(cpu_pos))
+	return BASE_ADDR
 end
 
 local function on_start_io(pos, cpu_pos)
-	store_exchange_data(pos)
+	local src_addr = M(pos):get_int("src_addr")
+	M(cpu_pos):set_int("router_addr", src_addr)
+	MsgQue[src_addr] = nil
 end
 
-local function on_receive_fields(pos, formname, fields, player)
-	if not player or minetest.is_protected(pos, player:get_player_name()) then
-		return
-	end
-	
-	local meta = M(pos)
-	local nvm = lib.get_nvm(pos)
-	if fields.tab == "3" then
-		meta:set_string("formspec", formspec_help())
-	elseif fields.tab == "2" then
-		nvm.in_use = false
-		meta:set_string("formspec", formspec_use(pos))
-	elseif fields.tab == "1" or fields.save then
-		Num2addr[H(pos)] = {}
-		nvm.in_use = true
-		store_settings(pos, meta, fields)
-		store_exchange_data(pos)
-		meta:set_string("formspec", formspec_use(pos))
-	elseif fields.update then
-		meta:set_string("formspec", formspec_use(pos))
-	elseif fields.exit and fields.addr then
-		local address = tonumber(fields.addr) or 1
-		meta:set_int("baseaddr", address)
-		lib.infotext(meta, DESCRIPTION)
-		meta:set_string("formspec", formspec_use(pos))
+local function preserve_router_address(pos, itemstack)
+	local imeta = itemstack:get_meta()
+	if imeta then
+		M(pos):set_int("src_addr", imeta:get_int("src_addr"))
 	end
 end
 
-local function on_rightclick(pos, node, clicker, itemstack, pointed_thing)
-	if not clicker or minetest.is_protected(pos, clicker:get_player_name()) then
-		return
-	end
-	if M(pos):contains("baseaddr") then
-		M(pos):set_string("formspec", formspec_use(pos))
-	end
+local function preserve_metadata(pos, oldnode, oldmetadata, drops)
+	local meta = drops[1]:get_meta()
+	meta:set_int("src_addr", oldmetadata.src_addr)
 end
 
---minetest.register_node("beduino:io_module", {
---	description = DESCRIPTION,
---	inventory_image = "beduino_iom_inventory.png",
---	wield_image = "beduino_iom_inventory.png",
---	tiles = {
---		"beduino_controller_side.png",
---		"beduino_controller_side.png",
---		"beduino_controller_side.png",
---		"beduino_controller_side.png",
---		"beduino_controller_side.png",
---		"beduino_controller_side.png^beduino_iom.png",
---	},
---	drawtype = "nodebox",
---	node_box = {
---		type = "fixed",
---		fixed = {
---			{-6/32, -6/32, 12/32,  6/32,  6/32, 16/32},
---		},
---	},
+minetest.register_node("beduino:router", {
+	description = DESCRIPTION,
+	inventory_image = "beduino_router_inventory.png",
+	wield_image = "beduino_router_inventory.png",
+	tiles = {
+		"beduino_controller_side.png",
+		"beduino_controller_side.png",
+		"beduino_controller_side.png",
+		"beduino_controller_side.png",
+		"beduino_controller_side.png",
+		{
+			image = 'beduino_controller_side2.png^beduino_router2.png',
+			backface_culling = false,
+			animation = {
+				type = "vertical_frames",
+				aspect_w = 64,
+				aspect_h = 64,
+				length = 0.5,
+			},
+		},
+	},
+	drawtype = "nodebox",
+	node_box = {
+		type = "fixed",
+		fixed = {
+			{-6/32, -6/32, 12/32,  6/32,  6/32, 16/32},
+		},
+	},
 
---	after_place_node = function(pos, placer)
---		local meta = M(pos)
---		local own_num = lib.add_node(pos, "beduino:io_module")
---		meta:set_string("node_number", own_num)  -- for techage
---		meta:set_string("own_number", own_num)  -- for tubelib
---		meta:set_string("owner", placer:get_player_name())
---		lib.infotext(meta, DESCRIPTION)
---		meta:set_string("formspec", formspec_place())
---	end,
+	after_place_node = function(pos, placer, itemstack, pointed_thing)
+		local meta = M(pos)
+		preserve_router_address(pos, itemstack)
+		if not meta:contains("src_addr") then
+			local addr = get_next_address()
+			M(pos):set_int("src_addr", addr)
+		end
+		meta:set_string("infotext", DESCRIPTION .. " #" .. M(pos):get_int("src_addr"))
+	end,
 
---	on_receive_fields = on_receive_fields,
---	on_init_io = on_init_io,
---	on_start_io = on_start_io,
---	on_receive_fields = on_receive_fields,
---	on_rightclick = on_rightclick,
+	on_start_io = on_start_io,
+	preserve_metadata = preserve_metadata,
 
---	paramtype = "light",
---	use_texture_alpha = "clip",
---	sunlight_propagates = true,
---	paramtype2 = "facedir",
---	groups = {choppy=2, cracky=2, crumbly=2},
---	is_ground_content = false,
---})
+	paramtype = "light",
+	use_texture_alpha = "clip",
+	sunlight_propagates = true,
+	paramtype2 = "facedir",
+	groups = {choppy=2, cracky=2, crumbly=2},
+	is_ground_content = false,
+})
 
---beduino.register_io_nodes({"beduino:io_module"})
---beduino.lib.register_node({"beduino:io_module"}, {
---	on_recv_message = function(pos, src, topic, payload)
---		if lib.tubelib then
---			pos, src, topic = pos, topic, src
---		end
---		local val = lib.get_num_cmnd(topic)
---		if val then
---			local nvm = lib.get_nvm(pos)
---			local port = lib.get_node_port(pos, src)
---			lib.set_input(nvm, port, val)
---		else
---			return "unsupported"
---		end
---	end,
---})
+beduino.register_io_nodes({"beduino:router"})
 
---lbm: broker mit pos und number registrieren
+-- address is fix 0x100, regA = dst_addr, regB = msg
+local function sys_send_msg(cpu_pos, address, regA, regB, regC)
+	print("sys_send_msg", regA, regB)
+	local size = vm16.peek(cpu_pos, regB) + 1
+	local msg = vm16.read_mem_as_str(cpu_pos, regB, math.min(size, MAX_MSG_SIZE))
+	local src_addr = M(cpu_pos):get_int("router_addr")
+	return send_msg(src_addr, regA, msg)
+end
+
+-- address is fix 0x100, regA = buff, regB = buff_size
+local function sys_receive_msg(cpu_pos, address, regA, regB, regC)
+	print("sys_receive_msg", regA, regB)
+	local size = vm16.peek(cpu_pos, regB)
+	local addr = M(cpu_pos):get_int("router_addr")
+	local src_addr, msg = receive_msg(addr)
+	msg = msg:sub(1, size*4)
+	print("sys_receive_msg2", addr, msg)
+	vm16.write_mem_as_str(cpu_pos, regA, msg)
+	return src_addr
+end
+
+lib.register_SystemHandler(0x040, sys_send_msg)
+lib.register_SystemHandler(0x041, sys_receive_msg)
+
+

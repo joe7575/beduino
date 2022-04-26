@@ -26,11 +26,13 @@ dofile(MP.."/lib/lib.lua")
 dofile(MP.."/lib/kv_store.lua")
 dofile(MP.."/lib/dispatch.lua")
 dofile(MP.."/lib/os.lua")
+dofile(MP.."/lib/files.lua")
+
+dofile(MP.."/controller.lua")
 
 dofile(MP.."/com/router.lua")
 dofile(MP.."/com/broker.lua")
-
-dofile(MP.."/controller.lua")
+dofile(MP.."/com/files.lua")
 
 if minetest.global_exists("techage") or minetest.global_exists("tubelib") then
 	dofile(MP.."/tech/io_ports.lua")
