@@ -44,6 +44,18 @@ func request_data(address, ident, add_data, resp) {
   system(0x101, address, resp);
   system(0x102, address, ident, add_data);
 }
+
+func clear_screen(address) {
+  system(0x103, address);
+}
+
+func append_line(address, text) {
+  system(0x104, address, text);
+}
+
+func write_line(address, row, text) {
+  system(0x105, address, row, text);
+}
 ]]
 
 local example1_c = [[
@@ -106,8 +118,8 @@ import "string.asm"
 static var buff[80];
 
 func init() {
-  send_cmnd(1, "clear", "");
-  send_cmnd(1, "set", "2:Hello");
+  clear_screen(1);
+  write_line(1, 2, "Hello");
 }
 
 func loop() {
@@ -115,11 +127,10 @@ func loop() {
 
   if(event()) {
     if(input(0) == 1) {
-      strcpy(buff, "3:");
-      request_data(0, "name", "", buff + 1);
-      send_cmnd(1, "set", buff);
+      request_data(0, "name", "", buff);
+      write_line(1, 3, buff);
     } else {
-      send_cmnd(1, "set", "3:~");
+      write_line(1, 3, "~");
     }
   }
 }
@@ -189,6 +200,18 @@ func request_data(address, ident, add_data, resp) {
   system(0x121, address, resp);
   system(0x122, address, ident, add_data);
 }
+
+func clear_screen(address) {
+  system(0x123, address);
+}
+
+func append_line(address, text) {
+  system(0x124, address, text);
+}
+
+func write_line(address, row, text) {
+  system(0x125, address, row, text);
+}
 ]]
 
 local example1_c = [[
@@ -239,7 +262,7 @@ func loop() {
 
 local example3_c = [[
 // SmartLine Display/Player Detector example
-// Connect display to port #0 and detector to port #1
+// Connect detector to port #0 and display to port #1
 // The detector event is used to read the detector input
 // and output the player name to the display (row 5)
 
@@ -251,20 +274,19 @@ import "string.asm"
 static var buff[80];
 
 func init() {
-  send_cmnd(0, "clear", "");
-  send_cmnd(0, "row", "3:Hello");
+  clear_screen(1);
+  write_line(1, 3, "Hello");
 }
 
 func loop() {
   var sts;
 
   if(event()) {
-    if(input(1) == 1) {
-      strcpy(buff, "5:");
-      request_data(1, "name", "", buff + 1);
-      send_cmnd(0, "row", buff);
+    if(input(0) == 1) {
+      request_data(0, "name", "", buff);
+      write_line(1, 5, buff);
     } else {
-      send_cmnd(0, "row", "5:~");
+      write_line(1, 5, "~");
     }
   }
 }

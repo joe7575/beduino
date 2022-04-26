@@ -42,7 +42,7 @@ end
 local function sys_resp_buff(cpu_pos, address, regA, regB, regC)
 	--print("sys_resp_buff",  P2S(cpu_pos), address, regA, regB, regC)
 	RespAddr[H(cpu_pos)] = regB
-	return 0
+	return 1
 end
 
 local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
@@ -51,7 +51,7 @@ local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
 	local ident = vm16.read_ascii(cpu_pos, regB, 16)
 	local add_data = vm16.read_ascii(cpu_pos, regC, 32)
 	tech.send_single(own_num, dest_num, ident, add_data)
-	return 0
+	return 1
 end
 
 local function sys_request_data(cpu_pos, address, regA, regB, regC)
@@ -64,8 +64,42 @@ local function sys_request_data(cpu_pos, address, regA, regB, regC)
 	if resp_addr and resp_addr ~= 0 then
 		vm16.write_ascii(cpu_pos, resp_addr, resp)
 	end
+	return 1
+end
 
-	return 0
+local function sys_clear_screen(cpu_pos, address, regA, regB, regC)
+	--print("sys_clear_screen", P2S(cpu_pos), address, regA, regB, regC)
+	local own_num, dest_num = get_numbers(cpu_pos, regA)
+	tech.send_single(own_num, dest_num, "clear")
+	return 1
+end
+
+local function sys_add_line(cpu_pos, address, regA, regB, regC)
+	--print("sys_add_line", P2S(cpu_pos), address, regA, regB, regC)
+	local own_num, dest_num = get_numbers(cpu_pos, regA)
+	local text = vm16.read_ascii(cpu_pos, regB, 64)
+	if tech.tubelib then
+		tech.send_single(own_num, dest_num, "text", text)
+	else
+		tech.send_single(own_num, dest_num, "add", text)
+	end
+	return 1
+end
+
+local function sys_write_line(cpu_pos, address, regA, regB, regC)
+	--print("sys_write_row", P2S(cpu_pos), address, regA, regB, regC)
+	local own_num, dest_num = get_numbers(cpu_pos, regA)
+	local row = regB
+	local text = vm16.read_ascii(cpu_pos, regC, 64)
+	if tech.tubelib then
+		tech.send_single(own_num, dest_num, "row", {row = row, str = text})
+	else
+		local payload = safer_lua.Store()
+		payload.set("row", row)
+		payload.set("str", text)
+		tech.send_single(own_num, dest_num, "set", payload)
+	end
+	return 1
 end
 
 if minetest.global_exists("techage") then
@@ -73,12 +107,18 @@ if minetest.global_exists("techage") then
 	lib.register_SystemHandler(0x100, sys_send_cmnd)
 	lib.register_SystemHandler(0x101, sys_resp_buff)
 	lib.register_SystemHandler(0x102, sys_request_data)
+	lib.register_SystemHandler(0x103, sys_clear_screen)
+	lib.register_SystemHandler(0x104, sys_add_line)
+	lib.register_SystemHandler(0x105, sys_write_line)
 
 elseif minetest.global_exists("tubelib") then
 
 	lib.register_SystemHandler(0x120, sys_send_cmnd)
 	lib.register_SystemHandler(0x121, sys_resp_buff)
 	lib.register_SystemHandler(0x122, sys_request_data)
+	lib.register_SystemHandler(0x123, sys_clear_screen)
+	lib.register_SystemHandler(0x124, sys_add_line)
+	lib.register_SystemHandler(0x125, sys_write_line)
 
 end
 
