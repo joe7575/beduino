@@ -129,7 +129,7 @@ beduino.register_io_nodes({"beduino:router"})
 
 -- address is fix 0x100, regA = dst_addr, regB = msg
 local function sys_send_msg(cpu_pos, address, regA, regB, regC)
-	print("sys_send_msg", regA, regB)
+	--print("sys_send_msg", regA, regB)
 	local size = vm16.peek(cpu_pos, regB) + 1
 	local msg = vm16.read_mem_as_str(cpu_pos, regB, math.min(size, MAX_MSG_SIZE))
 	local src_addr = M(cpu_pos):get_int("router_addr")
@@ -138,12 +138,11 @@ end
 
 -- address is fix 0x100, regA = buff, regB = buff_size
 local function sys_receive_msg(cpu_pos, address, regA, regB, regC)
-	print("sys_receive_msg", regA, regB)
+	--print("sys_receive_msg", regA, regB)
 	local size = vm16.peek(cpu_pos, regB)
 	local addr = M(cpu_pos):get_int("router_addr")
 	local src_addr, msg = receive_msg(addr)
 	msg = msg:sub(1, size*4)
-	print("sys_receive_msg2", addr, msg)
 	vm16.write_mem_as_str(cpu_pos, regA, msg)
 	return src_addr
 end
