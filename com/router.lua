@@ -38,10 +38,8 @@ local function count_receive(addr)
 end
 
 local function send_msg(src_addr, dst_addr, msg)
-	print("send_msg", src_addr, dst_addr)
 	RouterPos[dst_addr] = RouterPos[dst_addr] or lib.get_pos(dst_addr)
 	if lib.valid_address(RouterPos[dst_addr], src_addr) then
-		print(2)
 		MsgQue[dst_addr] = MsgQue[dst_addr] or {}
 		table.insert(MsgQue[dst_addr], {src_addr = src_addr, msg = msg})
 		count_transmit(src_addr)
@@ -202,7 +200,6 @@ end
 local function sys_receive_msg(cpu_pos, address, regA, regB, regC)
 	local addr = M(cpu_pos):get_int("router_addr")
 	local src_addr, msg = receive_msg(addr)
-	print("sys_receive_msg", addr, src_addr, #msg)
 	msg = msg:sub(1, regB * 4)
 	vm16.write_mem_as_str(cpu_pos, regA, msg)
 	return src_addr

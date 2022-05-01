@@ -41,7 +41,6 @@ Licensed under the GNU AGPLv3 (See LICENSE.txt)
 
 ## ToDo
 
-- Add recipes for techage and tubelib
 - Add support for further technology mods
 - Write documentation
 - ...
