@@ -77,11 +77,11 @@ end
 local function formspec_place(pos)
 	local baseaddr = M(pos):get_int("baseaddr")
 	local val = BaseAddr2Idx[baseaddr] or 0
-		
+
 	return "size[4,2]"..
 		--"field[0.2,0.8;3.8,1;addr;I/O port: (1 - 65535);]"..
 		"label[0.1,0.0;I/O base port:]"..
-		"dropdown[0.1,0.6;1.5;baseaddr;0,8,16,24,32,40,48,56;"..val.."]".. 
+		"dropdown[0.1,0.6;1.5;baseaddr;0,8,16,24,32,40,48,56;"..val.."]"..
 		"button_exit[2.0,0.55;2,1;exit;Save]"
 end
 
@@ -108,7 +108,7 @@ local function formspec_use(pos)
 	else
 		buttons = "button[8.7,8.6;3.5,1.0;save;Save]"
 	end
-	
+
 	for i = 0,7 do
 		local y = i * 0.8 + 1
 		lines[#lines+1] = "label[0.5,"..y..";#"..S(i + baseaddr).."]"
@@ -122,7 +122,7 @@ local function formspec_use(pos)
 			lines[#lines+1] = "field[8.4,"..(y-0.3)..";3.5,0.7;lbl"..S(i)..";;"..S(labels[i]).."]"
 		end
 	end
-	
+
 	return "size[13,10]"..
 		"real_coordinates[true]"..
 		"tabheader[0,0;tab;I/O,config,help;" .. tab .. ";;true]"..
@@ -183,7 +183,7 @@ local function on_receive_fields(pos, formname, fields, player)
 	if not player or minetest.is_protected(pos, player:get_player_name()) then
 		return
 	end
-	
+
 	local meta = M(pos)
 	local nvm = tech.get_nvm(pos)
 	if fields.tab == "3" then
@@ -271,12 +271,12 @@ minetest.register_node("beduino:io_module", {
 	paramtype2 = "facedir",
 	groups = {choppy=2, cracky=2, crumbly=2},
 	is_ground_content = false,
+	stack_max = 1,
 })
 
 beduino.register_io_nodes({"beduino:io_module"})
 beduino.tech.register_node({"beduino:io_module"}, {
 	on_recv_message = function(pos, src, topic, payload)
-		--print("on_recv_message1", src, topic, payload)
 		if tech.tubelib then
 			pos, src, topic = pos, topic, src
 		end
@@ -284,7 +284,6 @@ beduino.tech.register_node({"beduino:io_module"}, {
 		if val then
 			local nvm = tech.get_nvm(pos)
 			local port = tech.get_node_port(pos, src)
-			--print("on_recv_message2", src, port, val)
 			tech.set_input(nvm, port, val)
 			local cpu_pos = S2P(M(pos):get_string("cpu_pos"))
 			beduino.set_event(cpu_pos, 1)

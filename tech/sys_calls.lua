@@ -25,7 +25,6 @@ local Port2Num = {}
 local RespAddr = {}
 
 function tech.register_system_address(cpu_pos, port, own_num, dest_num)
-	--print("register_system_address", port, own_num, dest_num)
 	assert(cpu_pos and port)
 	local hash = H(cpu_pos)
 	Port2Num[hash] = Port2Num[hash] or {}
@@ -40,13 +39,11 @@ local function get_numbers(cpu_pos, port)
 end
 
 local function sys_resp_buff(cpu_pos, address, regA, regB, regC)
-	--print("sys_resp_buff",  P2S(cpu_pos), address, regA, regB, regC)
 	RespAddr[H(cpu_pos)] = regB
 	return 1
 end
 
 local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
-	--print("sys_send_cmnd", P2S(cpu_pos), address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
 	local ident = vm16.read_ascii(cpu_pos, regB, 16)
 	local add_data = vm16.read_ascii(cpu_pos, regC, 32)
@@ -55,7 +52,6 @@ local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
 end
 
 local function sys_request_data(cpu_pos, address, regA, regB, regC)
-	--print("sys_request_data", P2S(cpu_pos), address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
 	local ident = vm16.read_ascii(cpu_pos, regB, 16)
 	local add_data = vm16.read_ascii(cpu_pos, regC, 32)
@@ -68,14 +64,12 @@ local function sys_request_data(cpu_pos, address, regA, regB, regC)
 end
 
 local function sys_clear_screen(cpu_pos, address, regA, regB, regC)
-	--print("sys_clear_screen", P2S(cpu_pos), address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
 	tech.send_single(own_num, dest_num, "clear")
 	return 1
 end
 
 local function sys_add_line(cpu_pos, address, regA, regB, regC)
-	--print("sys_add_line", P2S(cpu_pos), address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
 	local text = vm16.read_ascii(cpu_pos, regB, 64)
 	if tech.tubelib then
@@ -87,7 +81,6 @@ local function sys_add_line(cpu_pos, address, regA, regB, regC)
 end
 
 local function sys_write_line(cpu_pos, address, regA, regB, regC)
-	--print("sys_write_row", P2S(cpu_pos), address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
 	local row = regB
 	local text = vm16.read_ascii(cpu_pos, regC, 64)

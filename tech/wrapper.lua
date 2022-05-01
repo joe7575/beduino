@@ -49,7 +49,6 @@ elseif minetest.global_exists("tubelib") then
 		if type(number) == "number" then
 			number = string.format("%.04u", number)
 		end
-		--print("send_single", number, topic, payload)
 		return tubelib.send_request(number, topic, payload)
 	end
 	beduino.tech.get_node_info = function(number)

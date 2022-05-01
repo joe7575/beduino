@@ -21,6 +21,13 @@ local function get_day_count(pos, number, regA, regB, regC)
 	return minetest.get_day_count()
 end
 
+local function mydebug(pos, number, regA, regB, regC)
+	local s = vm16.read_ascii(pos, regA, 64)
+	print(s)
+	return 1
+end
+
 beduino.lib.register_SystemHandler(0x20, get_timeofday)
 beduino.lib.register_SystemHandler(0x21, get_day_count)
+beduino.lib.register_SystemHandler(0x22, mydebug)
 

@@ -30,8 +30,8 @@ dofile(MP.."/lib/files.lua")
 
 dofile(MP.."/controller.lua")
 
-dofile(MP.."/com/router.lua")
 dofile(MP.."/com/broker.lua")
+dofile(MP.."/com/router.lua")
 dofile(MP.."/com/files.lua")
 
 if minetest.global_exists("techage") or minetest.global_exists("tubelib") then

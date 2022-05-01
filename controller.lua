@@ -9,7 +9,7 @@
 	See LICENSE.txt for more information
 
    Beduino Controller / CPU
-   
+
 ]]--
 
 -- for lazy programmers
@@ -197,6 +197,7 @@ minetest.register_node("beduino:controller", {
 	paramtype2 = "facedir",
 	groups = {cracky=2, crumbly=2, choppy=2},
 	is_ground_content = false,
+	stack_max = 1,
 })
 
 minetest.register_lbm({

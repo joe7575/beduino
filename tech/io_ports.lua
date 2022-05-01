@@ -22,7 +22,6 @@ local Num2port = {}
 local Port2num = {}
 
 function beduino.tech.set_input(nvm, port, val)
-	--print("set_input", port, val)
 	if port and port < 8 then
 		nvm.input = nvm.input or {}
 		nvm.input[port] = val
@@ -30,7 +29,6 @@ function beduino.tech.set_input(nvm, port, val)
 end
 
 function beduino.tech.get_input(nvm, port)
-	--print("get_input", port)
 	if port and port < 8 then
 		nvm.input = nvm.input or {}
 		return nvm.input[port] or 0
@@ -38,7 +36,6 @@ function beduino.tech.get_input(nvm, port)
 end
 
 function beduino.tech.set_output(nvm, port, val)
-	--print("set_output", port, val)
 	if port and port < 8 then
 		nvm.output = nvm.output or {}
 		if nvm.output[port] ~= val then
@@ -49,7 +46,6 @@ function beduino.tech.set_output(nvm, port, val)
 end
 
 function beduino.tech.get_output(nvm, port)
-	--print("get_output", port)
 	if port and port < 8 then
 		nvm.output = nvm.output or {}
 		return nvm.output[port] or 0
@@ -63,7 +59,7 @@ function beduino.tech.add_node_data(pos, port, number)
 		Num2port[hash] = Num2port[hash] or {}
 		Port2num[hash] = Port2num[hash] or {}
 		NodeInfo[hash] = NodeInfo[hash] or {}
-		
+
 		if number and number:match("[%d]+") then
 			Num2port[hash][number] = port
 			Port2num[hash][port] = number

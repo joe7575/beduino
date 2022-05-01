@@ -35,7 +35,7 @@ global halt
 ;===================================
 itoa:
   move A, [SP+2]
-  move X, [SP+1]  
+  move X, [SP+1]
   move D, X      ; return val
   push #0        ; end-of-string
 
@@ -65,7 +65,7 @@ exit01:
 ;===================================
 itoha:
   move A, [SP+2]
-  move X, [SP+1]  
+  move X, [SP+1]
   move D, X      ; return val
   push #0        ; end-of-string
   move C, #4     ; num digits
@@ -95,7 +95,7 @@ exit02:
 ;===================================
 halt:
   halt
-  
+
 ]]
 
 vm16.register_ro_file("beduino", "stdlib.asm", stdlib_asm)

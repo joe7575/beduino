@@ -20,13 +20,13 @@ local iom_c = [[
 func event() {
   var ptr = 2;
   var res = *ptr;
-  *ptr = 0; 
+  *ptr = 0;
   return res;
 }
 
 func read(port, cmnd) {
   output(port, cmnd);
-  return input(port); 
+  return input(port);
 }
 
 func send_cmnd(address, ident, add_data) {
@@ -54,6 +54,7 @@ func write_line(address, row, text) {
 local example1_c = [[
 // Output some characters on the
 // programmer status line (system #0).
+import "stdlib.asm"
 import "ta_iom.c"
 
 const MAX = 32;
@@ -170,13 +171,13 @@ local iom_c = [[
 func event() {
   var ptr = 2;
   var res = *ptr;
-  *ptr = 0; 
+  *ptr = 0;
   return res;
 }
 
 func read(port, cmnd) {
   output(port, cmnd);
-  return input(port); 
+  return input(port);
 }
 
 func send_cmnd(address, ident, add_data) {
@@ -204,6 +205,7 @@ func write_line(address, row, text) {
 local example1_c = [[
 // Output some characters on the
 // programmer status line (system #0).
+import "stdlib.asm"
 import "tp_iom.c"
 
 const MAX = 32;
