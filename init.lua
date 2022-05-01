@@ -10,8 +10,8 @@
 
 ]]--
 
-if not minetest.global_exists("vm16") or vm16.version < 3.3 then
-	minetest.log("error", "[Beduino] The mod requires vm16 version 3.3 or newer!")
+if not minetest.global_exists("vm16") or vm16.version < 3.5 then
+	minetest.log("error", "[Beduino] The mod requires vm16 version 3.5 or newer!")
 	return
 end
 
