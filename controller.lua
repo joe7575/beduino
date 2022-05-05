@@ -19,13 +19,11 @@ local P2S = function(pos) if pos then return minetest.pos_to_string(pos) end end
 local S2P = function(s) return minetest.string_to_pos(s) end
 
 local lib = beduino.lib
-local io  = beduino.io
 
 local RADIUS = 3    -- for I/O modules
 local Inputs = {}   -- [cpu_pos][port] = {node_pos, clbk}
 local Outputs = {}  -- [cpu_pos][port] = {node_pos, clbk}
 local IONodes = {}  -- Known I/O nodes
-local NodePositions
 
 local Info = [[
               Beduino
@@ -50,9 +48,8 @@ end
 
 
 local function on_init_cpu(cpu_pos)
-	NodePositions = find_io_nodes(cpu_pos)
 	local out = {}
-	for _,pos in ipairs(NodePositions) do
+	for _,pos in ipairs(find_io_nodes(cpu_pos)) do
 		local node = minetest.get_node(pos)
 		local ndef = minetest.registered_nodes[node.name]
 		if ndef and ndef.on_init_io then
@@ -64,8 +61,7 @@ local function on_init_cpu(cpu_pos)
 end
 
 local function on_start_cpu(cpu_pos)
-	NodePositions = NodePositions or find_io_nodes(cpu_pos)
-	for _,pos in ipairs(NodePositions) do
+	for _,pos in ipairs(find_io_nodes(cpu_pos)) do
 		local node = minetest.get_node(pos)
 		local ndef = minetest.registered_nodes[node.name]
 		if ndef and ndef.on_start_io then
@@ -75,8 +71,7 @@ local function on_start_cpu(cpu_pos)
 end
 
 local function on_stop_cpu(cpu_pos)
-	NodePositions = NodePositions or find_io_nodes(cpu_pos)
-	for _,pos in ipairs(NodePositions) do
+	for _,pos in ipairs(find_io_nodes(cpu_pos)) do
 		local node = minetest.get_node(pos)
 		local ndef = minetest.registered_nodes[node.name]
 		if ndef and ndef.on_stop_io then

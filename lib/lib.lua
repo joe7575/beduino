@@ -20,10 +20,23 @@ local T2S = function(t) return minetest.serialize(t) or 'return {}' end
 
 local storage = minetest.get_mod_storage()
 
-function beduino.lib.get_next_address()
-	local addr = storage:get_int("RouterAddress") + 1
-	storage:set_int("RouterAddress", addr)
-	return addr
+----------------------------------------------------------------------------------
+--  Address to position translation
+----------------------------------------------------------------------------------
+local PosList = {}
+
+local function register_pos(pos, address)
+	storage:set_string("A" .. address, P2S(pos))
+end
+
+local function get_pos(address)
+	PosList[address] = PosList[address] or S2P(storage:get_string("A" .. address))
+	return PosList[address]
+end
+
+local function unregister_pos(address)
+	storage:set_string("A" .. address, "")
+	PosList[address] = nil
 end
 
 ----------------------------------------------------------------------------------
@@ -31,52 +44,82 @@ end
 ----------------------------------------------------------------------------------
 local AddressList = {}
 
-local function get_addresses(pos)
-	local s = M(pos):get_string("address_list")
-	if s ~= "" then
+local function get_addresses(meta)
+	local s =  meta:get_string("beduino_address_list")
+	if s ~= "-" then
 		local out = {}
 		for addr in s:gmatch("%w+") do  --- white spaces
-			out[addr] = true
+			out[tonumber(addr) or 0] = true
 		end
 		return out
 	end
 	return true
 end
 
-function beduino.lib.valid_address(pos, address)
-	local hash = H(pos)
-	AddressList[hash] = AddressList[hash] or get_addresses(pos)
-	return AddressList[hash] == true or AddressList[hash][address] ~= nil
+local function valid_filter_address(pos, address)
+	local meta = M(pos)
+	if meta:contains("beduino_address_list") then
+		local hash = H(pos)
+		AddressList[hash] = AddressList[hash] or get_addresses(meta)
+		return AddressList[hash] == true or AddressList[hash][address] ~= nil
+	end
 end
 
-function beduino.lib.del_address(pos)
+function beduino.lib.get_next_address(pos)
+	local addr = storage:get_int("RouterAddress") + 1
+	storage:set_int("RouterAddress", addr)
+	register_pos(pos, addr)
+	return addr
+end
+
+function beduino.lib.claim_address(pos, address)
+	register_pos(pos, address)
+end
+
+function beduino.lib.router_available(my_address)
+	local pos = get_pos(my_address)
+	if pos then
+		return M(pos):contains("beduino_address_list")
+	end
+end
+
+function beduino.lib.valid_route(my_addr, dst_addr)
+	local pos1 = get_pos(my_addr)
+	local pos2 = get_pos(dst_addr)
+	if pos1 and pos2 then
+		return valid_filter_address(pos2, my_addr)
+	end
+end
+
+function beduino.lib.on_receive_fields(pos, fields)
+	if fields.save then
+		local s = fields.address:gsub("^%s*(.-)%s*$", "%1")
+		if s == "" then 
+			s = "-"
+		end
+		M(pos):set_string("beduino_address_list", s)
+		local hash = H(pos)
+		AddressList[hash] = nil
+	end
+end
+
+function beduino.lib.del_filter_address(pos, my_addr)
+	unregister_pos(my_addr)
 	local hash = H(pos)
 	AddressList[hash] = nil
 end
 
 ----------------------------------------------------------------------------------
---  Router address lists for message filterung
+--  Router infotext
 ----------------------------------------------------------------------------------
 function beduino.lib.infotext(meta, descr, text)
 	local own_num = meta:get_string("node_number") or ""
 	local numbers = meta:get_string("numbers") or ""
 	if numbers ~= "" then
-		meta:set_string("infotext", descr .. " " .. own_num .. ": " .. "connected with" .. " " .. numbers)
+		meta:set_string("infotext", descr .. " " .. own_num .. ": " .. "connected to " .. numbers)
 	elseif text then
 		meta:set_string("infotext", descr .. " " .. own_num .. ": " .. text)
 	else
 		meta:set_string("infotext", descr .. " " .. own_num)
 	end
-end
-
-function beduino.lib.register_pos(pos, address)
-	storage:set_string("A" .. address, P2S(pos))
-end
-
-function beduino.lib.get_pos(address)
-	return S2P(storage:get_string("A" .. address))
-end
-
-function beduino.lib.unregister_pos(pos, address)
-	storage:set_string("A" .. address, "")
 end

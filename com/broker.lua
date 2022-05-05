@@ -14,15 +14,16 @@
 
 -- for lazy programmers
 local M = minetest.get_meta
+local P2S = function(pos) if pos then return minetest.pos_to_string(pos) end end
 
 local DESCRIPTION = "Beduino Broker"
 local MAX_TOPIC_NUM = 100
 
 local lib = beduino.lib
+local comm = beduino.comm
 
 local MsgTbl = {}
 local MsgCnt = {}
-local BrokerPos = {}
 
 local function count_request(addr)
 	MsgCnt[addr] = MsgCnt[addr] or {req = 0, pub = 0}
@@ -32,12 +33,11 @@ end
 local function count_publish(addr)
 	MsgCnt[addr] = MsgCnt[addr] or {req = 0, pub = 0}
 	MsgCnt[addr].pub = MsgCnt[addr].pub + 1
-
 end
 
 function beduino.comm.publish_msg(src_addr, dst_addr, topic, msg)
-	BrokerPos[dst_addr] = BrokerPos[dst_addr] or lib.get_pos(dst_addr)
-	if lib.valid_address(BrokerPos[dst_addr], src_addr) and topic <= MAX_TOPIC_NUM then
+	--print("publish_msg", src_addr, dst_addr, topic)
+	if topic <= MAX_TOPIC_NUM then
 		MsgTbl[dst_addr] = MsgTbl[dst_addr] or {}
 		MsgTbl[dst_addr][topic] = msg
 		count_publish(dst_addr)
@@ -47,52 +47,62 @@ function beduino.comm.publish_msg(src_addr, dst_addr, topic, msg)
 end
 
 function beduino.comm.request_msg(dst_addr, topic)
-	MsgTbl[dst_addr] = MsgTbl[dst_addr] or {}
-	count_request(dst_addr)
-	return MsgTbl[dst_addr][topic]
+	--print("request_msg", dst_addr, topic)
+	if MsgTbl[dst_addr] then
+		local msg = MsgTbl[dst_addr][topic]
+		if msg then
+			count_request(dst_addr)
+			return msg
+		end
+	end
 end
 
 local function preserve_router_address(pos, itemstack)
 	local imeta = itemstack:get_meta()
-	if imeta and imeta:contains("src_addr") then
-		M(pos):set_int("src_addr", imeta:get_int("src_addr"))
+	if imeta and imeta:contains("my_addr") then
+		M(pos):set_int("my_addr", imeta:get_int("my_addr"))
 	end
 end
 
 local function preserve_metadata(pos, oldnode, oldmetadata, drops)
-	if oldmetadata.src_addr then
+	if oldmetadata.my_addr then
 		local meta = drops[1]:get_meta()
-		meta:set_int("src_addr", oldmetadata.src_addr)
-		meta:set_string("description", DESCRIPTION .. " #" .. oldmetadata.src_addr)
+		meta:set_int("my_addr", oldmetadata.my_addr)
+		meta:set_string("description", DESCRIPTION .. " #" .. oldmetadata.my_addr)
 	end
 end
 
 local function formspec(pos, tx_cnt, rx_cnt)
-	local addr = M(pos):get_int("src_addr")
-	local s = M(pos):get_string("address_list")
-	local cnts = MsgCnt[addr] or {pub = 0, req = 0}
+	local my_addr = M(pos):get_int("my_addr")
+	local s = M(pos):get_string("beduino_address_list")
+	local cnts = MsgCnt[my_addr] or {pub = 0, req = 0}
 	return "size[8,3]"..
 		"label[0.2,0.0;Messages: " .. cnts.pub .. " published,   ".. cnts.req .. " requested]" ..
 		"field[0.2,1.6;8.1,1;address;Valid Addresses (separated by spaces);" .. s .. "]"..
 		"button[3.4,2.2;2,1;update;Update]" ..
-		"button_exit[6.0,2.2;2,1;exit;Save]"
+		"button_exit[6.0,2.2;2,1;save;Save]"
 end
 
 local function after_place_node(pos, placer, itemstack, pointed_thing)
 	local meta = M(pos)
 	preserve_router_address(pos, itemstack)
-	if not meta:contains("src_addr") then
-		local addr = lib.get_next_address()
-		M(pos):set_int("src_addr", addr)
+	if not meta:contains("my_addr") then
+		local my_addr = lib.get_next_address(pos)
+		meta:set_int("my_addr", my_addr)
+	else
+		local my_addr = meta:get_int("my_addr")
+		lib.claim_address(pos, my_addr)
 	end
-	lib.register_pos(pos, M(pos):get_int("src_addr"))
-	meta:set_string("infotext", DESCRIPTION .. " #" .. M(pos):get_int("src_addr"))
+	meta:set_string("infotext", DESCRIPTION .. " #" .. M(pos):get_int("my_addr"))
 	meta:set_string("formspec", formspec(pos))
+	meta:set_string("beduino_address_list", "-")
 end
 
 local function after_dig_node(pos, oldnode, oldmetadata, digger)
-	lib.del_address(pos)
-	lib.unregister_pos(pos, tonumber(oldmetadata.fields.src_addr))
+	local my_addr = tonumber(oldmetadata.fields.my_addr) or 0
+	lib.del_filter_address(pos, my_addr)
+	MsgTbl[my_addr] = nil
+	MsgCnt[my_addr] = nil
 end
 
 local function on_receive_fields(pos, formname, fields, player)
@@ -100,10 +110,7 @@ local function on_receive_fields(pos, formname, fields, player)
 		return
 	end
 
-	if fields.save then
-		local s = fields.address:gsub("^%s*(.-)%s*$", "%1")
-		M(pos):set_string("address_list", s)
-	end
+	beduino.lib.on_receive_fields(pos, fields)
 	M(pos):set_string("formspec", formspec(pos))
 end
 

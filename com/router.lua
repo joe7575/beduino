@@ -25,7 +25,6 @@ local comm = beduino.comm
 
 local MsgQue = {}
 local MsgCnt = {}
-local RouterPos = {}
 
 local function count_transmit(addr)
 	MsgCnt[addr] = MsgCnt[addr] or {rx = 0, tx = 0}
@@ -37,26 +36,28 @@ local function count_receive(addr)
 	MsgCnt[addr].rx = MsgCnt[addr].rx + 1
 end
 
-local function send_msg(src_addr, dst_addr, msg)
-	RouterPos[dst_addr] = RouterPos[dst_addr] or lib.get_pos(dst_addr)
-	if lib.valid_address(RouterPos[dst_addr], src_addr) then
+local function send_msg(my_addr, dst_addr, msg)
+	--print("send_msg", my_addr, dst_addr)
+	if lib.valid_route(my_addr, dst_addr) then
 		MsgQue[dst_addr] = MsgQue[dst_addr] or {}
-		table.insert(MsgQue[dst_addr], {src_addr = src_addr, msg = msg})
-		count_transmit(src_addr)
-		count_receive(dst_addr)
+		table.insert(MsgQue[dst_addr], {src_addr = my_addr, msg = msg})
 		if #MsgQue[dst_addr] > MAX_NUM_MSG then
 			table.remove(MsgQue[dst_addr], 1)
 		end
+		count_transmit(my_addr)
+		count_receive(dst_addr)
 		return 1
 	end
 	return 0
 end
 
-local function receive_msg(dst_addr)
-	MsgQue[dst_addr] = MsgQue[dst_addr] or {}
-	local data = table.remove(MsgQue[dst_addr], 1)
-	if data then
-		return data.src_addr, data.msg
+local function receive_msg(my_addr)
+	--print("receive_msg", my_addr)
+	if MsgQue[my_addr] then
+		local data = table.remove(MsgQue[my_addr], 1)
+		if data then
+			return data.src_addr, data.msg
+		end
 	end
 	return 0, ""
 end
@@ -64,56 +65,60 @@ end
 local function on_init_io(pos, cpu_pos)
 	local meta = M(pos)
 	meta:set_string("cpu_pos", P2S(cpu_pos))
-	return meta:get_int("src_addr")
+	return meta:get_int("my_addr")
 end
 
 local function on_start_io(pos, cpu_pos)
-	local src_addr = M(pos):get_int("src_addr")
-	M(cpu_pos):set_int("router_addr", src_addr)
-	MsgQue[src_addr] = nil
+	local my_addr = M(pos):get_int("my_addr")
+	M(cpu_pos):set_int("router_addr", my_addr)
 end
 
 local function preserve_router_address(pos, itemstack)
 	local imeta = itemstack:get_meta()
-	if imeta and imeta:contains("src_addr") then
-		M(pos):set_int("src_addr", imeta:get_int("src_addr"))
+	if imeta and imeta:contains("my_addr") then
+		M(pos):set_int("my_addr", imeta:get_int("my_addr"))
 	end
 end
 
 local function preserve_metadata(pos, oldnode, oldmetadata, drops)
-	if oldmetadata.src_addr then
+	if oldmetadata.my_addr then
 		local meta = drops[1]:get_meta()
-		meta:set_int("src_addr", oldmetadata.src_addr)
-		meta:set_string("description", DESCRIPTION .. " #" .. oldmetadata.src_addr)
+		meta:set_int("my_addr", oldmetadata.my_addr)
+		meta:set_string("description", DESCRIPTION .. " #" .. oldmetadata.my_addr)
 	end
 end
 
 local function formspec(pos, tx_cnt, rx_cnt)
-	local addr = M(pos):get_int("src_addr")
-	local s = M(pos):get_string("address_list")
-	local cnts = MsgCnt[addr] or {rx = 0, tx = 0}
+	local my_addr = M(pos):get_int("my_addr")
+	local s = M(pos):get_string("beduino_address_list")
+	local cnts = MsgCnt[my_addr] or {rx = 0, tx = 0}
 	return "size[8,3]"..
 		"label[0.2,0.0;Messages: " .. cnts.rx .. " received,   ".. cnts.tx .. " sent]" ..
 		"field[0.2,1.6;8.1,1;address;Valid Addresses (separated by spaces);" .. s .. "]"..
 		"button[3.4,2.2;2,1;update;Update]" ..
-		"button_exit[6.0,2.2;2,1;exit;Save]"
+		"button_exit[6.0,2.2;2,1;save;Save]"
 end
 
 local function after_place_node(pos, placer, itemstack, pointed_thing)
 	local meta = M(pos)
 	preserve_router_address(pos, itemstack)
-	if not meta:contains("src_addr") then
-		local addr = lib.get_next_address()
-		M(pos):set_int("src_addr", addr)
+	if not meta:contains("my_addr") then
+		local my_addr = lib.get_next_address(pos)
+		meta:set_int("my_addr", my_addr)
+	else
+		local my_addr = meta:get_int("my_addr")
+		lib.claim_address(pos, my_addr)
 	end
-	lib.register_pos(pos, M(pos):get_int("src_addr"))
-	meta:set_string("infotext", DESCRIPTION .. " #" .. M(pos):get_int("src_addr"))
+	meta:set_string("infotext", DESCRIPTION .. " #" .. M(pos):get_int("my_addr"))
 	meta:set_string("formspec", formspec(pos))
+	meta:set_string("beduino_address_list", "-")
 end
 
 local function after_dig_node(pos, oldnode, oldmetadata, digger)
-	lib.del_address(pos)
-	lib.unregister_pos(pos, tonumber(oldmetadata.fields.src_addr))
+	local my_addr = tonumber(oldmetadata.fields.my_addr) or 0
+	lib.del_filter_address(pos, my_addr)
+	MsgQue[my_addr] = nil
+	MsgCnt[my_addr] = nil
 end
 
 local function on_receive_fields(pos, formname, fields, player)
@@ -121,10 +126,7 @@ local function on_receive_fields(pos, formname, fields, player)
 		return
 	end
 
-	if fields.save then
-		local s = fields.address:gsub("^%s*(.-)%s*$", "%1")
-		M(pos):set_string("address_list", s)
-	end
+	beduino.lib.on_receive_fields(pos, fields)
 	M(pos):set_string("formspec", formspec(pos))
 end
 
@@ -165,12 +167,7 @@ minetest.register_node("beduino:router", {
 	},
 
 	after_place_node = after_place_node,
-
-	after_dig_node = function(pos, oldnode, oldmetadata, digger)
-		lib.del_address(pos)
-		lib.unregister_pos(pos, tonumber(oldmetadata.fields.src_addr))
-	end,
-
+	after_dig_node = after_dig_node,
 	on_init_io = on_init_io,
 	on_start_io = on_start_io,
 	preserve_metadata = preserve_metadata,
@@ -192,14 +189,14 @@ beduino.register_io_nodes({"beduino:router"})
 local function sys_send_msg(cpu_pos, address, regA, regB, regC)
 	local size = vm16.peek(cpu_pos, regB) + 1
 	local msg = vm16.read_mem_as_str(cpu_pos, regB, math.min(size, MAX_MSG_SIZE))
-	local src_addr = M(cpu_pos):get_int("router_addr")
-	return send_msg(src_addr, regA, msg)
+	local my_addr = M(cpu_pos):get_int("router_addr")
+	return send_msg(my_addr, regA, msg)
 end
 
 -- address is fix 0x100, regA = buff, regB = buff_size
 local function sys_receive_msg(cpu_pos, address, regA, regB, regC)
-	local addr = M(cpu_pos):get_int("router_addr")
-	local src_addr, msg = receive_msg(addr)
+	local my_addr = M(cpu_pos):get_int("router_addr")
+	local src_addr, msg = receive_msg(my_addr)
 	msg = msg:sub(1, regB * 4)
 	vm16.write_mem_as_str(cpu_pos, regA, msg)
 	return src_addr
@@ -209,21 +206,29 @@ end
 local function sys_publish_msg(cpu_pos, address, regA, regB, regC)
 	local size = vm16.peek(cpu_pos, regC) + 1
 	local msg = vm16.read_mem_as_str(cpu_pos, regC, math.min(size, MAX_MSG_SIZE))
-	local src_addr = M(cpu_pos):get_int("router_addr")
-	count_transmit(src_addr)
-	return comm.publish_msg(src_addr, regA, regB, msg)
+	local my_addr = M(cpu_pos):get_int("router_addr")
+	if lib.valid_route(my_addr, regA) then
+		local res = comm.publish_msg(my_addr, regA, regB, msg)
+		if res then
+			count_transmit(my_addr)
+			return res
+		end
+	end
+	return 0
 end
 
 -- address is fix 0x100, regA = dst_addr, regB = topic, regC = buff
 local function sys_request_msg(cpu_pos, address, regA, regB, regC)
-	local msg = comm.request_msg(regA, regB)
-	if msg then
-		local size = vm16.peek(cpu_pos, regC) + 1
-		msg = msg:sub(1, size * 4)
-		vm16.write_mem_as_str(cpu_pos, regC, msg)
-		local src_addr = M(cpu_pos):get_int("router_addr")
-		count_receive(src_addr)
-		return 1
+	local my_addr = M(cpu_pos):get_int("router_addr")
+	if lib.router_available(my_addr) then
+		local msg = comm.request_msg(regA, regB)
+		if msg then
+			local size = vm16.peek(cpu_pos, regC) + 1
+			msg = msg:sub(1, size * 4)
+			vm16.write_mem_as_str(cpu_pos, regC, msg)
+			count_receive(my_addr)
+			return 1
+		end
 	end
 	return 0
 end
