@@ -91,6 +91,75 @@ see [Cipol Language Reference](https://github.com/joe7575/vm16/wiki/Cipol-Langua
 
 
 
+## Router
+
+Routers are used to send messages from one to another controller. Each controller needs its own router. Each router automatically gets an unique number/address, which is used for the addressing. The 16 bit address allows up to 65535 router.
+
+```c
+// Send a message via router.
+// `address` is the router destination address
+func send_msg(address, msg);
+
+// Receive a message via router.
+// Function returns the sender address or 0.
+func recv_msg(buff, size);
+```
+
+The maximum messages length is 64 words.
+
+The router comes with two example programs to demonstrate the message communication:
+
+- `tx_demo.c`  to cyclically send a message to router #2
+- `rx_demo.c` to receive and output messages
+
+Copy the code from `tx_demo.c` into your own file and adapt the router address to your needs.
+
+#### Address Filter
+
+Router allow to set an address filter. By default, messages from all other controllers are received. By means of the address list (white list) the number of valid addresses can be limited. Enter the addresses of the allowed routers in the router menu. Addresses must be separated by spaces, e.g.: "123 234 235".
+
+
+
+## Broker
+
+The broker is used for a server/broker based communication between controllers. The broker will store received messages and provides the messages to other controllers, even if the original message source/sender is not available anymore.
+
+Messages for the broker have to have a topic value. The topic is used to publish and request a dedicated messages.
+
+Each broker automatically gets an unique number/address, which is used for the addressing.
+
+```c
+// Send a message to the broker.
+// `address` is the router destination address
+// `topic` value is used as message identifier
+func publish_msg(address, topic, msg);
+    
+// Read a message from the broker.
+// Function returns 1 (success) or 0 (no msg).
+// `buff` is a buffer, used for the received message
+// `size` ist the buffer size in words
+func request_msg(address, topic, buff, size);
+```
+
+The maximum messages length is 64 words. Valid values for a topic are 1..100.
+
+The broker comes with two example programs to demonstrate the publish/request process:
+
+- `pub_demo.c`  to cyclically publish/send a message to broker #5
+- `req_demo.c` to request/receive a messages from broker #5
+
+Copy the demo code into your own files and adapt the broker address to your needs.
+
+#### Address Filter
+
+Broker (like router) allow to set an address filter. By default, messages from all controllers are received. By means of the address list (white list) the number of valid addressed can be limited. Enter the addresses of the allowed publishing controllers in the broker menu. Addresses must be separated by spaces, e.g.: "123 234 235".
+
+Only the receipt of messages can be restricted, requesting a message from the broker is always allowed (if the topic number is known).
+
+
+
+## 
+
 ## Further Information
 
 - [Cipol Language Reference](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference)
