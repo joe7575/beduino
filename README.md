@@ -2,6 +2,8 @@
 
 **A microcontroller for Minetest**
 
+![screenshot](https://github.com/joe7575/beduino/blob/main/screenshot.png)
+
 Beduino is a 16-bit microcontroller and development environment with
 editor, file system, compiler, assembler, and debugger based on the mod vm16. The controller can be programmed in a C like language.
 
