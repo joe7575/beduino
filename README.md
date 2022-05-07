@@ -26,7 +26,7 @@ tbd.
 ## First Steps
 
 - (see video:  https://youtu.be/Dbn19YcltTk)
-
+- [Manual](https://github.com/joe7575/beduino/blob/main/manual/manual_EN.md)
 
 ## Dependencies
 
@@ -48,6 +48,10 @@ Licensed under the GNU AGPLv3 (See LICENSE.txt)
 
 
 ## History
+
+### v0.2 (2022-05-07)
+
+- Add first manual
 
 ### v0.1 (2022-05-01)
 
