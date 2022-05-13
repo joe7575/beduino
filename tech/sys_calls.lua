@@ -35,7 +35,9 @@ local function get_numbers(cpu_pos, port)
 	assert(cpu_pos and port)
 	local hash = H(cpu_pos)
 	Port2Num[hash] = Port2Num[hash] or {}
-	return Port2Num[hash][port].own_num, Port2Num[hash][port].dest_num
+	if Port2Num[hash][port] then
+		return Port2Num[hash][port].own_num, Port2Num[hash][port].dest_num
+	end
 end
 
 local function sys_resp_buff(cpu_pos, address, regA, regB, regC)
@@ -45,54 +47,69 @@ end
 
 local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
-	local ident = vm16.read_ascii(cpu_pos, regB, 16)
-	local add_data = vm16.read_ascii(cpu_pos, regC, 32)
-	tech.send_single(own_num, dest_num, ident, add_data)
-	return 1
+	if own_num and dest_num then
+		local ident = vm16.read_ascii(cpu_pos, regB, 16)
+		local add_data = vm16.read_ascii(cpu_pos, regC, 32)
+		tech.send_single(own_num, dest_num, ident, add_data)
+		return 1
+	end
+	return 0
 end
 
 local function sys_request_data(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
-	local ident = vm16.read_ascii(cpu_pos, regB, 16)
-	local add_data = vm16.read_ascii(cpu_pos, regC, 32)
-	local resp = tech.send_single(own_num, dest_num, ident, add_data)
-	local resp_addr = RespAddr[H(cpu_pos)]
-	if resp_addr and resp_addr ~= 0 then
-		vm16.write_ascii(cpu_pos, resp_addr, resp)
+	if own_num and dest_num then
+		local ident = vm16.read_ascii(cpu_pos, regB, 16)
+		local add_data = vm16.read_ascii(cpu_pos, regC, 32)
+		local resp = tech.send_single(own_num, dest_num, ident, add_data)
+		local resp_addr = RespAddr[H(cpu_pos)]
+		if resp_addr and resp_addr ~= 0 then
+			vm16.write_ascii(cpu_pos, resp_addr, resp)
+		end
+		return 1
 	end
-	return 1
+	return 0
 end
 
 local function sys_clear_screen(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
-	tech.send_single(own_num, dest_num, "clear")
-	return 1
+	if own_num and dest_num then
+		tech.send_single(own_num, dest_num, "clear")
+		return 1
+	end
+	return 0
 end
 
 local function sys_add_line(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
-	local text = vm16.read_ascii(cpu_pos, regB, 64)
-	if tech.tubelib then
-		tech.send_single(own_num, dest_num, "text", text)
-	else
-		tech.send_single(own_num, dest_num, "add", text)
+	if own_num and dest_num then
+		local text = vm16.read_ascii(cpu_pos, regB, 64)
+		if tech.tubelib then
+			tech.send_single(own_num, dest_num, "text", text)
+		else
+			tech.send_single(own_num, dest_num, "add", text)
+		end
+		return 1
 	end
-	return 1
+	return 0
 end
 
 local function sys_write_line(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
-	local row = regB
-	local text = vm16.read_ascii(cpu_pos, regC, 64)
-	if tech.tubelib then
-		tech.send_single(own_num, dest_num, "row", {row = row, str = text})
-	else
-		local payload = safer_lua.Store()
-		payload.set("row", row)
-		payload.set("str", text)
-		tech.send_single(own_num, dest_num, "set", payload)
+	if own_num and dest_num then
+		local row = regB
+		local text = vm16.read_ascii(cpu_pos, regC, 64)
+		if tech.tubelib then
+			tech.send_single(own_num, dest_num, "row", {row = row, str = text})
+		else
+			local payload = safer_lua.Store()
+			payload.set("row", row)
+			payload.set("str", text)
+			tech.send_single(own_num, dest_num, "set", payload)
+		end
+		return 1
 	end
-	return 1
+	return 0
 end
 
 if minetest.global_exists("techage") then
