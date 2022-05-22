@@ -29,13 +29,26 @@ func read(port, cmnd) {
   return input(port);
 }
 
-func send_cmnd(address, ident, add_data) {
+// 'ident' and 'add_data' are strings
+func send_tas_cmnd(address, ident, add_data) {
   system(0x100, address, ident, add_data);
 }
 
-func request_data(address, ident, add_data, resp) {
+// 'ident' and 'add_data' are strings, 'resp' is a pointer
+func request_tas_data(address, ident, add_data, resp) {
   system(0x101, address, resp);
   system(0x102, address, ident, add_data);
+}
+
+// 'topic' is a number, 'payload' is arr[8]
+func send_cmnd(address, topic, payload) {
+  system(0x106, address, topic, payload);
+}
+
+// 'topic' is a number, 'payload' and 'resp' is arr[8]
+func request_data(address, topic, payload, resp) {
+  system(0x101, address, resp);
+  system(0x107, address, topic, payload);
 }
 
 func clear_screen(address) {
@@ -121,7 +134,7 @@ func loop() {
 
   if(event()) {
     if(input(0) == 1) {
-      request_data(0, "name", "", buff);
+      request_tas_data(0, "name", "", buff);
       write_line(1, 3, buff);
     } else {
       write_line(1, 3, "~");
@@ -272,7 +285,7 @@ func loop() {
 
   if(event()) {
     if(input(0) == 1) {
-      request_data(0, "name", "", buff);
+      request_tas_data(0, "name", "", buff);
       write_line(1, 5, buff);
     } else {
       write_line(1, 5, "~");

@@ -51,6 +51,10 @@ Licensed under the GNU AGPLv3 (See LICENSE.txt)
 
 ## History
 
+### v0.3 (2022-05-22)
+
+- Add new techage commands for binary messages
+
 ### v0.2 (2022-05-07)
 
 - Add first manual

@@ -45,7 +45,7 @@ local function sys_resp_buff(cpu_pos, address, regA, regB, regC)
 	return 1
 end
 
-local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
+local function sys_send_tas_cmnd(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
 	if own_num and dest_num then
 		local ident = vm16.read_ascii(cpu_pos, regB, 16)
@@ -56,7 +56,7 @@ local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
 	return 0
 end
 
-local function sys_request_data(cpu_pos, address, regA, regB, regC)
+local function sys_request_tas_data(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
 	if own_num and dest_num then
 		local ident = vm16.read_ascii(cpu_pos, regB, 16)
@@ -65,6 +65,32 @@ local function sys_request_data(cpu_pos, address, regA, regB, regC)
 		local resp_addr = RespAddr[H(cpu_pos)]
 		if resp_addr and resp_addr ~= 0 then
 			vm16.write_ascii(cpu_pos, resp_addr, resp)
+		end
+		return 1
+	end
+	return 0
+end
+
+local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
+	local own_num, dest_num = get_numbers(cpu_pos, regA)
+	if own_num and dest_num then
+		local topic = regB
+		local payload = vm16.read_mem(cpu_pos, regC, 8)
+		tech.send_single(own_num, dest_num, topic, payload)
+		return 1
+	end
+	return 0
+end
+
+local function sys_request_data(cpu_pos, address, regA, regB, regC)
+	local own_num, dest_num = get_numbers(cpu_pos, regA)
+	if own_num and dest_num then
+		local topic = regB
+		local payload = vm16.read_mem(cpu_pos, regC, 8)
+		local resp = tech.send_single(own_num, dest_num, topic, payload)
+		local resp_addr = RespAddr[H(cpu_pos)]
+		if resp_addr and resp_addr ~= 0 then
+			vm16.write_mem(cpu_pos, resp_addr, resp)
 		end
 		return 1
 	end
@@ -114,12 +140,14 @@ end
 
 if minetest.global_exists("techage") then
 
-	lib.register_SystemHandler(0x100, sys_send_cmnd)
+	lib.register_SystemHandler(0x100, sys_send_tas_cmnd)
 	lib.register_SystemHandler(0x101, sys_resp_buff)
-	lib.register_SystemHandler(0x102, sys_request_data)
+	lib.register_SystemHandler(0x102, sys_request_tas_data)
 	lib.register_SystemHandler(0x103, sys_clear_screen)
 	lib.register_SystemHandler(0x104, sys_add_line)
 	lib.register_SystemHandler(0x105, sys_write_line)
+	lib.register_SystemHandler(0x106, sys_send_cmnd)
+	lib.register_SystemHandler(0x107, sys_request_data)
 
 elseif minetest.global_exists("tubelib") then
 
