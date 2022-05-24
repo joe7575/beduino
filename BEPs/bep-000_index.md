@@ -7,3 +7,5 @@
 [003](./bep-003_sys_call.md) Numbers for system calls
 
 [004](./bep-004_io_ports.md) I/O Port Allocation
+
+[005](bep-005_ta_cmnd.md ) Techage Commands
