@@ -94,7 +94,7 @@ end
 function beduino.lib.on_receive_fields(pos, fields)
 	if fields.save then
 		local s = fields.address:gsub("^%s*(.-)%s*$", "%1")
-		if s == "" then 
+		if s == "" then
 			s = "-"
 		end
 		M(pos):set_string("beduino_address_list", s)
