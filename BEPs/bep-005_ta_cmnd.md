@@ -11,9 +11,7 @@
 These commands do not return a any result.
 
 - *Topic* specifies the command. *Topic* is a numeric value.
-- *Payload* is an array and is used for additional data. If not needed, you can provide `NULL`.
-
-
+- *Payload* is an array and is used for additional data. If not needed, you can provide `""`.
 
 | Command              | Topic (num) | Payload (array/string) | Remarks                                                      |
 | -------------------- | ----------- | ---------------------- | ------------------------------------------------------------ |
@@ -71,4 +69,79 @@ These commands request a response in form of an array or string.
 |                            |             |                        |                         |                                                              |
 
 
+
+### Examples
+
+> **Note**
+>
+> Octal strings can be used as alternative to an array (`"\001\002"` corresponds to `{1, 2}`).
+
+#### Signal Tower
+
+Signal tower on port #1:
+
+```c
+import "ta_iom.c"
+
+func init() {
+}
+
+func loop() {
+  send_cmnd(1, 2, "\000");  // off
+  sleep(5);                 // sleep 5 cycles
+  send_cmnd(1, 2, "\001");  // green
+  sleep(5);
+  send_cmnd(1, 2, "\002");  // amber
+  sleep(5);
+  send_cmnd(1, 2, "\003");  // red
+  sleep(5);
+}
+```
+
+
+
+#### Sound Block
+
+Example to play a sound with Sound Block on port #0:
+
+```c
+import "ta_iom.c"
+import "stdlib.asm"
+
+const CMD_SOUND_BLOCK = 14;
+const CMD_START_STOP = 1;
+
+var sound[] = {2, 36};
+var volume[] = {1, 5};
+var start[] = {1};
+
+func init() {
+  send_cmnd(0, CMD_SOUND_BLOCK, sound);
+  send_cmnd(0, CMD_SOUND_BLOCK, volume);
+  send_cmnd(0, CMD_START_STOP,  start);
+}
+
+func loop() {
+  halt();
+}
+```
+
+
+
+The same example in compact form (based on octal strings):
+
+```c
+import "ta_iom.c"
+import "stdlib.asm"
+
+func init() {
+  send_cmnd(0, 14, "\002\044"); // select sound file
+  send_cmnd(0, 14, "\001\005"); // set volume
+  send_cmnd(0, 1,  "\001");     // play sound
+}
+
+func loop() {
+  halt();
+}
+```
 
