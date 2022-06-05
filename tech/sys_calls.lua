@@ -75,11 +75,15 @@ local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
 	if own_num and dest_num then
 		local topic = regB
-		local payload = vm16.read_mem(cpu_pos, regC, 8)
-		tech.send_single(own_num, dest_num, topic, payload)
-		return 1
+		local payload
+		if topic >= 64 then
+			payload = vm16.read_ascii(cpu_pos, regC, 32)
+		else
+			payload = vm16.read_mem(cpu_pos, regC, 8)
+		end
+		return techage.beduino_send_cmnd(own_num, dest_num, topic, payload)
 	end
-	return 0
+	return 1
 end
 
 local function sys_request_data(cpu_pos, address, regA, regB, regC)
@@ -87,14 +91,18 @@ local function sys_request_data(cpu_pos, address, regA, regB, regC)
 	if own_num and dest_num then
 		local topic = regB
 		local payload = vm16.read_mem(cpu_pos, regC, 8)
-		local resp = tech.send_single(own_num, dest_num, topic, payload)
+		local sts, resp = techage.beduino_request_data(own_num, dest_num, topic, payload)
 		local resp_addr = RespAddr[H(cpu_pos)]
-		if resp_addr and resp_addr ~= 0 then
-			vm16.write_mem(cpu_pos, resp_addr, resp)
+		if sts == 0 and resp and resp_addr and resp_addr ~= 0 then
+			if type(resp) == "table" then
+				vm16.write_mem(cpu_pos, resp_addr, resp)
+			else
+				vm16.write_ascii_16(cpu_pos, resp_addr, resp .. "\0")
+			end
 		end
-		return 1
+		return sts
 	end
-	return 0
+	return 1
 end
 
 local function sys_clear_screen(cpu_pos, address, regA, regB, regC)
