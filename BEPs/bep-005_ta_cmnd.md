@@ -1,6 +1,6 @@
 | Author     | Version | Status   | Modified    |
 | ---------- | ------- | -------- | ----------- |
-| J.Stolberg | 0.2     | Proposal | 30 May 2022 |
+| J.Stolberg | 0.3     | Proposal | 6 June 2022 |
 
 
 
@@ -36,6 +36,7 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 | Signal Lamp          | 3           | [idx, num]             | Set the lamp color for "TA4 2x" and "TA4 4x" Signal Lamps<br />*idx* is the lamp number (1..4)<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
 | Distri. Filter Slot  | 4           | [idx, num]             | Enable/disable a Distributor filter slot.<br />*idx* is the slot number: 1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />*num* is the state: 0 = "off", 1 = "on" |
 | Detector Block Reset | 6           | -                      | Reset the item counter of the TA4 Item Detector block        |
+| TA3 Sequenzer        | 7           | [num]                  | Turn the TA3 Sequencer on/off<br />*num* is the state: 0 = "off", 1 = "on", 2 = "pause" |
 | Exchange Block       | 9           | [idx]                  | Place/remove/exchange an block by means of the TA3 Door Controller II (techage:ta3_doorcontroller2)<br />*idx* is the inventory slot number (1..n) |
 | Autocrafter          | 10          | [num1, num2, idx]      | Set the TA4 Autocrafter recipe with a recipe from a TA4 Recipe Block.<br/>*num1/num2* is the TA4 Recipe Block number (num1 * 65536 + num2)<br/>*idx* is the number of the recipe in the TA4 Recipe Block |
 | Move Contr. 1        | 11          | [1]                    | TA4 Move Controller command to move the block(s) from position A to B |
@@ -44,10 +45,11 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 | Turn Contr. 1        | 12          | [1]                    | TA4 Turn Controller command to turn the block(s) to the left |
 | Turn Contr. 2        | 12          | [2]                    | TA4 Turn Controller command to turn the block(s) to the right |
 | Turn Contr. 3        | 12          | [3]                    | TA4 Turn Controller command to turn the block(s) 180 degrees |
-| Sequenzer 1          | 13          | [slot]                 | Start command for the TA4 Sequencer. <br />*slot* is the time slot (1..n) where the execution starts. |
-| Sequenzer 2          | 13          | [0]                    | Stop command for the TA4 Sequencer.                          |
+| TA4 Sequenzer 1      | 13          | [slot]                 | Start/goto command for the TA4 Sequencer. <br />*slot* is the time slot (1..n) where the execution starts. |
+| TA4 Sequenzer 2      | 13          | [0]                    | Stop command for the TA4 Sequencer.                          |
 | Sound 1              | 14          | [1, volume]            | Set volume of the sound block<br />*volume* is a value from 1 to 5 |
 | Sound 2              | 14          | [2, index]             | Select sound sample of the sound block<br />*index* is the sound sample number |
+|                      |             |                        |                                                              |
 | Display Clear        | 17          | -                      | Clear the display                                            |
 | Display Add Line     | 67          | "text string"          | Add a new line to the display                                |
 | Display Write Line   | 68          | "<num>text string"     | Overwrite a text line with the given string. <br />The first string character is the line number (1..5)<br />Examples: "1Hello World", "2Minetest" |
@@ -99,7 +101,107 @@ The function `request_data` request a response from a node specified by *port*. 
 | Inventory Item Count       | 140         | [1, idx]               | [num]                   | Amount of TA4 8x2000 Chest items<br />*idx* is the inventory slot number <br />(1..8 from left to right, or 0 for the total number) |
 | Inventory Item Name        | 140         | [2, idx]               | "\<node name>"          | Name of TA4 8x2000 Chest items<br />*idx* is the inventory slot number <br />(1..8 from left to right) |
 | Furnace Output             | 141         | -                      | "\<node name>"          | Node name of the Industrial Furnace output. <br />Returns "none", if no recipe is active |
-|                            |             |                        |                         |                                                              |
+| Binary State               | 142         | -                      | [num]                   | Current block state: OFF = 0, ON = 1                         |
+| Light Level                | 143         | -                      | [num]                   | Light level value between 0  and 15 (15 is high)             |
+| Player Name                | 144         | -                      | "\<player name>"        | Player name of last action                                   |
+| Solar Cell State           | 145         | -                      | [num]                   | 0 = UNUSED, 1 = CHARGING, 2 = UNCHARGING                     |
+| Consumption                | 146         | -                      | [num]                   | TA4 Electric Meter total power consumption                   |
+
+
+
+### Nodes and Commands
+
+| Technical Node Name | Supported Commands |
+| ------------------- | ------------------ |
+| techage:chest_cart | 131 |
+| techage:chest_ta2 | 131 |
+| techage:chest_ta3 | 131 |
+| techage:chest_ta4 | 131 |
+| techage:coalfirebox | 128, 129, 132 |
+| techage:furnace_firebox | 128, 129, 132 |
+| techage:generator | 1, 128, 129, 135 |
+| techage:heatexchanger2 | 1, 128, 129, 134, 135 |
+| techage:oilfirebox | 128, 129, 132 |
+| techage:powerswitch, techage:powerswitchsmall | 1, 142 |
+| techage:signal_lamp_off | 1 |
+| techage:t4_pump | 1, 128, 129, 137 |
+| techage:t4_waterpump | 1, 128, 129 |
+| techage:ta3_akku | 1, 128, 129, 134 |
+| techage:ta3_cartdetector_off | 1, 142 |
+| techage:ta3_cartdetector_off | 142 |
+| techage:ta3_distributor_pas | 1, 4, 128, 129 |
+| techage:ta3_doorcontroller | 1 |
+| techage:ta3_doorcontroller2 | 1, 9 |
+| techage:ta3_drillbox_pas | 1, 128, 129 |
+| techage:ta3_electronic_fab_pas | 1, 128, 129 |
+| techage:ta3_furnace_pas | 1, 128, 129, 141 |
+| techage:ta3_grinder_pas | 1, 128, 129 |
+| techage:ta3_injector_pas | 1, 128, 129 |
+| techage:ta3_lightdetector_off | 142, 143 |
+| techage:ta3_liquidsampler_pas | 1, 128, 129 |
+| techage:ta3_logic | 1 |
+| techage:ta3_logic2 | 1 |
+| techage:ta3_nodedetector_off | 142 |
+| techage:ta3_playerdetector_off | 142, 144 |
+| techage:ta3_pusher_pas | 1, 64, 65 |
+| techage:ta3_quarry_pas | 1, 128, 129, 133 |
+| techage:ta3_recycler_pas | 1, 128, 129 |
+| techage:ta3_rinser_pas | 1, 128, 129 |
+| techage:ta3_sequencer | 7 |
+| techage:ta3_sieve_pas | 1, 128, 129 |
+| techage:ta3_silo | 129, 134 |
+| techage:ta3_soundblock | 1, 14 |
+| techage:ta3_valve_open | 1, 129 |
+| techage:ta4_battery | 134 |
+| techage:ta4_chest | 131, 140 |
+| techage:ta4_collector | 129 |
+| techage:ta4_detector_off | 6, 139 |
+| techage:ta4_display | 17, 67, 68 |
+| techage:ta4_displayXL | 17, 67, 68 |
+| techage:ta4_distributor_pas | 1, 4, 128, 129 |
+| techage:ta4_doser | 1, 128, 129 |
+| techage:ta4_electricmeter | 1, 128, 129, 146 |
+| techage:ta4_electrolyzer | 1, 128, 129, 134, 135 |
+| techage:ta4_electronic_fab_pas | 1, 128, 129 |
+| techage:ta4_fuelcell | 1, 128, 129, 134, 135 |
+| techage:ta4_grinder_pas | 1, 128, 129 |
+| techage:ta4_icta_controller | 1, 129 |
+| techage:ta4_icta_controller | 1, 129 |
+| techage:ta4_injector_pas | 1, 128, 129 |
+| techage:ta4_laser_emitter | 142 |
+| techage:ta4_liquidsampler_pas | 1, 128, 129 |
+| techage:ta4_lua_controller | 1, 129 |
+| techage:ta4_mbadetector | 142 |
+| techage:ta4_movecontroller | 11, 129 |
+| techage:ta4_movecontroller | 129 |
+| techage:ta4_playerdetector_off | 142, 144 |
+| techage:ta4_pumpjack_pas | 134 |
+| techage:ta4_pusher_pas | 1, 64, 65 |
+| techage:ta4_quarry_pas | 1, 128, 129, 133 |
+| techage:ta4_recycler_pas | 1, 128, 129 |
+| techage:ta4_rinser_pas | 1, 128, 129 |
+| techage:ta4_sensor_chest | 66, 131, 138 |
+| techage:ta4_sequencer | 13 |
+| techage:ta4_sieve_pas | 1, 128, 129 |
+| techage:ta4_signallamp_2x | 3 |
+| techage:ta4_signallamp_4x | 3 |
+| techage:ta4_signaltower | 2, 13 |
+| techage:ta4_signaltower | 2, 130 |
+| techage:ta4_silo | 129, 134 |
+| techage:ta4_solar_inverter | 1, 128, 129, 135 |
+| techage:ta4_solar_minicell | 145 |
+| techage:ta4_transformer | 1, 128, 129 |
+| techage:ta4_turncontroller | 12 |
+| techage:ta4_wind_turbine | 1, 129, 135 |
+| techage:ta5_flycontroller | 11, 129 |
+| techage:ta5_flycontroller | 129 |
+| techage:ta5_fr_controller_pas | 1, 128, 129 |
+| techage:ta5_heatexchanger2 | 1, 128, 129, 135 |
+| techage:ta5_hl_chest | 131 |
+| techage:ta5_pump | 1, 128, 129 |
+| techage:ta5_tele_pipe | 1, 128, 129 |
+| techage:ta5_tele_tube | 1, 128, 129 |
+| techage:tiny_generator | 1, 128, 129, 132, 135 |
 
 
 

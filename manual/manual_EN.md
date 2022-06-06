@@ -1,6 +1,6 @@
 # Beduino
 
-Beduino is a 16-bit micro-controller system inspired by Arduino boards and kits. It can be programmed in the C like programming language [Cipol](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference).
+Beduino is a 16-bit micro-controller system inspired by Arduino boards and kits. It can be programmed in a C like programming language [Cipol](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference).
 
 To be able to use Beduino, a basic knowledge of programming languages would be useful.
 
