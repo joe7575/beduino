@@ -15,7 +15,7 @@ Browse on: [GitHub](https://github.com/joe7575/beduino)
 
 Download: [GitHub](https://github.com/joe7575/beduino/archive/master.zip)
 
-Documentation: [tbd](https://github.com/joe7575/beduino/wiki)
+Documentation: [Wiki](https://github.com/joe7575/beduino/wiki)
 
 A new page to the [Cipol-Programming-Language](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference) is in the making...
 
