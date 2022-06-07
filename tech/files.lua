@@ -40,7 +40,7 @@ func request_tas_data(address, ident, add_data, resp) {
   system(0x102, address, ident, add_data);
 }
 
-// 'topic' is a number, 'payload' is arr[8]
+// 'topic' is a number, 'payload' is an array or string
 func send_cmnd(address, topic, payload) {
   system(0x106, address, topic, payload);
 }
