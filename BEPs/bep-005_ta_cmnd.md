@@ -203,6 +203,8 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:ta5_tele_pipe | 1, 128, 129 |
 | techage:ta5_tele_tube | 1, 128, 129 |
 | techage:tiny_generator | 1, 128, 129, 132, 135 |
+| pdp13:14segment | 16 |
+| pdp13:7segment | 15 |
 
 
 

@@ -18,8 +18,8 @@ local HELP = minetest.formspec_escape([[
 value = input(port);
 output(port, value);
 state = read(port, IO_STATE);
-send_cmnd(port, ident, add_data);
-request_data(port, ident, add_data, resp_buff);
+send_cmnd(port, topic, payload);
+request_data(port, topic, payload, resp_buff);
 ]]):gsub("\n", ",")
 
 -- for lazy programmers

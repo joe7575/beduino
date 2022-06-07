@@ -30,37 +30,37 @@ func read(port, cmnd) {
 }
 
 // 'ident' and 'add_data' are strings
-func send_tas_cmnd(address, ident, add_data) {
-  system(0x100, address, ident, add_data);
+func send_tas_cmnd(port, ident, add_data) {
+  system(0x100, port, ident, add_data);
 }
 
 // 'ident' and 'add_data' are strings, 'resp' is a pointer
-func request_tas_data(address, ident, add_data, resp) {
-  system(0x101, address, resp);
-  system(0x102, address, ident, add_data);
+func request_tas_data(port, ident, add_data, resp) {
+  system(0x101, port, resp);
+  system(0x102, port, ident, add_data);
 }
 
 // 'topic' is a number, 'payload' is an array or string
-func send_cmnd(address, topic, payload) {
-  system(0x106, address, topic, payload);
+func send_cmnd(port, topic, payload) {
+  system(0x106, port, topic, payload);
 }
 
 // 'topic' is a number, 'payload' and 'resp' is arr[8]
-func request_data(address, topic, payload, resp) {
-  system(0x101, address, resp);
-  system(0x107, address, topic, payload);
+func request_data(port, topic, payload, resp) {
+  system(0x101, port, resp);
+  system(0x107, port, topic, payload);
 }
 
-func clear_screen(address) {
-  system(0x103, address);
+func clear_screen(port) {
+  system(0x103, port);
 }
 
-func append_line(address, text) {
-  system(0x104, address, text);
+func append_line(port, text) {
+  system(0x104, port, text);
 }
 
-func write_line(address, row, text) {
-  system(0x105, address, row, text);
+func write_line(port, row, text) {
+  system(0x105, port, row, text);
 }
 ]]
 
