@@ -37,7 +37,9 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 | Distri. Filter Slot  | 4           | [idx, num]             | Enable/disable a Distributor filter slot.<br />*idx* is the slot number: 1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />*num* is the state: 0 = "off", 1 = "on" |
 | Detector Block Reset | 6           | -                      | Reset the item counter of the TA4 Item Detector block        |
 | TA3 Sequenzer        | 7           | [num]                  | Turn the TA3 Sequencer on/off<br />*num* is the state: 0 = "off", 1 = "on", 2 = "pause" |
-| Exchange Block       | 9           | [idx]                  | Place/remove/exchange an block by means of the TA3 Door Controller II (techage:ta3_doorcontroller2)<br />*idx* is the inventory slot number (1..n) |
+| DC2 Exchange Block   | 9           | [0, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Exchange a block<br />*idx* is the inventory slot number (1..n) of/for the block to be exchanged |
+| DC2 Set Block        | 9           | [1, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Set/add a block<br />*idx* is the inventory slot number (1..n) with the block to be set |
+| DC2 Dig Block        | 9           | [2, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Dig/remove a block<br />*idx* is the empty inventory slot number (1..n) for the block |
 | Autocrafter          | 10          | [num1, num2, idx]      | Set the TA4 Autocrafter recipe with a recipe from a TA4 Recipe Block.<br/>*num1/num2* is the TA4 Recipe Block number (num1 * 65536 + num2)<br/>*idx* is the number of the recipe in the TA4 Recipe Block |
 | Move Contr. 1        | 11          | [1]                    | TA4 Move Controller command to move the block(s) from position A to B |
 | Move Contr. 2        | 11          | [2]                    | TA4 Move Controller command to move the block(s) from position B to A |
