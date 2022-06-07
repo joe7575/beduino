@@ -53,9 +53,9 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 | [PDP-13] 14-Segment  | 16          | [num]                  | Ouput value (0-0x3FFF) to the 14-segment block<br />See: [PDP-13 Manual](https://github.com/joe7575/pdp13/blob/main/manuals/manualXL_EN.md#pdp-13-14-segment) |
 | Display Clear        | 17          | -                      | Clear the display                                            |
 | Display Add Line     | 67          | "text string"          | Add a new line to the display                                |
-| Display Write Line   | 68          | "<num>text string"     | Overwrite a text line with the given string. <br />The first string character is the line number (1..5)<br />Examples: "1Hello World", "2Minetest" |
-| Start TA4 Pusher     | 64          | "<item name>"          | Start the TA4 pusher to pull/push items.<br />Example: `default:dirt 8` |
-| Config TA4 Pusher    | 65          | "<item name>"          | Configure the TA4 pusher.<br/>Example: `wool:blue`           |
+| Display Write Line   | 68          | "\<num>text string"    | Overwrite a text line with the given string. <br />The first string character is the line number (1..5)<br />Examples: "1Hello World", "2Minetest" |
+| Start TA4 Pusher     | 64          | "\<item name>"         | Start the TA4 pusher to pull/push items.<br />Example: `default:dirt 8` |
+| Config TA4 Pusher    | 65          | "\<item name>"         | Configure the TA4 pusher.<br/>Example: `wool:blue`           |
 | Sensor Chest Text    | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
 
 
