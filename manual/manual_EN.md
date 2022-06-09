@@ -91,6 +91,70 @@ see [Cipol Language Reference](https://github.com/joe7575/vm16/wiki/Cipol-Langua
 
 
 
+## OS Library
+
+Beduino supports the following "OS" like function:
+
+### get_timeofday
+
+Returns the time of day in minutes(0 - 1439)
+
+```c
+var t = get_timeofday();
+```
+
+### get_day_count
+
+Returns number days elapsed since world was created.
+
+```c
+var t = get_day_count();
+```
+
+### get_sec_time
+
+Returns the time in seconds (0 - 65535)
+
+```c
+var t = get_sec_time();
+```
+
+### get_msec_time
+
+Returns the time in milliseconds (0 - 65535)
+
+```c
+var t = get_msec_time();
+```
+
+### get_random
+
+Returns a pseudo-random number x such that l <= x <= u
+
+```c
+// Prototype: get_random(l, u);
+var num = get_random(0, 10);
+```
+
+###  chat_msg
+
+Sends yourself a chat message (max. length is 40 words)
+
+```c
+chat_msg("Hi!");
+```
+
+### get_description
+
+Copy the description text of `name` to `desc_buff`. `lang_code` is needed for the translation (e.g. "en" or "de")
+
+```c
+// Prototype: get_description(name, lang_code, desc_buff)
+get_description("default:dirt", "de", s);
+```
+
+
+
 ## Router
 
 Routers are used to send messages from one to another controller. Each controller needs its own router. Each router automatically gets an unique number/address, which is used for the addressing. The 16 bit address allows up to 65535 router.

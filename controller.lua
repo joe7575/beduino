@@ -177,6 +177,7 @@ minetest.register_node("beduino:controller", {
 	vm16_cpu = cpu_def,
 	after_place_node = function(pos, placer)
 		M(pos):set_string("infotext", "Beduino Controller")
+		M(pos):set_string("owner", placer:get_player_name())
 	end,
 	on_timer = function(pos, elapsed)
 		local prog_pos = S2P(M(pos):get_string("prog_pos"))

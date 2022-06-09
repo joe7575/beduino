@@ -19,7 +19,7 @@ local function stub() end
 if minetest.global_exists("techage") then
 
 	beduino.tech.tubelib = false
-	beduino.tech.get_nvm =  techage.get_nvm
+	beduino.tech.get_nvm = techage.get_nvm
 	beduino.tech.get_mem = techage.get_mem
 	beduino.tech.del_mem = techage.del_mem
 	beduino.tech.add_manual_items = techage.add_manual_items
