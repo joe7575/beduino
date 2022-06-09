@@ -85,76 +85,6 @@ tbd.
 
 
 
-## Standard Library
-
-see [Cipol Language Reference](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference)
-
-
-
-## OS Library
-
-Beduino supports the following "OS" like function:
-
-### get_timeofday
-
-Returns the time of day in minutes(0 - 1439)
-
-```c
-var t = get_timeofday();
-```
-
-### get_day_count
-
-Returns number days elapsed since world was created.
-
-```c
-var t = get_day_count();
-```
-
-### get_sec_time
-
-Returns the time in seconds (0 - 65535)
-
-```c
-var t = get_sec_time();
-```
-
-### get_msec_time
-
-Returns the time in milliseconds (0 - 65535)
-
-```c
-var t = get_msec_time();
-```
-
-### get_random
-
-Returns a pseudo-random number x such that l <= x <= u
-
-```c
-// Prototype: get_random(l, u);
-var num = get_random(0, 10);
-```
-
-###  chat_msg
-
-Sends yourself a chat message (max. length is 40 words)
-
-```c
-chat_msg("Hi!");
-```
-
-### get_description
-
-Copy the description text of `name` to `desc_buff`. `lang_code` is needed for the translation (e.g. "en" or "de")
-
-```c
-// Prototype: get_description(name, lang_code, desc_buff)
-get_description("default:dirt", "de", s);
-```
-
-
-
 ## Router
 
 Routers are used to send messages from one to another controller. Each controller needs its own router. Each router automatically gets an unique number/address, which is used for the addressing. The 16 bit address allows up to 65535 router.
@@ -169,7 +99,10 @@ func send_msg(address, msg);
 func recv_msg(buff, size);
 ```
 
-The maximum messages length is 64 words.
+The maximum messages length is 64 words. 
+
+> **Note**
+> Word 0 of each messages buffer is the msg size, which is the number of words without the size itself (see example `tx_demo.c`).
 
 The router comes with two example programs to demonstrate the message communication:
 
@@ -207,6 +140,9 @@ func request_msg(address, topic, buff, size);
 
 The maximum messages length is 64 words. Valid values for a topic are 1..100.
 
+> **Note**
+> Word 0 of each messages buffer is the msg size, which is the number of words without the size itself (see example pub_demo.c`).
+
 The broker comes with two example programs to demonstrate the publish/request process:
 
 - `pub_demo.c`  to cyclically publish/send a message to broker #5
@@ -222,12 +158,9 @@ Only the receipt of messages can be restricted, requesting a message from the br
 
 
 
-## 
-
 ## Further Information
 
 - [Cipol Language Reference](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference)
 - [VM16 Instruction Set](https://github.com/joe7575/vm16/blob/master/doc/introduction.md)
-
 - [Assembler Manual](https://github.com/joe7575/vm16/blob/master/doc/asm.md)
 

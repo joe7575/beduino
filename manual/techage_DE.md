@@ -63,6 +63,6 @@ request_data(port, topic, payload, resp);
 
 - *port* ist die I/O Modul Port Nummer
 - *topic* ist eine Nummer aus der Liste der [Beduino Kommandos](https://github.com/joe7575/beduino/blob/main/BEPs/bep-005_ta_cmnd.md)
-- *payload* ist je nach Kommando ein Array oder ein String mit zusätzlichen Informationen Werden keine zusätzlichen Kommandos benötigt, kann `""` angegeben werden
+- *payload* ist je nach Kommando ein Array oder ein String mit zusätzlichen Informationen Werden keine zusätzlichen Kommandos benötigt, kann "" angegeben werden
 - *resp* ist ein Array für die Antwortdaten. Das Array muss groß genug definiert werden, so dass es die Antwortdaten aufnehmen kann
 

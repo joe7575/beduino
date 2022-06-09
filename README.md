@@ -28,7 +28,7 @@ tbd.
 ## First Steps
 
 - (see video:  https://youtu.be/Dbn19YcltTk)
-- [Manual](https://github.com/joe7575/beduino/blob/main/manual/manual_EN.md)
+- [Manuals](https://github.com/joe7575/beduino/wiki)
 
 ## Dependencies
 

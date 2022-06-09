@@ -42,7 +42,7 @@ func request_msg(address, topic, buff, size) {
 local tx_demo_c = [[
 // Comm Transmit Demo
 // Send a text messages to router #2.
-// Byte 0 of the messages buffer is the msg size.
+// Word 0 of the messages buffer is the msg size.
 
 import "comm.c"
 
@@ -97,7 +97,7 @@ func loop() {
 local pub_demo_c = [[
 // Broker Publish Demo
 // Send messages to the broker #5.
-// Byte 0 of the messages array is the msg size.
+// Word 0 of the messages array is the msg size.
 
 import "comm.c"
 
