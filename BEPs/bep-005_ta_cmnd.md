@@ -106,7 +106,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | Furnace Output             | 141         | -                      | "\<node name>"          | Node name of the Industrial Furnace output. <br />Returns "none", if no recipe is active |
 | Binary State               | 142         | -                      | [num]                   | Current block state: OFF = 0, ON = 1                         |
 | Light Level                | 143         | -                      | [num]                   | Light level value between 0  and 15 (15 is high)             |
-| Player Name                | 144         | -                      | "\<player name>"        | Player name of last action                                   |
+| Player Name                | 144         | -                      | "\<player name>"        | Player name of the TA3/TA4 Player Detector                   |
 | Solar Cell State           | 145         | -                      | [num]                   | 0 = UNUSED, 1 = CHARGING, 2 = UNCHARGING                     |
 | Consumption                | 146         | -                      | [num]                   | TA4 Electric Meter total power consumption                   |
 
@@ -154,7 +154,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:ta3_sieve_pas | 1, 128, 129 |
 | techage:ta3_silo | 129, 134 |
 | techage:ta3_soundblock | 1, 14 |
-| techage:ta3_valve_open | 1, 129 |
+| techage:ta3_valve_open | 1, 142 |
 | techage:ta4_battery | 134 |
 | techage:ta4_chest | 131, 140 |
 | techage:ta4_collector | 129 |
@@ -173,7 +173,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:ta4_injector_pas | 1, 128, 129 |
 | techage:ta4_laser_emitter | 142 |
 | techage:ta4_liquidsampler_pas | 1, 128, 129 |
-| techage:ta4_lua_controller | 1, 129 |
+| techage:ta4_lua_controller | 1, 142 |
 | techage:ta4_mbadetector | 142 |
 | techage:ta4_movecontroller | 11, 129 |
 | techage:ta4_movecontroller | 129 |
@@ -190,7 +190,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:ta4_signallamp_4x | 3 |
 | techage:ta4_signaltower | 2, 13 |
 | techage:ta4_signaltower | 2, 130 |
-| techage:ta4_silo | 129, 134 |
+| techage:ta4_silo | 131, 134 |
 | techage:ta4_solar_inverter | 1, 128, 129, 135 |
 | techage:ta4_solar_minicell | 145 |
 | techage:ta4_transformer | 1, 128, 129 |
