@@ -109,6 +109,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | Player Name                | 144         | -                      | "\<player name>"        | Player name of the TA3/TA4 Player Detector                   |
 | Solar Cell State           | 145         | -                      | [num]                   | 0 = UNUSED, 1 = CHARGING, 2 = UNCHARGING                     |
 | Consumption                | 146         | -                      | [num]                   | TA4 Electric Meter total power consumption                   |
+| DC2 Block Name             | 147         | [idx]                  | "\<node name>"          | Name of the placed block<br />*idx* is the inventory slot number (1..n) of the related the block position |
 
 
 
@@ -134,7 +135,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:ta3_cartdetector_off | 142 |
 | techage:ta3_distributor_pas | 1, 4, 128, 129 |
 | techage:ta3_doorcontroller | 1 |
-| techage:ta3_doorcontroller2 | 1, 9 |
+| techage:ta3_doorcontroller2 | 1, 9, 147 |
 | techage:ta3_drillbox_pas | 1, 128, 129 |
 | techage:ta3_electronic_fab_pas | 1, 128, 129 |
 | techage:ta3_furnace_pas | 1, 128, 129, 141 |
