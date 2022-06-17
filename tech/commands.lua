@@ -40,7 +40,6 @@ if minetest.global_exists("techage") then
 	beduino.lib.register_cmnd("flowrate")
 	beduino.lib.register_cmnd("action")
 	beduino.lib.register_cmnd("stacks")
-	beduino.lib.register_cmnd("count")
 	beduino.lib.register_cmnd("output")
 	beduino.lib.register_cmnd("input")
 

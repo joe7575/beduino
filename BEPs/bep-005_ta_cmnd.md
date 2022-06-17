@@ -29,36 +29,37 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 
 
 
-| Command              | Topic (num) | Payload (array/string) | Remarks                                                      |
-| -------------------- | ----------- | ---------------------- | ------------------------------------------------------------ |
-| Turn on/off          | 1           | [num]                  | Turn block (lamp, machine, ...) on/off<br />*num* is the state: 0 = "off", 1 = "on" |
-| Signal Tower         | 2           | [num]                  | Set Signal Tower color<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
-| Signal Lamp          | 3           | [idx, num]             | Set the lamp color for "TA4 2x" and "TA4 4x" Signal Lamps<br />*idx* is the lamp number (1..4)<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
-| Distri. Filter Slot  | 4           | [idx, num]             | Enable/disable a Distributor filter slot.<br />*idx* is the slot number: 1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />*num* is the state: 0 = "off", 1 = "on" |
-| Detector Block Reset | 6           | -                      | Reset the item counter of the TA4 Item Detector block        |
-| TA3 Sequenzer        | 7           | [num]                  | Turn the TA3 Sequencer on/off<br />*num* is the state: 0 = "off", 1 = "on", 2 = "pause" |
-| DC2 Exchange Block   | 9           | [0, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Exchange a block<br />*idx* is the inventory slot number (1..n) of/for the block to be exchanged |
-| DC2 Set Block        | 9           | [1, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Set/add a block<br />*idx* is the inventory slot number (1..n) with the block to be set |
-| DC2 Dig Block        | 9           | [2, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Dig/remove a block<br />*idx* is the empty inventory slot number (1..n) for the block |
-| Autocrafter          | 10          | [num1, num2, idx]      | Set the TA4 Autocrafter recipe with a recipe from a TA4 Recipe Block.<br/>*num1/num2* is the TA4 Recipe Block number (num1 * 65536 + num2)<br/>*idx* is the number of the recipe in the TA4 Recipe Block |
-| Move Contr. 1        | 11          | [1]                    | TA4 Move Controller command to move the block(s) from position A to B |
-| Move Contr. 2        | 11          | [2]                    | TA4 Move Controller command to move the block(s) from position B to A |
-| Move Contr. 3        | 11          | [3]                    | TA4 Move Controller command to move the block(s) to the opposite position |
-| Turn Contr. 1        | 12          | [1]                    | TA4 Turn Controller command to turn the block(s) to the left |
-| Turn Contr. 2        | 12          | [2]                    | TA4 Turn Controller command to turn the block(s) to the right |
-| Turn Contr. 3        | 12          | [3]                    | TA4 Turn Controller command to turn the block(s) 180 degrees |
-| TA4 Sequenzer 1      | 13          | [slot]                 | Start/goto command for the TA4 Sequencer. <br />*slot* is the time slot (1..n) where the execution starts. |
-| TA4 Sequenzer 2      | 13          | [0]                    | Stop command for the TA4 Sequencer.                          |
-| Sound 1              | 14          | [1, volume]            | Set volume of the sound block<br />*volume* is a value from 1 to 5 |
-| Sound 2              | 14          | [2, index]             | Select sound sample of the sound block<br />*index* is the sound sample number |
-| [PDP-13] 7-Segment   | 15          | [num]                  | Ouput value (0-15) to the 7-segment block (values > 15 will turn off the block) |
-| [PDP-13] 14-Segment  | 16          | [num]                  | Ouput value (0-0x3FFF) to the 14-segment block<br />See: [PDP-13 Manual](https://github.com/joe7575/pdp13/blob/main/manuals/manualXL_EN.md#pdp-13-14-segment) |
-| Display Clear        | 17          | -                      | Clear the display                                            |
-| Display Add Line     | 67          | "text string"          | Add a new line to the display                                |
-| Display Write Line   | 68          | "\<num>text string"    | Overwrite a text line with the given string. <br />The first string character is the line number (1..5)<br />Examples: "1Hello World", "2Minetest" |
-| Start TA4 Pusher     | 64          | "\<item name>"         | Start the TA4 pusher to pull/push items.<br />Example: `default:dirt 8` |
-| Config TA4 Pusher    | 65          | "\<item name>"         | Configure the TA4 pusher.<br/>Example: `wool:blue`           |
-| Sensor Chest Text    | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
+| Command               | Topic (num) | Payload (array/string) | Remarks                                                      |
+| --------------------- | ----------- | ---------------------- | ------------------------------------------------------------ |
+| Turn on/off           | 1           | [num]                  | Turn block (lamp, machine, ...) on/off<br />*num* is the state: 0 = "off", 1 = "on" |
+| Signal Tower          | 2           | [num]                  | Set Signal Tower color<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
+| Signal Lamp           | 3           | [idx, num]             | Set the lamp color for "TA4 2x" and "TA4 4x" Signal Lamps<br />*idx* is the lamp number (1..4)<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
+| Distri. Filter Slot   | 4           | [idx, num]             | Enable/disable a Distributor filter slot.<br />*idx* is the slot number: 1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />*num* is the state: 0 = "off", 1 = "on" |
+| Detector Block Reset  | 6           | -                      | Reset the item counter of the TA4 Item Detector block        |
+| TA3 Sequenzer         | 7           | [num]                  | Turn the TA3 Sequencer on/off<br />*num* is the state: 0 = "off", 1 = "on", 2 = "pause" |
+| DC2 Exchange Block    | 9           | [0, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Exchange a block<br />*idx* is the inventory slot number (1..n) of/for the block to be exchanged |
+| DC2 Set Block         | 9           | [1, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Set/add a block<br />*idx* is the inventory slot number (1..n) with the block to be set |
+| DC2 Dig Block         | 9           | [2, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Dig/remove a block<br />*idx* is the empty inventory slot number (1..n) for the block |
+| Autocrafter           | 10          | [num1, num2, idx]      | Set the TA4 Autocrafter recipe with a recipe from a TA4 Recipe Block.<br/>*num1/num2* is the TA4 Recipe Block number (num1 * 65536 + num2)<br/>*idx* is the number of the recipe in the TA4 Recipe Block |
+| Move Contr. 1         | 11          | [1]                    | TA4 Move Controller command to move the block(s) from position A to B |
+| Move Contr. 2         | 11          | [2]                    | TA4 Move Controller command to move the block(s) from position B to A |
+| Move Contr. 3         | 11          | [3]                    | TA4 Move Controller command to move the block(s) to the opposite position |
+| Turn Contr. 1         | 12          | [1]                    | TA4 Turn Controller command to turn the block(s) to the left |
+| Turn Contr. 2         | 12          | [2]                    | TA4 Turn Controller command to turn the block(s) to the right |
+| Turn Contr. 3         | 12          | [3]                    | TA4 Turn Controller command to turn the block(s) 180 degrees |
+| TA4 Sequenzer 1       | 13          | [slot]                 | Start/goto command for the TA4 Sequencer. <br />*slot* is the time slot (1..n) where the execution starts. |
+| TA4 Sequenzer 2       | 13          | [0]                    | Stop command for the TA4 Sequencer.                          |
+| Sound 1               | 14          | [1, volume]            | Set volume of the sound block<br />*volume* is a value from 1 to 5 |
+| Sound 2               | 14          | [2, index]             | Select sound sample of the sound block<br />*index* is the sound sample number |
+| [PDP-13] 7-Segment    | 15          | [num]                  | Ouput value (0-15) to the 7-segment block (values > 15 will turn off the block) |
+| [PDP-13] 14-Segment   | 16          | [num]                  | Ouput value (0-0x3FFF) to the 14-segment block<br />See: [PDP-13 Manual](https://github.com/joe7575/pdp13/blob/main/manuals/manualXL_EN.md#pdp-13-14-segment) |
+| Display Clear         | 17          | -                      | Clear the display                                            |
+| Display Add Line      | 67          | "text string"          | Add a new line to the display                                |
+| Display Write Line    | 68          | "\<num>text string"    | Overwrite a text line with the given string. <br />The first string character is the line number (1..5)<br />Examples: "1Hello World", "2Minetest" |
+| Start TA4 Pusher      | 64          | "\<item name>"         | Start the TA4 pusher to pull/push items.<br />Example: `default:dirt 8` |
+| Config TA4 Pusher     | 65          | "\<item name>"         | Configure the TA4 pusher.<br/>Example: `wool:blue`           |
+| Sensor Chest Text     | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
+| Distri. Filter Config | 67          | "\<slot> \<item list>" | Configure a Distributor filter slot, like: "red default:dirt dye:blue" |
 
 
 
@@ -110,6 +111,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | Solar Cell State           | 145         | -                      | [num]                   | 0 = UNUSED, 1 = CHARGING, 2 = UNCHARGING                     |
 | Consumption                | 146         | -                      | [num]                   | TA4 Electric Meter total power consumption                   |
 | DC2 Block Name             | 147         | [idx]                  | "\<node name>"          | Name of the placed block<br />*idx* is the inventory slot number (1..n) of the related the block position |
+| Distri. Filter Get         | 148         | "\<slot>"              | "\<item list>"          | *idx* is the slot number: <br />1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />Return a string like: "default:dirt dye:blue" |
 
 
 
@@ -133,7 +135,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:ta3_akku | 1, 128, 129, 134 |
 | techage:ta3_cartdetector_off | 1, 142 |
 | techage:ta3_cartdetector_off | 142 |
-| techage:ta3_distributor_pas | 1, 4, 128, 129 |
+| techage:ta3_distributor_pas | 1, 4, 67, 128, 129,148 |
 | techage:ta3_doorcontroller | 1 |
 | techage:ta3_doorcontroller2 | 1, 9, 147 |
 | techage:ta3_drillbox_pas | 1, 128, 129 |
@@ -162,7 +164,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:ta4_detector_off | 6, 139 |
 | techage:ta4_display | 17, 67, 68 |
 | techage:ta4_displayXL | 17, 67, 68 |
-| techage:ta4_distributor_pas | 1, 4, 128, 129 |
+| techage:ta4_distributor_pas | 1, 4, 67, 128, 129, 148 |
 | techage:ta4_doser | 1, 128, 129 |
 | techage:ta4_electricmeter | 1, 128, 129, 146 |
 | techage:ta4_electrolyzer | 1, 128, 129, 134, 135 |
