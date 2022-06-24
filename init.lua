@@ -43,6 +43,7 @@ if minetest.global_exists("techage") or minetest.global_exists("tubelib") then
 	dofile(MP.."/tech/wrapper.lua")
 	dofile(MP.."/tech/commands.lua")
 	dofile(MP.."/tech/io_module.lua")
+	dofile(MP.."/tech/inp_module.lua")
 	dofile(MP.."/tech/sys_calls.lua")
 	dofile(MP.."/tech/files.lua")
 	dofile(MP.."/tech/recipes.lua")

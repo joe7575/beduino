@@ -49,6 +49,25 @@ einen Event aus. Events können über die Funktion `event()` abgefragt werden.
 Liefert die Funktion den Wert `1` zurück, wurden ein oder mehrere Signale empfangen.
 Der Aufruf von `event()` setzt das Event-Flag zurück.
 
+
+
+## Input Modul
+
+Auch jedes Input Modul benötigt eine eigene Basisadresse,
+hat aber nur einen Port, an dem alle eingehenden Kommandos ankommen.
+Dies hat den Vorteil, dass vom Beduino Controller aus nur ein Port abgefragt werden muss.
+
+Das erste empfangene Kommando wird vom Modul gespeichert und ein Event
+wird an den Beduino Controller ausgelöst. Events können über die 
+Funktion `event()` abgefragt werden.
+
+Alle weiteren Kommandos werden solange verworfen, bis der Wert vom 
+Beduino Controller über `input()` ausgelesen und das Input-Register damit gelöscht wurde.
+
+Der Aufruf von `event()` setzt das Event-Flag zurück.
+
+
+
 ## Techage Kommandos
 
 Für komplexere Kommandos zur Steuerung von techage Maschinen dienen

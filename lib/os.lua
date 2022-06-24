@@ -43,7 +43,7 @@ end
 local function get_description(cpu_pos, address, regA, regB, regC)
 	local name = vm16.read_ascii(cpu_pos, regA, 32)
 	local lang_code = vm16.read_ascii(cpu_pos, regB, 4)
-	local ndef = minetest.registered_nodes[name] or minetest.registered_items[name] 
+	local ndef = minetest.registered_nodes[name] or minetest.registered_items[name]
 		or minetest.registered_craftitems[name]
 	if ndef then
 		local text = minetest.get_translated_string(lang_code, ndef.description)

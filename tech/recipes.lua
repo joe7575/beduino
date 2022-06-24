@@ -51,6 +51,15 @@ if minetest.global_exists("techage") then
 	})
 
 	minetest.register_craft({
+		output = "beduino:inp_module",
+		recipe = {
+				{"", "dye:blue", ""},
+				{"techage:aluminum", "basic_materials:copper_wire", "basic_materials:plastic_sheet"},
+				{"techage:ta4_ramchip", "techage:ta4_wlanchip", "techage:ta4_ramchip"},
+		},
+	})
+
+	minetest.register_craft({
 		output = "beduino:router",
 		recipe = {
 				{"", "dye:blue", ""},

@@ -50,6 +50,20 @@ Events can be queried using the `event()` function.
 If the function returns the value `1`, one or more signals have been received. 
 Calling `event()` resets the event flag.
 
+## Input Module
+
+Each input module also requires its own base address, but has only one 
+port where all incoming commands arrive. This has the advantage that only 
+one port needs to be queried from the Beduino controller. 
+
+The first command received is saved by the module and an event is triggered 
+on the Beduino controller. Events can be queried using the `event()` function. 
+
+All further commands are discarded until the value has been read from the 
+Beduino controller via `input()` and the input register has thus been deleted.
+
+Calling `event()` resets the event flag.
+
 ## Techage Commands
 
 The following commands are used for more complex commands to control techage machines. 

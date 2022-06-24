@@ -2,6 +2,7 @@ techage.add_to_manual('EN', {
   "1,Beduino for Techage",
   "2,First Steps",
   "2,I/O Module",
+  "2,Input Module",
   "2,Techage Commands",
 }, {
   "Beduino is a 16-bit microcontroller system inspired by Arduino boards and kits.\n"..
@@ -48,6 +49,18 @@ techage.add_to_manual('EN', {
   "If the function returns the value '1'\\, one or more signals have been received. \n"..
   "Calling 'event()' resets the event flag.\n"..
   "\n",
+  "Each input module also requires its own base address\\, but has only one \n"..
+  "port where all incoming commands arrive. This has the advantage that only \n"..
+  "one port needs to be queried from the Beduino controller. \n"..
+  "\n"..
+  "The first command received is saved by the module and an event is triggered \n"..
+  "on the Beduino controller. Events can be queried using the 'event()' function. \n"..
+  "\n"..
+  "All further commands are discarded until the value has been read from the \n"..
+  "Beduino controller via 'input()' and the input register has thus been deleted.\n"..
+  "\n"..
+  "Calling 'event()' resets the event flag.\n"..
+  "\n",
   "The following commands are used for more complex commands to control techage machines. \n"..
   "For this\\, too\\, there must be a connection from the I/O module to the techage block\\, \n"..
   "since a port is always required for addressing:\n"..
@@ -65,7 +78,9 @@ techage.add_to_manual('EN', {
   "",
   "",
   "",
+  "",
 }, {
+  "",
   "",
   "",
   "",

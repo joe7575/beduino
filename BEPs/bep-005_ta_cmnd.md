@@ -44,6 +44,8 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 | Move Contr. 1         | 11          | [1]                    | TA4 Move Controller command to move the block(s) from position A to B |
 | Move Contr. 2         | 11          | [2]                    | TA4 Move Controller command to move the block(s) from position B to A |
 | Move Contr. 3         | 11          | [3]                    | TA4 Move Controller command to move the block(s) to the opposite position |
+| MC move xyz           | 18          | [x, y, z]              | TA4 Move Controller command to move the block(s) by the given<br /> x/y/z-distance. Valid ranges for x, y, and z are -100 to 100. <br />(Note: `65536 - 100 = 65425` with corresponds to `-100`) |
+| MC reset              | 19          | -                      | Reset TA4 Move Controller (move block(s) to start position)  |
 | Turn Contr. 1         | 12          | [1]                    | TA4 Turn Controller command to turn the block(s) to the left |
 | Turn Contr. 2         | 12          | [2]                    | TA4 Turn Controller command to turn the block(s) to the right |
 | Turn Contr. 3         | 12          | [3]                    | TA4 Turn Controller command to turn the block(s) 180 degrees |
@@ -172,14 +174,12 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:ta4_fuelcell | 1, 128, 129, 134, 135 |
 | techage:ta4_grinder_pas | 1, 128, 129 |
 | techage:ta4_icta_controller | 1, 129 |
-| techage:ta4_icta_controller | 1, 129 |
 | techage:ta4_injector_pas | 1, 128, 129 |
 | techage:ta4_laser_emitter | 142 |
 | techage:ta4_liquidsampler_pas | 1, 128, 129 |
 | techage:ta4_lua_controller | 1, 142 |
 | techage:ta4_mbadetector | 142 |
-| techage:ta4_movecontroller | 11, 129 |
-| techage:ta4_movecontroller | 129 |
+| techage:ta4_movecontroller | 11, 18, 19, 129 |
 | techage:ta4_playerdetector_off | 142, 144 |
 | techage:ta4_pumpjack_pas | 134 |
 | techage:ta4_pusher_pas | 1, 64, 65 |

@@ -51,6 +51,10 @@ Licensed under the GNU AGPLv3 (See LICENSE.txt)
 
 ## History
 
+### v0.5 (2022-06-24)
+
+- Add Input module
+
 ### v0.4 (2022-06-06)
 
 - Improve integration into techage

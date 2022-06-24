@@ -128,7 +128,7 @@ local function formspec_use(pos)
 		"tabheader[0,0;tab;I/O,config,help;" .. tab .. ";;true]"..
 		"container[0.3,1]"..
 		"box[0.2,0.5;12,6.7;#333]"..
-		"label[0.5,0;Addr]"..
+		"label[0.5,0;Port]"..
 		"label[2.0,0;Number]"..
 		"label[5.0,0;OUT]"..
 		"label[6.7,0;IN]"..
@@ -155,7 +155,7 @@ local function on_init_io(pos, cpu_pos)
 	store_exchange_data(pos)
 	local baseaddr = meta:get_int("baseaddr")
 	local own_num = meta:get_string("own_number")
-	for addr = baseaddr, baseaddr + 8 do
+	for addr = baseaddr, baseaddr + 7 do
 		beduino.register_input_address(pos, cpu_pos, addr, on_input)
 		beduino.register_output_address(pos, cpu_pos, addr, on_output)
 		local dest_num = tech.get_node_number(pos, addr - baseaddr)
@@ -262,7 +262,6 @@ minetest.register_node("beduino:io_module", {
 	on_receive_fields = on_receive_fields,
 	on_init_io = on_init_io,
 	on_start_io = on_start_io,
-	on_receive_fields = on_receive_fields,
 	on_rightclick = on_rightclick,
 
 	paramtype = "light",
@@ -280,7 +279,7 @@ beduino.tech.register_node({"beduino:io_module"}, {
 		if tech.tubelib then
 			pos, src, topic = pos, topic, src
 		end
-		local val = lib.get_num_cmnd(topic)
+		local val = lib.get_num_cmnd(topic) or tonumber(topic) or 0
 		if val then
 			local nvm = tech.get_nvm(pos)
 			local port = tech.get_node_port(pos, src)
