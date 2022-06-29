@@ -25,8 +25,8 @@ local function get_sec_time(cpu_pos, address, regA, regB, regC)
 	return minetest.get_gametime() % 0x10000
 end
 
-local function get_msec_time(cpu_pos, address, regA, regB, regC)
-	return math.floor(minetest.get_us_time() / 1000) % 0x10000
+local function get_time(cpu_pos, address, regA, regB, regC)
+	return math.floor(minetest.get_us_time() / 100000) % 0x10000
 end
 
 local function get_random(cpu_pos, address, regA, regB, regC)
@@ -58,7 +58,7 @@ end
 beduino.lib.register_SystemHandler(0x20, get_timeofday)
 beduino.lib.register_SystemHandler(0x21, get_day_count)
 beduino.lib.register_SystemHandler(0x22, get_sec_time)
-beduino.lib.register_SystemHandler(0x23, get_msec_time)
+beduino.lib.register_SystemHandler(0x23, get_time)
 beduino.lib.register_SystemHandler(0x24, get_random)
 beduino.lib.register_SystemHandler(0x25, chat_msg)
 beduino.lib.register_SystemHandler(0x26, get_description)
@@ -79,8 +79,8 @@ func get_sec_time() {
   return system(0x22, 0);
 }
 
-// Returns the time in milliseconds (0 - 65535)
-func get_msec_time() {
+// Returns the time in 100 ms resolution (0 - 65535)
+func get_time() {
   return system(0x23, 0);
 }
 
