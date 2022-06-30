@@ -77,6 +77,15 @@ if minetest.global_exists("techage") then
 		},
 	})
 
+	minetest.register_craft({
+		output = "beduino:14segment",
+		recipe = {
+			{"wool:black", "", ""},
+			{"techage:vacuum_tube", "", ""},
+			{"basic_materials:ic", "basic_materials:ic", ""},
+		},
+	})
+
 elseif minetest.global_exists("tubelib") then
 
 	minetest.register_craft({
