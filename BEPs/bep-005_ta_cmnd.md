@@ -109,11 +109,12 @@ The function `request_data` request a response from a node specified by *port*. 
 | Furnace Output             | 141         | -                      | "\<node name>"          | Node name of the Industrial Furnace output. <br />Returns "none", if no recipe is active |
 | Binary State               | 142         | -                      | [num]                   | Current block state: OFF = 0, ON = 1                         |
 | Light Level                | 143         | -                      | [num]                   | Light level value between 0  and 15 (15 is high)             |
-| Player Name                | 144         | -                      | "\<player name>"        | Player name of the TA3/TA4 Player Detector                   |
+| Player Name                | 144         | -                      | "\<player name>"        | Player name of the TA3/TA4 Player Detector or TA4 Button     |
 | Solar Cell State           | 145         | -                      | [num]                   | 0 = UNUSED, 1 = CHARGING, 2 = UNCHARGING                     |
 | Consumption                | 146         | -                      | [num]                   | TA4 Electric Meter total power consumption                   |
 | DC2 Block Name             | 147         | [idx]                  | "\<node name>"          | Name of the placed block<br />*idx* is the inventory slot number (1..n) of the related the block position |
 | Distri. Filter Get         | 148         | "\<slot>"              | "\<item list>"          | *idx* is the slot number: <br />1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />Return a string like: "default:dirt dye:blue" |
+| Time Stamp                 | 149         | -                      | [time]                  | Time in system ticks (norm. 100 ms) when the TA4 Button is clicked |
 
 
 
@@ -161,6 +162,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:ta3_soundblock | 1, 14 |
 | techage:ta3_valve_open | 1, 142 |
 | techage:ta4_battery | 134 |
+| techage:ta4_button_off | 144, 149 |
 | techage:ta4_chest | 131, 140 |
 | techage:ta4_collector | 129 |
 | techage:ta4_detector_off | 6, 139 |
