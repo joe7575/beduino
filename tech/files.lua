@@ -64,6 +64,30 @@ func write_line(port, row, text) {
 }
 ]]
 
+local seg14_c = [[
+import "ta_iom.c"
+
+static var Chars[] = {
+  0x2237, 0x0A8F, 0x0039, 0x088F, 0x2039, 0x2031, 0x023D, 0x2236,
+  0x0889, 0x001E, 0x2530, 0x0038, 0x0176, 0x0476, 0x003F, 0x2233,
+  0x043F, 0x2633, 0x222D, 0x0881, 0x003E, 0x1130, 0x1436, 0x1540,
+  0x0940, 0x1109 };
+
+static var Numbers[] = {
+  0x003F, 0x0106, 0x221B, 0x020F, 0x2226, 0x222D, 0x223D, 0x0901,
+  0x223F, 0x222F};
+
+func seg14_putchar(port, c) {
+  var i = c - 65;
+  send_cmnd(port, 16, &Chars[i]); 
+}
+
+func seg14_putdigit(port, val) {
+  var i = val - 48;
+  send_cmnd(port, 16, &Numbers[i]); 
+}
+]]
+
 local example1_c = [[
 // Output some characters on the
 // programmer status line (system #0).
@@ -172,6 +196,7 @@ func loop() {
 ]]
 
 vm16.register_ro_file("beduino", "ta_iom.c",   iom_c)
+vm16.register_ro_file("beduino", "seg14.c",    seg14_c)
 vm16.register_ro_file("beduino", "ta_cmnd.c",  lib.get_command_file())
 vm16.register_ro_file("beduino", "example1.c", example1_c)
 vm16.register_ro_file("beduino", "example2.c", example2_c)

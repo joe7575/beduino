@@ -78,11 +78,47 @@ if minetest.global_exists("techage") then
 	})
 
 	minetest.register_craft({
-		output = "beduino:14segment",
+		output = "beduino:14segment1",
 		recipe = {
-			{"wool:black", "", ""},
-			{"techage:vacuum_tube", "", ""},
+			{"wool:white", "dye:white", "dye:black"},
+			{"techage:ta4_leds", "techage:ta4_leds", ""},
 			{"basic_materials:ic", "basic_materials:ic", ""},
+		},
+	})
+
+	minetest.register_craft({
+		output = "beduino:14segment2",
+		recipe = {
+			{"beduino:14segment1", "", ""},
+			{"", "", ""},
+			{"", "", ""},
+		},
+	})
+
+	minetest.register_craft({
+		output = "beduino:14segment3",
+		recipe = {
+			{"beduino:14segment2", "", ""},
+			{"", "", ""},
+			{"", "", ""},
+		},
+	})
+
+	minetest.register_craft({
+		output = "beduino:14segment1",
+		recipe = {
+			{"beduino:14segment2", "", ""},
+			{"", "", ""},
+			{"", "", ""},
+		},
+	})
+
+	minetest.register_craft({
+		output = "beduino:14segment2",
+		recipe = {
+			{"beduino:14segment3", "", ""},
+			{"", "", ""},
+			{"", "", ""},
 		},
 	})
 
