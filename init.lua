@@ -30,6 +30,7 @@ dofile(MP.."/lib/lib.lua")
 dofile(MP.."/lib/kv_store.lua")
 dofile(MP.."/lib/dispatch.lua")
 dofile(MP.."/lib/os.lua")
+dofile(MP.."/lib/eeprom.lua")
 dofile(MP.."/lib/files.lua")
 
 dofile(MP.."/controller.lua")

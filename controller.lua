@@ -24,6 +24,7 @@ local RADIUS = 3    -- for I/O modules
 local Inputs = {}   -- [cpu_pos][port] = {node_pos, clbk}
 local Outputs = {}  -- [cpu_pos][port] = {node_pos, clbk}
 local IONodes = {}  -- Known I/O nodes
+local Memory = {["beduino:eeprom2k"] = true, ["beduino:ram2k"] = true, ["beduino:ram4k"] = true}
 
 local Info = [[
               Beduino
@@ -37,7 +38,6 @@ a C like language.
 Learn more about Cipol on:
 https://github.com/joe7575/vm16/wiki
 
-The Controller is connected to:
 ]]
 
 local function find_io_nodes(cpu_pos)
@@ -46,9 +46,36 @@ local function find_io_nodes(cpu_pos)
 	return minetest.find_nodes_in_area(pos1, pos2, IONodes)
 end
 
+local function has_eeprom(pos)
+	local inv = M(pos):get_inventory()
+	local e2p2k = ItemStack("beduino:eeprom2k")
+	return inv:contains_item("memory", e2p2k)
+end
+
+local function ram_size(pos)
+	local inv = M(pos):get_inventory()
+	local ram2k = ItemStack("beduino:ram2k")
+	local ram4k = ItemStack("beduino:ram4k")
+	if inv:contains_item("memory", ram4k) and inv:contains_item("memory", ram2k) then
+		return 7  -- 8192 words
+	elseif inv:contains_item("memory", ram2k) then
+		return 6  -- 4096 words
+	end
+	return 5  -- 2048 words
+end
 
 local function on_init_cpu(cpu_pos)
 	local out = {}
+	
+	out[#out + 1] = "The Controller has:"
+	out[#out + 1] = string.format(" - %u K RAM", (2 ^ (ram_size(cpu_pos) + 6)) / 1024)
+	if has_eeprom(cpu_pos) then
+		out[#out + 1] = " - 2 K EEPROM"
+	end
+	
+	out[#out + 1] = ""
+	out[#out + 1] = "The Controller is connected to:"
+
 	for _,pos in ipairs(find_io_nodes(cpu_pos)) do
 		local node = minetest.get_node(pos)
 		local ndef = minetest.registered_nodes[node.name]
@@ -67,6 +94,9 @@ local function on_start_cpu(cpu_pos)
 		if ndef and ndef.on_start_io then
 			ndef.on_start_io(pos, cpu_pos)
 		end
+		if has_eeprom(cpu_pos) then
+			beduino.eeprom_init(cpu_pos)
+		end
 	end
 end
 
@@ -78,6 +108,13 @@ local function on_stop_cpu(cpu_pos)
 			ndef.on_stop_io(pos, cpu_pos)
 		end
 	end
+end
+
+local function formspec()
+	return "size[8,7]"..
+		"label[3,0;Memory Slots]" ..
+		"list[context;memory;3,0.6;2,2;]" ..
+		"list[current_player;main;0,3.2;8,4;]"
 end
 
 -- CPU definition
@@ -132,7 +169,7 @@ local cpu_def = {
 		end
 	end,
 	on_mem_size = function(pos)
-		return 5  -- 2048 words
+		return ram_size(pos)
 	end,
 	on_start = function(pos)
 		M(pos):set_string("infotext", "Beduino Controller (running)")
@@ -175,9 +212,14 @@ minetest.register_node("beduino:controller", {
 		},
 	},
 	vm16_cpu = cpu_def,
+	on_construct = function(pos)
+		local inv = M(pos):get_inventory()
+		inv:set_size('memory', 4)
+	end,
 	after_place_node = function(pos, placer)
 		M(pos):set_string("infotext", "Beduino Controller")
 		M(pos):set_string("owner", placer:get_player_name())
+		M(pos):set_string("formspec", formspec())
 	end,
 	on_timer = function(pos, elapsed)
 		local prog_pos = S2P(M(pos):get_string("prog_pos"))
@@ -186,6 +228,38 @@ minetest.register_node("beduino:controller", {
 	after_dig_node = function(pos)
 		local prog_pos = S2P(M(pos):get_string("prog_pos"))
 		vm16.unload_cpu(pos, prog_pos)
+	end,
+	can_dig = function(pos, player)
+		if minetest.is_protected(pos, player:get_player_name()) then
+			return false
+		end
+		local inv = minetest.get_meta(pos):get_inventory()
+		return inv:is_empty("main")
+	end,
+	allow_metadata_inventory_put = function(pos, listname, index, stack, player)
+		if minetest.is_protected(pos, player:get_player_name()) then
+			return 0
+		end
+		if M(pos):get_int("running") == 1 then
+			return 0
+		end
+		if not Memory[stack:get_name()] then
+			return 0
+		end
+		return 1
+	end,
+	allow_metadata_inventory_take = function(pos, listname, index, stack, player)
+		if minetest.is_protected(pos, player:get_player_name()) then
+			return 0
+		end
+		if M(pos):get_int("running") == 1 then
+			return 0
+		end
+		if M(pos):contains("prog_pos") then
+			local prog_pos = S2P(M(pos):get_string("prog_pos"))
+			vm16.unload_cpu(pos, prog_pos)
+		end
+		return stack:get_count()
 	end,
 	paramtype = "light",
 	use_texture_alpha = "clip",
@@ -207,6 +281,9 @@ minetest.register_lbm({
 		if M(pos):get_int("running") == 1 then
 			vm16.load_cpu(pos, prog_pos, cpu_def)
 			cpu_def.on_init(pos, prog_pos)
+			if has_eeprom(pos) then
+				beduino.eeprom_init(pos)
+			end
 		end
 	end
 })
@@ -215,6 +292,21 @@ lib.register_SystemHandler(0, function(cpu_pos, address, regA, regB, regC)
 	local prog_pos = S2P(M(cpu_pos):get_string("prog_pos"))
 	return vm16.putchar(prog_pos, regA) or 0xffff, 500
 end)
+
+minetest.register_craftitem("beduino:eeprom2k", {
+	description = "EEPROM 2K",
+	inventory_image = "beduino_eeprom2k.png",
+})
+
+minetest.register_craftitem("beduino:ram2k", {
+	description = "RAM 2K",
+	inventory_image = "beduino_ram2k.png",
+})
+
+minetest.register_craftitem("beduino:ram4k", {
+	description = "RAM 4K",
+	inventory_image = "beduino_ram4k.png",
+})
 
 -------------------------------------------------------------------------------
 -- API for I/O nodes
