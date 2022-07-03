@@ -51,6 +51,11 @@ Licensed under the GNU AGPLv3 (See LICENSE.txt)
 
 ## History
 
+### v0.6 (2022-07-03)
+
+- 14 segment display added
+- RAM and EEPROM chips added
+
 ### v0.5 (2022-06-24)
 
 - Add Input module

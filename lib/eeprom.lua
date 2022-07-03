@@ -61,7 +61,6 @@ local function e2p_read_block(cpu_pos, address, regA, regB, regC)
 		local resp = {}
 		local last = regA + math.min(regC, 32) - 1
 		for i = regA, last do
-			print("i", i, Cache[hash][i % 2048])
 			resp[#resp + 1] = Cache[hash][i % 2048] or 0xFFFF
 		end
 		vm16.write_mem(cpu_pos, regB, resp)
@@ -133,5 +132,24 @@ function beduino.eeprom_init(cpu_pos)
 	end
 	Cache[hash] = S2T(meta:get_string("eeprom"))
 	
+	meta:mark_as_private("eeprom")
+end
+
+function beduino.eeprom_read(cpu_pos)
+	local hash = H(cpu_pos)
+	local meta = M(cpu_pos)
+
+	local code = meta:get_string("eeprom")
+	meta:set_string("eeprom", "")
+	Cache[hash] = nil
+	return code
+end
+
+function beduino.eeprom_write(cpu_pos, code)
+	local hash = H(cpu_pos)
+	local meta = M(cpu_pos)
+
+	meta:set_string("eeprom", code)
+	Cache[hash] = S2T(code)
 	meta:mark_as_private("eeprom")
 end

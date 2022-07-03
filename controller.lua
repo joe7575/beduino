@@ -17,6 +17,8 @@ local M = minetest.get_meta
 local H = minetest.hash_node_position
 local P2S = function(pos) if pos then return minetest.pos_to_string(pos) end end
 local S2P = function(s) return minetest.string_to_pos(s) end
+local S2T = function(s) return minetest.deserialize(s) or {} end
+local T2S = function(t) return minetest.serialize(t) or 'return {}' end
 
 local lib = beduino.lib
 
@@ -106,6 +108,27 @@ local function on_stop_cpu(cpu_pos)
 		local ndef = minetest.registered_nodes[node.name]
 		if ndef and ndef.on_stop_io then
 			ndef.on_stop_io(pos, cpu_pos)
+		end
+	end
+end
+
+local function get_eeprom_code(stack)
+	local name = stack:get_name()
+	if name == "beduino:eeprom2k" then
+		local meta = stack:get_meta()
+		if meta then
+			return meta:get_string("code")
+		end
+	end
+end
+
+local function set_eeprom_code(stack, code)
+	local name = stack:get_name()
+	if name == "beduino:eeprom2k" then
+		local meta = stack:get_meta()
+		if meta then
+			meta:set_string("code", code)
+			return true
 		end
 	end
 end
@@ -240,11 +263,23 @@ minetest.register_node("beduino:controller", {
 		if minetest.is_protected(pos, player:get_player_name()) then
 			return 0
 		end
-		if M(pos):get_int("running") == 1 then
+		if vm16.is_loaded(pos) then
 			return 0
 		end
-		if not Memory[stack:get_name()] then
+		local name = stack:get_name()
+		if not Memory[name] then
 			return 0
+		end
+		local inv = minetest.get_meta(pos):get_inventory()
+		if inv:contains_item("memory", {name = name}) then
+			return 0
+		end
+		if name == "beduino:ram4k" and not inv:contains_item("memory", {name = "beduino:ram2k"}) then
+			return 0
+		end
+		if name == "beduino:eeprom2k" then
+			local code = get_eeprom_code(stack)
+			beduino.eeprom_write(pos, code)
 		end
 		return 1
 	end,
@@ -252,12 +287,16 @@ minetest.register_node("beduino:controller", {
 		if minetest.is_protected(pos, player:get_player_name()) then
 			return 0
 		end
-		if M(pos):get_int("running") == 1 then
+		if vm16.is_loaded(pos) then
 			return 0
 		end
-		if M(pos):contains("prog_pos") then
-			local prog_pos = S2P(M(pos):get_string("prog_pos"))
-			vm16.unload_cpu(pos, prog_pos)
+		local name = stack:get_name()
+		if name == "beduino:eeprom2k" then
+			local inv = minetest.get_meta(pos):get_inventory()
+			local stack = inv:get_stack(listname, index)
+			local code = beduino.eeprom_read(pos)
+			set_eeprom_code(stack, code)
+			inv:set_stack(listname, index, stack)
 		end
 		return stack:get_count()
 	end,
@@ -293,9 +332,28 @@ lib.register_SystemHandler(0, function(cpu_pos, address, regA, regB, regC)
 	return vm16.putchar(prog_pos, regA) or 0xffff, 500
 end)
 
+local function on_use(itemstack, user)
+	local meta = itemstack:get_meta()
+	local tbl = S2T(meta:get_string("code"))
+	
+	local out = {}
+	for i = 0,31,4 do
+		out[#out + 1] = string.format("%04X: %04X %04X %04X %04X", 
+			i, tbl[i] or 0xFFFF, tbl[i+1] or 0xFFFF, tbl[i+2] or 0xFFFF, tbl[i+3] or 0xFFFF)
+	end
+	local s = table.concat(out, "\n")
+	local formspec = "size[6,3.2]" ..
+		"style_type[textarea;font=mono]" ..
+		"textarea[0.3,0.3;10,4;;Code:;" .. s .. "]"
+	local player_name = user:get_player_name()
+	minetest.show_formspec(player_name, "beduino:eeprom2k", formspec)
+	return itemstack
+end
+
 minetest.register_craftitem("beduino:eeprom2k", {
 	description = "EEPROM 2K",
 	inventory_image = "beduino_eeprom2k.png",
+	on_use = on_use,
 })
 
 minetest.register_craftitem("beduino:ram2k", {

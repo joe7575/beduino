@@ -37,7 +37,7 @@ if minetest.global_exists("techage") then
 		recipe = {
 			{"", "dye:blue", ""},
 			{"basic_materials:plastic_sheet", "basic_materials:gold_wire", "techage:aluminum"},
-			{"techage:ta4_ramchip", "techage:ta4_wlanchip", "techage:ta4_ramchip"},
+			{"beduino:ram2k", "techage:ta4_wlanchip", ""},
 		},
 	})
 
@@ -46,7 +46,7 @@ if minetest.global_exists("techage") then
 		recipe = {
 				{"", "dye:blue", ""},
 				{"basic_materials:plastic_sheet", "basic_materials:copper_wire", "techage:aluminum"},
-				{"techage:ta4_ramchip", "techage:ta4_wlanchip", "techage:ta4_ramchip"},
+				{"beduino:ram2k", "techage:ta4_wlanchip", "beduino:ram2k"},
 		},
 	})
 
@@ -55,7 +55,7 @@ if minetest.global_exists("techage") then
 		recipe = {
 				{"", "dye:blue", ""},
 				{"techage:aluminum", "basic_materials:copper_wire", "basic_materials:plastic_sheet"},
-				{"techage:ta4_ramchip", "techage:ta4_wlanchip", "techage:ta4_ramchip"},
+				{"beduino:ram2k", "techage:ta4_wlanchip", "beduino:ram2k"},
 		},
 	})
 
@@ -64,16 +64,16 @@ if minetest.global_exists("techage") then
 		recipe = {
 				{"", "dye:blue", ""},
 				{"basic_materials:plastic_sheet", "default:mese_crystal", "techage:aluminum"},
-				{"techage:ta4_ramchip", "techage:ta4_wlanchip", "techage:ta4_ramchip"},
+				{"beduino:ram2k", "techage:ta4_wlanchip", "beduino:ram2k"},
 		},
 	})
 
 	minetest.register_craft({
 		output = "beduino:broker",
 		recipe = {
-				{"basic_materials:plastic_sheet", "dye:blue", "techage:aluminum"},
-				{"techage:ta4_ramchip", "default:mese_crystal", "techage:ta4_ramchip"},
-				{"techage:ta4_ramchip", "techage:ta4_wlanchip", "techage:ta4_ramchip"},
+				{"", "dye:blue", ""},
+				{"basic_materials:plastic_sheet", "default:mese_crystal", "techage:aluminum"},
+				{"beduino:ram4k", "techage:ta4_wlanchip", "beduino:ram4k"},
 		},
 	})
 
@@ -120,6 +120,21 @@ if minetest.global_exists("techage") then
 			{"", "", ""},
 			{"", "", ""},
 		},
+	})
+
+	techage.recipes.add("ta4_electronic_fab", {
+		output = "beduino:eeprom2k 1",
+		input = {"basic_materials:plastic_sheet 1", "techage:ta4_silicon_wafer 1", "techage:usmium_nuggets 1"}
+	})
+
+	techage.recipes.add("ta4_electronic_fab", {
+		output = "beduino:ram2k 1",
+		input = {"basic_materials:plastic_sheet 1", "techage:ta4_silicon_wafer 1"}
+	})
+
+	techage.recipes.add("ta4_electronic_fab", {
+		output = "beduino:ram4k 1",
+		input = {"basic_materials:plastic_sheet 1", "techage:ta4_silicon_wafer 2"}
 	})
 
 elseif minetest.global_exists("tubelib") then
