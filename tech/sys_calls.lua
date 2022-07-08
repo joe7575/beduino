@@ -50,7 +50,9 @@ local function sys_send_tas_cmnd(cpu_pos, address, regA, regB, regC)
 	if own_num and dest_num then
 		local ident = vm16.read_ascii(cpu_pos, regB, 16)
 		local add_data = vm16.read_ascii(cpu_pos, regC, 32)
+		techage.counting_start(M(cpu_pos):get_string("owner"))
 		tech.send_single(own_num, dest_num, ident, add_data)
+		techage.counting_stop()
 		return 1
 	end
 	return 0
@@ -81,6 +83,7 @@ local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
 		else
 			payload = vm16.read_mem(cpu_pos, regC, 8)
 		end
+		techage.counting_add(M(cpu_pos):get_string("owner"), 1)
 		return techage.beduino_send_cmnd(own_num, dest_num, topic, payload)
 	end
 	return 1
