@@ -102,12 +102,7 @@ beduino.tech.register_node({"beduino:14segment1", "beduino:14segment2", "beduino
 		end
 		if topic == "value" then
 			N(pos).code = tonumber(payload) or 0
-			local now = techage.SystemTime
-			local mem = pdp13.get_mem(pos)
-			if (mem.last_message or 0) + .5 < now then
-				lcdlib.update_entities(pos)
-				mem.last_message = now
-			end
+			lcdlib.update_entities(pos)
 			return true
 		else
 			return "unsupported"
@@ -116,12 +111,7 @@ beduino.tech.register_node({"beduino:14segment1", "beduino:14segment2", "beduino
 	on_beduino_receive_cmnd = function(pos, src, topic, payload)
 		if topic == 16 then
 			N(pos).code = payload[1] or 0
-			local now = techage.SystemTime
-			local mem = pdp13.get_mem(pos)
-			if (mem.last_message or 0) + .5 < now then
-				lcdlib.update_entities(pos)
-				mem.last_message = now
-			end
+			lcdlib.update_entities(pos)
 			return 0
 		else
 			return 2

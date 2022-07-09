@@ -185,7 +185,9 @@ local cpu_def = {
 	end,
 	-- Called when the programmers info/splash screen is displayed
 	on_init = function(pos, prog_pos, server_pos)
-		M(pos):set_string("prog_pos", P2S(prog_pos))
+		if prog_pos then
+			M(pos):set_string("prog_pos", P2S(prog_pos))
+		end
 		if server_pos then
 			local s = on_init_cpu(pos)
 			vm16.write_file(server_pos, "info.txt", Info .. s)
@@ -257,7 +259,7 @@ minetest.register_node("beduino:controller", {
 			return false
 		end
 		local inv = minetest.get_meta(pos):get_inventory()
-		return inv:is_empty("main")
+		return inv:is_empty("memory")
 	end,
 	allow_metadata_inventory_put = function(pos, listname, index, stack, player)
 		if minetest.is_protected(pos, player:get_player_name()) then
@@ -315,11 +317,10 @@ minetest.register_lbm({
 	nodenames = {"beduino:controller"},
 	run_at_every_load = true,
 	action = function(pos, node)
-		find_io_nodes(pos)
+		on_init_cpu(pos)
 		local prog_pos = S2P(M(pos):get_string("prog_pos"))
 		if M(pos):get_int("running") == 1 then
 			vm16.load_cpu(pos, prog_pos, cpu_def)
-			cpu_def.on_init(pos, prog_pos)
 			if has_eeprom(pos) then
 				beduino.eeprom_init(pos)
 			end
