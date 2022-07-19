@@ -12,13 +12,12 @@
 
 ]]--
 
+local lib = beduino.lib
+local tech = beduino.tech
 
 -- for lazy programmers
 local M = minetest.get_meta
-local N = pdp13.get_nvm
-
-local lib = beduino.lib
-local tech = beduino.tech
+local N = tech.get_nvm
 
 local DESCRIPTION = "Beduino 14-Segment"
 
