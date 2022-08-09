@@ -18,12 +18,13 @@ local P2S = function(pos) if pos then return minetest.pos_to_string(pos) end end
 
 local DESCRIPTION = "Beduino Router"
 local MAX_MSG_SIZE = 64
-local MAX_NUM_MSG = 5
+local MAX_NUM_MSG = 32
 
 local lib = beduino.lib
 local comm = beduino.comm
+local storage = beduino.storage
 
-local MsgQue = {}
+local MsgQue = minetest.deserialize(storage:get_string("MsgQue")) or {}
 local MsgCnt = {}
 
 local function count_transmit(addr)
@@ -185,7 +186,7 @@ minetest.register_node("beduino:router", {
 
 beduino.register_io_nodes({"beduino:router"})
 
--- address is fix 0x100, regA = dst_addr, regB = msg
+-- address is fix 0x040, regA = dst_addr, regB = msg
 local function sys_send_msg(cpu_pos, address, regA, regB, regC)
 	local size = vm16.peek(cpu_pos, regB) + 1
 	local msg = vm16.read_mem_as_str(cpu_pos, regB, math.min(size, MAX_MSG_SIZE))
@@ -193,7 +194,7 @@ local function sys_send_msg(cpu_pos, address, regA, regB, regC)
 	return send_msg(my_addr, regA, msg)
 end
 
--- address is fix 0x100, regA = buff, regB = buff_size
+-- address is fix 0x041, regA = buff, regB = buff_size
 local function sys_receive_msg(cpu_pos, address, regA, regB, regC)
 	local my_addr = M(cpu_pos):get_int("router_addr")
 	local src_addr, msg = receive_msg(my_addr)
@@ -202,7 +203,7 @@ local function sys_receive_msg(cpu_pos, address, regA, regB, regC)
 	return src_addr
 end
 
--- address is fix 0x100, regA = dst_addr, regB = topic, regC = msg
+-- address is fix 0x042, regA = dst_addr, regB = topic, regC = msg
 local function sys_publish_msg(cpu_pos, address, regA, regB, regC)
 	local size = vm16.peek(cpu_pos, regC) + 1
 	local msg = vm16.read_mem_as_str(cpu_pos, regC, math.min(size, MAX_MSG_SIZE))
@@ -217,7 +218,7 @@ local function sys_publish_msg(cpu_pos, address, regA, regB, regC)
 	return 0
 end
 
--- address is fix 0x100, regA = dst_addr, regB = topic, regC = buff
+-- address is fix 0x043, regA = dst_addr, regB = topic, regC = buff
 local function sys_request_msg(cpu_pos, address, regA, regB, regC)
 	local my_addr = M(cpu_pos):get_int("router_addr")
 	if lib.router_available(my_addr) then
@@ -238,4 +239,6 @@ lib.register_SystemHandler(0x041, sys_receive_msg)
 lib.register_SystemHandler(0x042, sys_publish_msg)
 lib.register_SystemHandler(0x043, sys_request_msg)
 
-
+minetest.register_on_shutdown(function()
+	storage:set_string("MsgQue", minetest.serialize(MsgQue))
+end)

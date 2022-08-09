@@ -307,10 +307,11 @@ func init() {
   var sts;
 
   sts = request_data(2, 129, 0, response);
-  if(sts) {
+  if(sts == 0) {
     putnum(response[0]);
   } else{
-    putstr("err");
+    putstr("err ");
+    putnum(sts);
   }
 }
 

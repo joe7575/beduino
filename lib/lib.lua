@@ -19,6 +19,7 @@ local S2T = function(s) return minetest.deserialize(s) or {} end
 local T2S = function(t) return minetest.serialize(t) or 'return {}' end
 
 local storage = minetest.get_mod_storage()
+beduino.storage = storage
 
 ----------------------------------------------------------------------------------
 --  Address to position translation
