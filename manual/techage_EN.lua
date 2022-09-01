@@ -69,7 +69,7 @@ techage.add_to_manual('EN', {
   "    request_data(port\\, topic\\, payload\\, resp)\\;\n"..
   "\n"..
   "  - *port* is the I/O module port number\n"..
-  "  - *topic* is a number from the list of\n"..
+  "  - *topic* is a number from the list of Beduino commands\n"..
   "  - *payload* is an array or a string with additional information\\, depending on the command. If no additional commands are required\\, \"\" can be used\n"..
   "  - *resp* is an array for the response data. The array must be defined large enough to hold the response data\n"..
   "\n",

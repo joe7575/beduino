@@ -119,7 +119,7 @@ class MarkdownToLua(mistune.Renderer):
             self.item_name = content
         elif link == "/plan/":
             self.plan_table = content
-        return ""
+        return content
 
     def wiki_link(self, name, itype):
         """
