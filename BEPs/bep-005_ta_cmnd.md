@@ -1,6 +1,6 @@
-| Author     | Version | Status   | Modified    |
-| ---------- | ------- | -------- | ----------- |
-| J.Stolberg | 0.3     | Proposal | 6 June 2022 |
+| Author     | Version | Status   | Modified   |
+| ---------- | ------- | -------- | ---------- |
+| J.Stolberg | 0.4     | Proposal | 3 Sep 2022 |
 
 
 
@@ -62,6 +62,7 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 | Config TA4 Pusher     | 65          | "\<item name>"         | Configure the TA4 pusher.<br/>Example: `wool:blue`           |
 | Sensor Chest Text     | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
 | Distri. Filter Config | 67          | "\<slot> \<item list>" | Configure a Distributor filter slot, like: "red default:dirt dye:blue" |
+| Flow Limiter Config   | 68          | [limit]                | Configure the number of items to pass through per start      |
 
 
 
@@ -115,6 +116,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | DC2 Block Name             | 147         | [idx]                  | "\<node name>"          | Name of the placed block<br />*idx* is the inventory slot number (1..n) of the related the block position |
 | Distri. Filter Get         | 148         | "\<slot>"              | "\<item list>"          | *idx* is the slot number: <br />1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />Return a string like: "default:dirt dye:blue" |
 | Time Stamp                 | 149         | -                      | [time]                  | Time in system ticks (norm. 100 ms) when the TA4 Button is clicked |
+| Flow Limiter Counter       | 150         | -                      | [num]                   | Number of items passed through                               |
 
 
 
@@ -212,6 +214,8 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:tiny_generator | 1, 128, 129, 132, 135 |
 | pdp13:14segment | 16 |
 | pdp13:7segment | 15 |
+| techage:ta3_item_flow_limiter_pas | 1, 68, 128, 129, 150 |
+| techage:ta4_item_flow_limiter_pas | 1, 68, 128, 129, 150 |
 
 
 
