@@ -58,11 +58,11 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 | Display Clear         | 17          | -                      | Clear the display                                            |
 | Display Add Line      | 67          | "text string"          | Add a new line to the display                                |
 | Display Write Line    | 68          | "\<num>text string"    | Overwrite a text line with the given string. <br />The first string character is the line number (1..5)<br />Examples: "1Hello World", "2Minetest" |
-| Start TA4 Pusher      | 64          | "\<item name>"         | Start the TA4 pusher to pull/push items.<br />Example: `default:dirt 8` |
 | Config TA4 Pusher     | 65          | "\<item name>"         | Configure the TA4 pusher.<br/>Example: `wool:blue`           |
 | Sensor Chest Text     | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
 | Distri. Filter Config | 67          | "\<slot> \<item list>" | Configure a Distributor filter slot, like: "red default:dirt dye:blue" |
-| Flow Limiter Config   | 68          | [limit]                | Configure the number of items to pass through per start      |
+| TA4 Pusher Limit      | 68          | [limit]                | Configure a TA4 Pusher with the number of items that are allowed to be pushed ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
+| TA4 Pump Limit        | 69          | [limit]                | Configure a TA4 Pump with the number of liquid units that are allowed to be pumped ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
 
 
 
@@ -116,7 +116,8 @@ The function `request_data` request a response from a node specified by *port*. 
 | DC2 Block Name             | 147         | [idx]                  | "\<node name>"          | Name of the placed block<br />*idx* is the inventory slot number (1..n) of the related the block position |
 | Distri. Filter Get         | 148         | "\<slot>"              | "\<item list>"          | *idx* is the slot number: <br />1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />Return a string like: "default:dirt dye:blue" |
 | Time Stamp                 | 149         | -                      | [time]                  | Time in system ticks (norm. 100 ms) when the TA4 Button is clicked |
-| Flow Limiter Counter       | 150         | -                      | [num]                   | Number of items passed through                               |
+| TA4 Pusher Counter         | 150         | -                      | [num]                   | Read the number of pushed items for a TA4 Pusher in "flow limiter" mode |
+| TA4 Pump Counter           | 151         | -                      | [num]                   | Read the number of pumped liquid units for a TA4 Pump in "flow limiter" mode |
 
 
 
@@ -214,8 +215,6 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:tiny_generator | 1, 128, 129, 132, 135 |
 | pdp13:14segment | 16 |
 | pdp13:7segment | 15 |
-| techage:ta3_item_flow_limiter_pas | 1, 68, 128, 129, 150 |
-| techage:ta4_item_flow_limiter_pas | 1, 68, 128, 129, 150 |
 
 
 
