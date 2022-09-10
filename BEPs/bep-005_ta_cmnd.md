@@ -63,6 +63,7 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 | Distri. Filter Config | 67          | "\<slot> \<item list>" | Configure a Distributor filter slot, like: "red default:dirt dye:blue" |
 | TA4 Pusher Limit      | 68          | [limit]                | Configure a TA4 Pusher with the number of items that are allowed to be pushed ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
 | TA4 Pump Limit        | 69          | [limit]                | Configure a TA4 Pump with the number of liquid units that are allowed to be pumped ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
+| Color                 | 70          | [color]                | Set the color of the TechAge Signal Lamp and TechAge Signal Lamp 2 (color = 0..255) |
 
 
 
@@ -135,7 +136,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | techage:heatexchanger2 | 1, 128, 129, 134, 135 |
 | techage:oilfirebox | 128, 129, 132 |
 | techage:powerswitch, techage:powerswitchsmall | 1, 142 |
-| techage:signal_lamp_off | 1 |
+| techage:signal_lamp_off, techage:signal_lamp2_off | 1, 70 |
 | techage:t4_pump | 1, 128, 129, 137 |
 | techage:t4_waterpump | 1, 128, 129 |
 | techage:ta3_akku | 1, 128, 129, 134 |
