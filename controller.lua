@@ -330,7 +330,12 @@ minetest.register_lbm({
 
 lib.register_SystemHandler(0, function(cpu_pos, address, regA, regB, regC)
 	local prog_pos = S2P(M(cpu_pos):get_string("prog_pos"))
-	return vm16.putchar(prog_pos, regA) or 0xffff, 500
+	return vm16.putchar(prog_pos, regA) or 0xffff, 500  -- add costs
+end)
+
+lib.register_SystemHandler(1, function(cpu_pos, address, regA, regB, regC)
+	local prog_pos = S2P(M(cpu_pos):get_string("prog_pos"))
+	return vm16.set_stdout(prog_pos, regA) or 0xffff, 500  -- add costs
 end)
 
 local function on_use(itemstack, user)

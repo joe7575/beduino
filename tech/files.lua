@@ -201,6 +201,44 @@ func loop() {
 }
 ]]
 
+local example5_c = [[
+// Programmer Terminal Window example
+import "stdio.asm"
+import "os.c"
+
+func timerstamp() {
+    putchar('[');
+    putnumf(get_day_count());
+    putchar(':');
+    putnumf(get_timeofday());
+    putchar('] ');
+}
+
+func init() {
+  setstdout(1);  // use terminal windows for stdout
+  putchar('\b'); // clear entire screen
+  putstr("+----------------------------------------------------------+\n");
+  putstr("|                Terminal Window Demo V1.0                 |\n");
+  putstr("+----------------------------------------------------------+\n");
+  putstr("\n");
+}
+
+func loop() {
+    timerstamp();
+    putstr("Something strange happend!\n");
+    sleep(10);
+    timerstamp();
+    putstr("These Romans are crazy!\n");
+    sleep(10);
+    timerstamp();
+    putstr("Cogito, ergo sum!\n");
+    sleep(10);
+    timerstamp();
+    putstr("Lorem ipsum dolor sit amet, consetetur sadipscing elitr.\n");
+    sleep(10);
+}
+]]
+
 vm16.register_ro_file("beduino", "ta_iom.c",   iom_c)
 vm16.register_ro_file("beduino", "seg14.c",    seg14_c)
 vm16.register_ro_file("beduino", "ta_cmnd.c",  lib.get_command_file())
@@ -208,6 +246,7 @@ vm16.register_ro_file("beduino", "example1.c", example1_c)
 vm16.register_ro_file("beduino", "example2.c", example2_c)
 vm16.register_ro_file("beduino", "example3.c", example3_c)
 vm16.register_ro_file("beduino", "example4.c", example4_c)
+vm16.register_ro_file("beduino", "example5.c", example5_c)
 
 elseif minetest.global_exists("tubelib") then
 
@@ -353,11 +392,50 @@ func loop() {
 }
 ]]
 
+local example5_c = [[
+// Programmer Terminal Window example
+import "stdio.asm"
+import "os.c"
+
+func timerstamp() {
+    putchar('[');
+    putnumf(get_day_count());
+    putchar(':');
+    putnumf(get_timeofday());
+    putchar('] ');
+}
+
+func init() {
+  setstdout(1);  // use terminal windows for stdout
+  putchar('\b'); // clear entire screen
+  putstr("+----------------------------------------------------------+\n");
+  putstr("|                Terminal Window Demo V1.0                 |\n");
+  putstr("+----------------------------------------------------------+\n");
+  putstr("\n");
+}
+
+func loop() {
+    timerstamp();
+    putstr("Something strange happend!\n");
+    sleep(10);
+    timerstamp();
+    putstr("These Romans are crazy!\n");
+    sleep(10);
+    timerstamp();
+    putstr("Cogito, ergo sum!\n");
+    sleep(10);
+    timerstamp();
+    putstr("Lorem ipsum dolor sit amet, consetetur sadipscing elitr.\n");
+    sleep(10);
+}
+]]
+
 vm16.register_ro_file("beduino", "tp_iom.c",   iom_c)
 vm16.register_ro_file("beduino", "tp_cmnd.c",  lib.get_command_file())
 vm16.register_ro_file("beduino", "example1.c", example1_c)
 vm16.register_ro_file("beduino", "example2.c", example2_c)
 vm16.register_ro_file("beduino", "example3.c", example3_c)
 vm16.register_ro_file("beduino", "example4.c", example4_c)
+vm16.register_ro_file("beduino", "example5.c", example5_c)
 
 end

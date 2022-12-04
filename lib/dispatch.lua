@@ -22,9 +22,9 @@ end
 
 function beduino.lib.on_system(cpu_pos, address, regA, regB, regC)
 	if SystemHandlers[address] then
-		local sts, resp = pcall(SystemHandlers[address], cpu_pos, address, regA, regB, regC)
+		local sts, resp, costs = pcall(SystemHandlers[address], cpu_pos, address, regA, regB, regC)
 		if sts then
-			return resp
+			return resp, costs
 		else
 			minetest.log("warning", "[Beduino] pcall exception: " .. resp)
 		end

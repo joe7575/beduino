@@ -21,3 +21,9 @@
 |                    |        |                                  |                               |
 |                    |        |                                  |                               |
 
+## VM16 internal system calls
+
+| Number (hex) | val1    | val2 | val3 | Remarks                                                      |
+| ------------ | ------- | ---- | ---- | ------------------------------------------------------------ |
+| 0            | char    | -    | -    | output char on stdout                                        |
+| 1            | channel | -    | -    | set output channel for 'stdout':<br />0 = Programmer debug line (default)<br />1 = Programmer terminal window |
