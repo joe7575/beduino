@@ -79,18 +79,18 @@ static var Numbers[] = {
 
 func seg14_putchar(port, c) {
   var i;
-  
+
   if(c > 64) {
     i = c - 65;  // A - Z
-    send_cmnd(port, 16, &Chars[i]); 
+    send_cmnd(port, 16, &Chars[i]);
   } else {
-    i = c - 48;  // 0 - 9 
-    send_cmnd(port, 16, &Numbers[i]); 
+    i = c - 48;  // 0 - 9
+    send_cmnd(port, 16, &Numbers[i]);
   }
 }
 
 func seg14_putdigit(port, val) {
-  send_cmnd(port, 16, &Numbers[val]); 
+  send_cmnd(port, 16, &Numbers[val]);
 }
 ]]
 

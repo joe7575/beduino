@@ -44,7 +44,7 @@ end
 local function e2p_write_value(cpu_pos, address, regA, regB, regC)
 	local hash = H(cpu_pos)
 	local meta = M(cpu_pos)
-	
+
 	if Cache[hash] then
 		Cache[hash][regA % 2048] = regB
 		meta:set_string("eeprom", T2S(Cache[hash]))
@@ -108,13 +108,13 @@ func e2p_write_value(address, value) {
   return system(0x62, address, value);
 }
 
-// Returns the number of values from the EEPROM starting 
+// Returns the number of values from the EEPROM starting
 // at the given address.
 func e2p_read_block(address, buff, num) {
   return system(0x63, address, buff, num);
 }
 
-// Write given values to the EEPROM starting 
+// Write given values to the EEPROM starting
 // at the given address.
 func e2p_write_block(address, buff, num) {
   return system(0x64, address, buff, num);
@@ -131,7 +131,7 @@ function beduino.eeprom_init(cpu_pos)
 		meta:set_string("eeprom", T2S({}))
 	end
 	Cache[hash] = S2T(meta:get_string("eeprom"))
-	
+
 	meta:mark_as_private("eeprom")
 end
 

@@ -68,13 +68,13 @@ end
 
 local function on_init_cpu(cpu_pos)
 	local out = {}
-	
+
 	out[#out + 1] = "The Controller has:"
 	out[#out + 1] = string.format(" - %u K RAM", (2 ^ (ram_size(cpu_pos) + 6)) / 1024)
 	if has_eeprom(cpu_pos) then
 		out[#out + 1] = " - 2 K EEPROM"
 	end
-	
+
 	out[#out + 1] = ""
 	out[#out + 1] = "The Controller is connected to:"
 
@@ -341,10 +341,10 @@ end)
 local function on_use(itemstack, user)
 	local meta = itemstack:get_meta()
 	local tbl = S2T(meta:get_string("code"))
-	
+
 	local out = {}
 	for i = 0,31,4 do
-		out[#out + 1] = string.format("%04X: %04X %04X %04X %04X", 
+		out[#out + 1] = string.format("%04X: %04X %04X %04X %04X",
 			i, tbl[i] or 0xFFFF, tbl[i+1] or 0xFFFF, tbl[i+2] or 0xFFFF, tbl[i+3] or 0xFFFF)
 	end
 	local s = table.concat(out, "\n")
