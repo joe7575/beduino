@@ -38,7 +38,7 @@ Optional: techage, tubelib
 
 ## License
 
-Copyright (C) 2022 Joachim Stolberg  
+Copyright (C) 2022-2023 Joachim Stolberg  
 Licensed under the GNU AGPLv3 (See LICENSE.txt)
 
 
@@ -50,6 +50,11 @@ Licensed under the GNU AGPLv3 (See LICENSE.txt)
 
 
 ## History
+
+### v0.7 (2023-01-01)
+
+- Add support for external terminals
+- Fix bug in 'putstr' function
 
 ### v0.6 (2022-07-03)
 

@@ -3,7 +3,7 @@
 	Beduino
 	=======
 
-	Copyright (C) 2022 Joachim Stolberg
+	Copyright (C) 2022-2023 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
@@ -327,16 +327,6 @@ minetest.register_lbm({
 		end
 	end
 })
-
-lib.register_SystemHandler(0, function(cpu_pos, address, regA, regB, regC)
-	local prog_pos = S2P(M(cpu_pos):get_string("prog_pos"))
-	return vm16.putchar(prog_pos, regA) or 0xffff, 500  -- add costs
-end)
-
-lib.register_SystemHandler(1, function(cpu_pos, address, regA, regB, regC)
-	local prog_pos = S2P(M(cpu_pos):get_string("prog_pos"))
-	return vm16.set_stdout(prog_pos, regA) or 0xffff, 500  -- add costs
-end)
 
 local function on_use(itemstack, user)
 	local meta = itemstack:get_meta()

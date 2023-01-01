@@ -3,7 +3,7 @@
 	Beduino
 	=======
 
-	Copyright (C) 2022 Joachim Stolberg
+	Copyright (C) 2022-2023 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
@@ -20,6 +20,7 @@ if minetest.global_exists("techage") and techage.version < 1.08 then
 end
 
 beduino = {}
+beduino.version = 0.7
 beduino.lib = {}
 beduino.comm = {}
 beduino.tech = {}
@@ -32,6 +33,7 @@ dofile(MP.."/lib/dispatch.lua")
 dofile(MP.."/lib/os.lua")
 dofile(MP.."/lib/eeprom.lua")
 dofile(MP.."/lib/files.lua")
+dofile(MP.."/lib/stdio.lua")
 
 dofile(MP.."/controller.lua")
 
