@@ -44,7 +44,7 @@ local tx_demo_c = [[
 // Send a text messages to router #2.
 // Word 0 of the messages buffer is the msg size.
 
-import "comm.c"
+import "sys/comm.c"
 
 static var cnt = 0;
 static var buff1[] = {2, '\b', '\0'};  // clear screen
@@ -70,8 +70,8 @@ local rx_demo_c = [[
 // Receive a text messages via router.
 // The message is shown on the programmers terminal.
 
-import "stdio.asm"
-import "comm.c"
+import "sys/stdio.asm"
+import "sys/comm.c"
 
 const MAX = 64;
 
@@ -99,7 +99,7 @@ local pub_demo_c = [[
 // Send messages to the broker #5.
 // Word 0 of the messages array is the msg size.
 
-import "comm.c"
+import "sys/comm.c"
 
 const MY_TOPIC = 1;
 
@@ -123,8 +123,8 @@ local req_demo_c = [[
 // Read a message from the broker.
 // The messages are shown on the programmers terminal.
 
-import "stdio.asm"
-import "comm.c"
+import "sys/stdio.asm"
+import "sys/comm.c"
 
 const MAX = 64;
 const MY_TOPIC = 1;
@@ -150,8 +150,8 @@ func loop() {
 }
 ]]
 
-vm16.register_ro_file("beduino", "comm.c",     comm_c)
-vm16.register_ro_file("beduino", "tx_demo.c",  tx_demo_c)
-vm16.register_ro_file("beduino", "rx_demo.c",  rx_demo_c)
-vm16.register_ro_file("beduino", "pub_demo.c", pub_demo_c)
-vm16.register_ro_file("beduino", "req_demo.c", req_demo_c)
+vm16.register_ro_file("beduino", "sys/comm.c",     comm_c)
+vm16.register_ro_file("beduino", "demo/tx_demo.c",  tx_demo_c)
+vm16.register_ro_file("beduino", "demo/rx_demo.c",  rx_demo_c)
+vm16.register_ro_file("beduino", "demo/pub_demo.c", pub_demo_c)
+vm16.register_ro_file("beduino", "demo/req_demo.c", req_demo_c)

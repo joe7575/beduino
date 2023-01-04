@@ -65,7 +65,7 @@ func write_line(port, row, text) {
 ]]
 
 local seg14_c = [[
-import "ta_iom.c"
+import "lib/ta_iom.c"
 
 static var Chars[] = {
   0x2237, 0x0A8F, 0x0039, 0x088F, 0x2039, 0x2031, 0x023D, 0x2236,
@@ -97,8 +97,8 @@ func seg14_putdigit(port, val) {
 local example1_c = [[
 // Output some characters on the
 // programmer status line (system #0).
-import "stdlib.asm"
-import "ta_iom.c"
+import "sys/stdlib.asm"
+import "lib/ta_iom.c"
 
 const MAX = 32;
 
@@ -122,8 +122,8 @@ func loop() {
 local example2_c = [[
 // Read button on input #0 and
 // control signal tower on output #1.
-import "ta_cmnd.c"
-import "ta_iom.c"
+import "lib/ta_cmnd.c"
+import "lib/ta_iom.c"
 
 static var idx = 0;
 
@@ -147,10 +147,10 @@ local example3_c = [[
 // The detector event is used to read the detector input
 // and output the player name to the display (row 3)
 
-import "stdlib.asm"
-import "ta_cmnd.c"
-import "ta_iom.c"
-import "string.asm"
+import "sys/stdlib.asm"
+import "sys/string.asm"
+import "lib/ta_cmnd.c"
+import "lib/ta_iom.c"
 
 static var buff[80];
 
@@ -177,8 +177,8 @@ local example4_c = [[
 // Block/machine state example
 // Output the block state on the signal tower
 // Connect block to port #0 and tower to port #1
-import "ta_cmnd.c"
-import "ta_iom.c"
+import "lib/ta_cmnd.c"
+import "lib/ta_iom.c"
 
 func init() {
   output(1, IO_OFF);
@@ -203,8 +203,8 @@ func loop() {
 
 local example5_c = [[
 // Programmer Terminal Window example
-import "stdio.asm"
-import "os.c"
+import "sys/stdio.asm"
+import "sys/os.c"
 
 func timerstamp() {
     putchar('[');
@@ -239,14 +239,34 @@ func loop() {
 }
 ]]
 
-vm16.register_ro_file("beduino", "ta_iom.c",   iom_c)
-vm16.register_ro_file("beduino", "seg14.c",    seg14_c)
-vm16.register_ro_file("beduino", "ta_cmnd.c",  lib.get_command_file())
-vm16.register_ro_file("beduino", "example1.c", example1_c)
-vm16.register_ro_file("beduino", "example2.c", example2_c)
-vm16.register_ro_file("beduino", "example3.c", example3_c)
-vm16.register_ro_file("beduino", "example4.c", example4_c)
-vm16.register_ro_file("beduino", "example5.c", example5_c)
+local example1_asm = [[
+; Read button on IOM port #0 and
+; turn on/off lamp on port #1.
+
+  jump 8
+  .org 8       ; the first 8 words are reserved
+
+loop:
+  nop          ; 100 ms delay
+  nop          ; 100 ms delay
+  in   A, #0   ; read switch value
+  skne  A, B   ; data changed?
+  jump loop    ; no change: read again
+
+  move B, A    ; store value in B
+  out  #01, A  ; output value
+  jump loop
+]]
+
+vm16.register_ro_file("beduino", "lib/ta_iom.c",   iom_c)
+vm16.register_ro_file("beduino", "lib/seg14.c",    seg14_c)
+vm16.register_ro_file("beduino", "lib/ta_cmnd.c",  lib.get_command_file())
+vm16.register_ro_file("beduino", "demo/example1.c", example1_c)
+vm16.register_ro_file("beduino", "demo/example2.c", example2_c)
+vm16.register_ro_file("beduino", "demo/example3.c", example3_c)
+vm16.register_ro_file("beduino", "demo/example4.c", example4_c)
+vm16.register_ro_file("beduino", "demo/example5.c", example5_c)
+vm16.register_ro_file("beduino", "demo/example1.asm", example1_asm)
 
 elseif minetest.global_exists("tubelib") then
 
@@ -288,8 +308,8 @@ func write_line(address, row, text) {
 local example1_c = [[
 // Output some characters on the
 // programmer status line (system #0).
-import "stdlib.asm"
-import "tp_iom.c"
+import "sys/stdlib.asm"
+import "lib/tp_iom.c"
 
 const MAX = 32;
 
@@ -313,8 +333,8 @@ func loop() {
 local example2_c = [[
 // Read button on input #0 and
 // control signal tower on output #1.
-import "tp_cmnd.c"
-import "tp_iom.c"
+import "lib/tp_cmnd.c"
+import "lib/tp_iom.c"
 
 static var idx = 0;
 
@@ -338,10 +358,10 @@ local example3_c = [[
 // The detector event is used to read the detector input
 // and output the player name to the display (row 5)
 
-import "stdlib.asm"
-import "tp_cmnd.c"
-import "tp_iom.c"
-import "string.asm"
+import "sys/stdlib.asm"
+import "sys/string.asm"
+import "lib/tp_cmnd.c"
+import "lib/tp_iom.c"
 
 static var buff[80];
 
@@ -368,8 +388,8 @@ local example4_c = [[
 // Block/machine state example
 // Output the block state on the signal tower
 // Connect block to port #0 and tower to port #1
-import "tp_cmnd.c"
-import "tp_iom.c"
+import "lib/tp_cmnd.c"
+import "lib/tp_iom.c"
 
 func init() {
   output(1, IO_OFF);
@@ -394,8 +414,8 @@ func loop() {
 
 local example5_c = [[
 // Programmer Terminal Window example
-import "stdio.asm"
-import "os.c"
+import "sys/stdio.asm"
+import "sys/os.c"
 
 func timerstamp() {
     putchar('[');
@@ -430,12 +450,33 @@ func loop() {
 }
 ]]
 
-vm16.register_ro_file("beduino", "tp_iom.c",   iom_c)
-vm16.register_ro_file("beduino", "tp_cmnd.c",  lib.get_command_file())
-vm16.register_ro_file("beduino", "example1.c", example1_c)
-vm16.register_ro_file("beduino", "example2.c", example2_c)
-vm16.register_ro_file("beduino", "example3.c", example3_c)
-vm16.register_ro_file("beduino", "example4.c", example4_c)
-vm16.register_ro_file("beduino", "example5.c", example5_c)
+local example1_asm = [[
+; Read button on IOM port #0 and
+; turn on/off lamp on port #1.
+
+  jump 8
+  .org 8       ; the first 8 words are reserved
+
+loop:
+  nop          ; 100 ms delay
+  nop          ; 100 ms delay
+  in   A, #0   ; read switch value
+  skne  A, B   ; data changed?
+  jump loop    ; no change: read again
+
+  move B, A    ; store value in B
+  out  #01, A  ; output value
+  jump loop
+]]
+
+
+vm16.register_ro_file("beduino", "lib/tp_iom.c",   iom_c)
+vm16.register_ro_file("beduino", "lib/tp_cmnd.c",  lib.get_command_file())
+vm16.register_ro_file("beduino", "demo/example1.c", example1_c)
+vm16.register_ro_file("beduino", "demo/example2.c", example2_c)
+vm16.register_ro_file("beduino", "demo/example3.c", example3_c)
+vm16.register_ro_file("beduino", "demo/example4.c", example4_c)
+vm16.register_ro_file("beduino", "demo/example5.c", example5_c)
+vm16.register_ro_file("beduino", "demo/example1.asm", example1_asm)
 
 end

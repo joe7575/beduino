@@ -14,8 +14,8 @@
 
 local lib = beduino.lib
 
-vm16.register_ro_file("beduino", "stdlib.asm", vm16.libc.stdlib_asm)
-vm16.register_ro_file("beduino", "stdio.asm",  vm16.libc.stdio_asm)
-vm16.register_ro_file("beduino", "mem.asm",    vm16.libc.mem_asm)
-vm16.register_ro_file("beduino", "string.asm", vm16.libc.string_asm)
-vm16.register_ro_file("beduino", "math.asm",   vm16.libc.math_asm)
+vm16.register_ro_file("beduino", "sys/stdlib.asm", vm16.libc.stdlib_asm)
+vm16.register_ro_file("beduino", "sys/stdio.asm",  vm16.libc.stdio_asm)
+vm16.register_ro_file("beduino", "sys/mem.asm",    vm16.libc.mem_asm)
+vm16.register_ro_file("beduino", "sys/string.asm", vm16.libc.string_asm)
+vm16.register_ro_file("beduino", "sys/math.asm",   vm16.libc.math_asm)

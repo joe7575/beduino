@@ -101,4 +101,4 @@ func get_description(name, lang_code, desc_buff) {
 }
 ]]
 
-vm16.register_ro_file("beduino", "os.c",   os_c)
+vm16.register_ro_file("beduino", "sys/os.c",   os_c)

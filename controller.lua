@@ -78,14 +78,17 @@ local function on_init_cpu(cpu_pos)
 	out[#out + 1] = ""
 	out[#out + 1] = "The Controller is connected to:"
 
+    local default = " - nothing yet"
 	for _,pos in ipairs(find_io_nodes(cpu_pos)) do
 		local node = minetest.get_node(pos)
 		local ndef = minetest.registered_nodes[node.name]
 		if ndef and ndef.on_init_io then
 			local address = ndef.on_init_io(pos, cpu_pos)
 			table.insert(out, string.format(" - %s #%d at %s", node.name, address, P2S(pos)))
+			default = nil
 		end
 	end
+	table.insert(out, default)
 	return table.concat(out, "\n")
 end
 

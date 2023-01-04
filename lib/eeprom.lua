@@ -121,7 +121,7 @@ func e2p_write_block(address, buff, num) {
 }
 ]]
 
-vm16.register_ro_file("beduino", "eeprom.c",   eeprom_c)
+vm16.register_ro_file("beduino", "lib/eeprom.c",   eeprom_c)
 
 function beduino.eeprom_init(cpu_pos)
 	local hash = H(cpu_pos)
