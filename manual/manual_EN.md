@@ -36,8 +36,8 @@ Beduino CPU registers are 16-bit wide. The CPU memory is also organized in 16-bi
 - Left-click with the programmer on both blocks to connect the programmer with server and controller.
 - Place the programmer in front of the controller (in reality, the programmer can be placed anywhere since it is already connected).
 - Open the programmer menu and press the "Init" button. This will initialize the controller and connect any existing I/O module to the controller.
-- Open the file "example1.c" with a double-click on the file name. 
-- Translate the example into machine language with the button "Debug" and start the program with "Run". The program will send some ASCII characters to the programmers terminal. If the terminal window is not open, the text will be placed on the status line of the programmer.
+- Open the file "demo/example1.c" with a double-click on the file name. 
+- Translate the example into machine language with the button "Debug" and start the program with "Run". The program will send some ASCII characters to the status line of the programmer.
 
 If you see characters like "@ABCDEFG..." then you did everything right, congratulations!
 
@@ -48,11 +48,12 @@ If you see characters like "@ABCDEFG..." then you did everything right, congratu
 The "Hello world" program is probably the most famous program. In the Beduino programming language, it looks like this:
 
 ```c
-import "stdio.asm"
-import "stdlib.asm"
+import "sys/stdio.asm"
+import "sys/stdlib.asm"
 
 func init() {
-  putstr("Hello world!");
+  setstdout(1); // switch to terminal output
+  putstr("Hello world!\n");
 }
 
 func loop() {
@@ -69,25 +70,97 @@ To test this program:
 - Generate a new file "test.c" by typing the file name into the text field in the button row and click on the button "New".
 - Open the new generated file with a double-click on the file name.
 - Copy the text from this manual into the editor window.
-- Start the program with the buttons "Debug" and "Run"
+- Start the program with the button "Execute". You will see the "Hello world!" on the terminal window.
 
-**Hints:**
+
+
+## Editor/Debugger
+
+The programmer has an integrated editor and debugger. It allows to implement and debug/test your own programs. Programs can be implemented in the C like language [Cipol](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference) or in [Assembler](https://github.com/joe7575/vm16/blob/master/doc/asm.md). The file system on the right provides example programs in both languages and many system and library modules to be used in your programs.
+
+For the first debugging steps we use the following modified "Hello world" program. Copy the code below and generate a new program "test.c".
+
+```c
+import "sys/stdio.asm"
+import "sys/stdlib.asm"
+
+func init() {
+  setstdout(1);
+}
+
+func loop() {
+  var i;
+
+  for(i = 0; i < 10; i++) {
+    putstr("Hello world!\n");
+    sleep(5);
+  }
+  halt();
+}
+```
+
+Please note that all changes on your program have to be stored with the "Save" button. Any other actions will lose your changes.
+
+Your program can now:
+
+- Directly be executed with "Execute". It will output "Hello world!" 10 times.
+- Compiled with "Compile". "Compile" generates the assembler file "out.asm". Any errors that may have occurred during compilation are output in the first line. To switch back to your program, double-click on the program file name on the right.
+- Tested and debugged with "Debug"
+
+This is the debugger window:
+
+![](./debugger.png)
+
+On the left you see your program, on the right the current values of your variables and the memory usage of your program (blue for code and green for stack size). The number 2048 is the size of your memory in words. The memory can be expanded using memory chips.
+
+The highlighted line with the ">>" marker is the current code line to be executed next. 
+
+You can new single-step through the program with the "Step" button. After several steps, you see the value of your variable 'i' in hexadecimal and decimal notation.
+
+You can set a breakpoint with a double-click on a code line. Breakpoints are highlighted with the '*' sign. Now you can click "Run" and the program will run until it reaches the breakpoint line. Another double-click on a breakpoint will delete the breakpoint again.
+
+"Run to C" means run to cursor, in this case the current highlighted line. Therefore:
+
+- Reset the program execution with "Reset"
+- Delete all breakpoints if available
+- Click on the line `putstr("Hello world!\n");`
+- Click on "Run to C". The program starts and stops at this line
+
+"Step in" and "Step out" are useful to step into you own functions.
+
+**Hint:** Sometimes the "Step out" button does not work as expected. This is typically the case, if a line of code is missing to step to.
+
+For example:
+
+```c
+for(i = 0; i < MAX; i++) {
+  my_func(0);
+}
+```
+
+A "Step out" from the function `my_func` will not find an appropriate code line. A workaround for this is:
+
+```c
+for(i = 0; i < MAX; i++) {
+  my_func(0);
+  ;  // <-- Add this "empty" line as helper line
+}
+```
+
+Now you can step in/out as expected without generating extra code.
+
+### Further Hints
 
 - Program source files have to have the ending ".c". Files with other endings can be generated, but can't be translated/compiled.
+- Folders like "lib/" or "sys/" are not real folders. The prefixes are part of the file name and help to sort the files accordingly.
 - To delete a file, open the file with the editor, delete the text, and save the file again.
 - The "ro" behind the file names means "read-only". "read-only" files can't be changed or deleted. They are used for examples and for standard library functions and definitions.
 
 
 
-## Debugger
-
-tbd.
-
-
-
 ## Router
 
-Routers are used to send messages from one to another controller. Each controller needs its own router. Each router automatically gets an unique number/address, which is used for the addressing. The 16 bit address allows up to 65535 router.
+Routers are used to send messages from one to another controller. Each controller needs its own router. Each router automatically gets an unique number/address, which is used for the addressing. The 16 bit address allows up to 65535 routers.
 
 ```c
 // Send a message via router.
