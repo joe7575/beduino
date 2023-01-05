@@ -65,6 +65,7 @@ func write_line(port, row, text) {
 ]]
 
 local seg14_c = [[
+import "sys/string.asm"
 import "lib/ta_iom.c"
 
 static var Chars[] = {
@@ -80,9 +81,14 @@ static var Numbers[] = {
 func seg14_putchar(port, c) {
   var i;
 
-  if(c > 64) {
+  if(c > 96) {
+    i = c - 97;  // a - z
+    send_cmnd(port, 16, &Chars[i]);
+  } else if(c > 64) {
     i = c - 65;  // A - Z
     send_cmnd(port, 16, &Chars[i]);
+  } else if(c == 32) {
+    send_cmnd(port, 16, "\000");
   } else {
     i = c - 48;  // 0 - 9
     send_cmnd(port, 16, &Numbers[i]);
@@ -91,6 +97,26 @@ func seg14_putchar(port, c) {
 
 func seg14_putdigit(port, val) {
   send_cmnd(port, 16, &Numbers[val]);
+}
+
+func seg14_putstr(base_port, s) {
+  var port = base_port;
+  var len = strlen(s);
+  var i;
+  var c;
+
+  for(i = 0; i < len; i++) {
+    c = s[i];
+    if(c > 255) {
+      seg14_putchar(port, c / 256);
+      port++;
+      seg14_putchar(port, c % 256);
+      port++;
+    } else {
+      seg14_putchar(port, c);
+      port++;
+    }
+  }
 }
 ]]
 
