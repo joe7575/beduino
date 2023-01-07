@@ -33,14 +33,21 @@ func publish_msg(address, topic, msg) {
 
 // Read a message from the broker.
 // Function returns 1 (success) or 0 (no msg).
-func request_msg(address, topic, buff, size) {
+func fetch_msg(address, topic, buff, size) {
   buff[0] = size;
   system(0x043, address, topic, buff);
+}
+
+// Request to a message from the broker.
+// Response is received asynchron.
+// Function returns 1 (success) or 0 (no msg).
+func request_msg(address, topic) {
+  system(0x044, address, topic);
 }
 ]]
 
 local tx_demo_c = [[
-// Comm Transmit Demo
+// Comm Send Demo
 // Send a text messages to router #2.
 // Word 0 of the messages buffer is the msg size.
 
@@ -78,6 +85,7 @@ const MAX = 64;
 static var buff[MAX];
 
 func init() {
+  setstdout(1); // use terminal windows for stdout
 }
 
 func loop() {
@@ -86,10 +94,10 @@ func loop() {
   var addr = recv_msg(buff, MAX);
 
   if(addr != 0) {
-    len = buff[0];     // string length
-    buff[len] = 0;     // to be safe
-    putstr(buff + 1);  // output string
-    putchar('\n');     // flush output stream
+    len = buff[0];    // string length
+    buff[len] = 0;    // to be safe
+    putstr(buff + 1); // output string
+    putchar('\n');    // flush output stream
   }
 }
 ]]
@@ -101,8 +109,6 @@ local pub_demo_c = [[
 
 import "sys/comm.c"
 
-const MY_TOPIC = 1;
-
 static var cnt = 0;
 static var msg[] = {1, 0};
 
@@ -113,26 +119,27 @@ func loop() {
   cnt++;
   if(cnt % 8 == 0) {
     msg[1]++;
-    publish_msg(5, MY_TOPIC, msg);
+    publish_msg(5, "MyTopic", msg);
   }
 }
 ]]
 
-local req_demo_c = [[
-// Broker Request Demo
-// Read a message from the broker.
+local fec_demo_c = [[
+// Broker Fetch Demo
+// Fetch messages from the broker #5
+// with immediate response,
 // The messages are shown on the programmers terminal.
 
 import "sys/stdio.asm"
 import "sys/comm.c"
 
-const MAX = 64;
-const MY_TOPIC = 1;
+const MAX = 32;
 
 static var cnt = 0;
 static var buff[MAX];
 
 func init() {
+  setstdout(1); // use terminal windows for stdout
 }
 
 func loop() {
@@ -140,12 +147,41 @@ func loop() {
 
   cnt++;
   if(cnt % 8 == 0) {
-    sts = request_msg(5, MY_TOPIC, buff, MAX);
+    sts = fetch_msg(5, "MyTopic", buff, MAX);
     if(sts == 1) {
       putstr("MyTopic: ");
       putnum(buff[1]);
-      putchar('\n');     // flush output stream
+      putchar('\n'); // flush output stream
     }
+  }
+}
+]]
+
+local req_demo_c = [[
+// Broker Request Demo
+// Request messages from the broker #5.
+// The response is provided after a broker message update.
+
+import "sys/comm.c"
+import "sys/stdio.asm"
+
+const MAX = 32;
+
+static var buff[MAX];
+
+func init() {
+  setstdout(1); // use terminal windows for stdout
+  request_msg(5, "MyTopic");  // initial
+}
+
+func loop() {
+  var addr = recv_msg(buff, MAX);
+
+  if(addr != 0) {
+    putstr("MyTopic: ");
+    putnum(buff[1]);
+    putchar('\n'); // flush output stream
+    request_msg(5, "MyTopic");  // again
   }
 }
 ]]
@@ -155,3 +191,4 @@ vm16.register_ro_file("beduino", "demo/tx_demo.c",  tx_demo_c)
 vm16.register_ro_file("beduino", "demo/rx_demo.c",  rx_demo_c)
 vm16.register_ro_file("beduino", "demo/pub_demo.c", pub_demo_c)
 vm16.register_ro_file("beduino", "demo/req_demo.c", req_demo_c)
+vm16.register_ro_file("beduino", "demo/fec_demo.c", fec_demo_c)

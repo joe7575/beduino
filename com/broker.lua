@@ -3,12 +3,12 @@
 	Beduino
 	=======
 
-	Copyright (C) 2022 Joachim Stolberg
+	Copyright (C) 2022-2023 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
 
-	Broker for publish/request communication
+	Broker for publish/fetch/request communication
 
 ]]--
 
@@ -17,46 +17,139 @@ local M = minetest.get_meta
 local P2S = function(pos) if pos then return minetest.pos_to_string(pos) end end
 
 local DESCRIPTION = "Beduino Broker"
-local MAX_TOPIC_NUM = 100
+local MAX_NUM_MSG = 100
+local MAX_MSG_SIZE = 32
 
 local lib = beduino.lib
 local comm = beduino.comm
 
-local MsgTbl = {}
-local MsgCnt = {}
+local MsgTbl = {} -- received messages
+local ReqTbl = {} -- received requests
+local TopicCnt = {} -- to limit the max topic number
 
-local function count_request(addr)
-	MsgCnt[addr] = MsgCnt[addr] or {req = 0, pub = 0}
-	MsgCnt[addr].req = MsgCnt[addr].req + 1
+----------------------------------------------------------------------
+-- Formspec
+----------------------------------------------------------------------
+local function in_list(list, x)
+    for _, v in ipairs(list) do
+        if v == x then return true end
+    end
+    return false
 end
 
-local function count_publish(addr)
-	MsgCnt[addr] = MsgCnt[addr] or {req = 0, pub = 0}
-	MsgCnt[addr].pub = MsgCnt[addr].pub + 1
+local function get_textsize(pos)
+	local textsize = M(pos):get_int("textsize")
+	if textsize >= 0 then
+		textsize = "+" .. textsize
+	else
+		textsize = tostring(textsize)
+	end
+	return textsize
 end
 
-function beduino.comm.publish_msg(src_addr, dst_addr, topic, msg)
+local function dump_table(tbl)
+	local out = {}
+	for _,v in ipairs(tbl or {}) do
+		table.insert(out, "#" .. v)
+	end
+	return table.concat(out, ", ")
+end
+
+local function get_msg_text(my_addr)
+	local out = {}
+	table.insert(out, "### Messages ###")
+	local default = "  No message"
+	for k,v in pairs(MsgTbl[my_addr] or {}) do
+		table.insert(out, "- " .. k .. ":  " .. v)
+		default = nil
+	end
+	table.insert(out, default)
+	table.insert(out, "### Requests ###")
+	default = "  No request"
+
+	for k,v in pairs(ReqTbl[my_addr] or {}) do
+		table.insert(out, "- " .. k .. ":  " .. dump_table(v))
+		default = nil
+	end
+	table.insert(out, default)
+	return table.concat(out, "\n")
+end
+
+local function below_topic_limit(dst_addr, topic)
+	if MsgTbl[dst_addr][topic] then
+		return true
+	end
+	if TopicCnt[dst_addr] < MAX_NUM_MSG then
+		TopicCnt[dst_addr] = TopicCnt[dst_addr] + 1
+		return true
+	end
+	return false
+end
+
+local function formspec(pos, tx_cnt, rx_cnt)
+	local my_addr = M(pos):get_int("my_addr")
+	local s = M(pos):get_string("beduino_address_list")
+	local textsize = get_textsize(pos)
+	local text = get_msg_text(my_addr)
+	return "formspec_version[4]" ..
+		"size[14,12]" ..
+		"button[12.6,0;0.6,0.6;larger;+]" ..
+		"button[13.2,0;0.6,0.6;smaller;-]" ..
+		"field[0.2,1.0;13.6,0.7;address;Valid Addresses (separated by spaces);" .. s .. "]"..
+		"box[0.2,2.4;13.6,8.4;#000]" ..
+		"style_type[textarea;font=mono;textcolor=#FFF;border=false;font_size="  .. textsize .. "]" ..
+		"textarea[0.2,2.4;13.6,8.4;;Messages/Requests;" .. text .. "]" ..
+		"button[4.4,11;2,0.7;update;Update]" ..
+		"button_exit[7.0,11;2,0.7;save;Save]"
+end
+
+----------------------------------------------------------------------
+-- Communication
+----------------------------------------------------------------------
+local function answer_requests(dst_addr, topic, msg)
+	if ReqTbl[dst_addr] and ReqTbl[dst_addr][topic] then
+		for _, addr in ipairs(ReqTbl[dst_addr][topic]) do
+			comm.router_send_msg(dst_addr, addr, msg)
+		end
+		ReqTbl[dst_addr][topic] = nil
+	end
+end
+
+local function publish_msg(src_addr, dst_addr, topic, msg)
 	--print("publish_msg", src_addr, dst_addr, topic)
-	if topic <= MAX_TOPIC_NUM then
-		MsgTbl[dst_addr] = MsgTbl[dst_addr] or {}
+	MsgTbl[dst_addr] = MsgTbl[dst_addr] or {}
+	TopicCnt[dst_addr] = TopicCnt[dst_addr] or 0
+	if below_topic_limit(dst_addr, topic) then
 		MsgTbl[dst_addr][topic] = msg
-		count_publish(dst_addr)
+		answer_requests(dst_addr, topic, msg)
 		return 1
 	end
 	return 0
 end
 
-function beduino.comm.request_msg(dst_addr, topic)
-	--print("request_msg", dst_addr, topic)
+local function fetch_msg(dst_addr, topic)
+	--print("fetch_msg", dst_addr, topic)
 	if MsgTbl[dst_addr] then
-		local msg = MsgTbl[dst_addr][topic]
-		if msg then
-			count_request(dst_addr)
-			return msg
-		end
+		return MsgTbl[dst_addr][topic]
 	end
 end
 
+local function request_msg(src_addr, dst_addr, topic)
+	--print("request_msg", src_addr, dst_addr, topic)
+	ReqTbl[dst_addr] = ReqTbl[dst_addr] or {}
+	ReqTbl[dst_addr][topic] = ReqTbl[dst_addr][topic] or {}
+	if not in_list(ReqTbl[dst_addr][topic], src_addr) then
+		if below_topic_limit(dst_addr, topic) then
+			table.insert(ReqTbl[dst_addr][topic], src_addr)
+			return 1
+		end
+	end
+	return 0
+end
+
+----------------------------------------------------------------------
+-- Node handling
+----------------------------------------------------------------------
 local function preserve_router_address(pos, itemstack)
 	local imeta = itemstack:get_meta()
 	if imeta and imeta:contains("my_addr") then
@@ -70,17 +163,6 @@ local function preserve_metadata(pos, oldnode, oldmetadata, drops)
 		meta:set_int("my_addr", oldmetadata.my_addr)
 		meta:set_string("description", DESCRIPTION .. " #" .. oldmetadata.my_addr)
 	end
-end
-
-local function formspec(pos, tx_cnt, rx_cnt)
-	local my_addr = M(pos):get_int("my_addr")
-	local s = M(pos):get_string("beduino_address_list")
-	local cnts = MsgCnt[my_addr] or {pub = 0, req = 0}
-	return "size[8,3]"..
-		"label[0.2,0.0;Messages: " .. cnts.pub .. " published,   ".. cnts.req .. " requested]" ..
-		"field[0.2,1.6;8.1,1;address;Valid Addresses (separated by spaces);" .. s .. "]"..
-		"button[3.4,2.2;2,1;update;Update]" ..
-		"button_exit[6.0,2.2;2,1;save;Save]"
 end
 
 local function after_place_node(pos, placer, itemstack, pointed_thing)
@@ -102,7 +184,7 @@ local function after_dig_node(pos, oldnode, oldmetadata, digger)
 	local my_addr = tonumber(oldmetadata.fields.my_addr) or 0
 	lib.del_filter_address(pos, my_addr)
 	MsgTbl[my_addr] = nil
-	MsgCnt[my_addr] = nil
+	TopicCnt[my_addr] = nil
 end
 
 local function on_receive_fields(pos, formname, fields, player)
@@ -157,3 +239,48 @@ minetest.register_node("beduino:broker", {
 })
 
 beduino.register_io_nodes({"beduino:broker"})
+
+----------------------------------------------------------------------
+-- Beduino API
+----------------------------------------------------------------------
+-- regA = dst_addr, regB = topic_str, regC = msg
+local function sys_publish_msg(cpu_pos, address, regA, regB, regC)
+	local topic = vm16.read_ascii(cpu_pos, regB, 16)
+	local size = vm16.peek(cpu_pos, regC) + 1
+	local msg = vm16.read_mem_as_str(cpu_pos, regC, math.min(size, MAX_MSG_SIZE))
+	local my_addr = M(cpu_pos):get_int("router_addr")
+	if lib.valid_route(my_addr, regA) then
+		return publish_msg(my_addr, regA, topic, msg)
+	end
+	return 0
+end
+
+-- regA = dst_addr, regB = topic_str, regC = buff
+local function sys_fetch_msg(cpu_pos, address, regA, regB, regC)
+	local my_addr = M(cpu_pos):get_int("router_addr")
+	if lib.router_available(my_addr) then
+		local topic = vm16.read_ascii(cpu_pos, regB, 16)
+		local msg = fetch_msg(regA, topic)
+		if msg then
+			local size = vm16.peek(cpu_pos, regC) + 1
+			msg = msg:sub(1, size * 4)
+			vm16.write_mem_as_str(cpu_pos, regC, msg)
+			return 1
+		end
+	end
+	return 0
+end
+
+-- regA = dst_addr, regB = topic_str
+local function sys_request_msg(cpu_pos, address, regA, regB, regC)
+	local topic = vm16.read_ascii(cpu_pos, regB, 16)
+	local my_addr = M(cpu_pos):get_int("router_addr")
+	if lib.valid_route(my_addr, regA) then
+		return request_msg(my_addr, regA, topic)
+	end
+	return 0
+end
+
+lib.register_SystemHandler(0x042, sys_publish_msg)
+lib.register_SystemHandler(0x043, sys_fetch_msg)
+lib.register_SystemHandler(0x044, sys_request_msg)

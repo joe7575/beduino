@@ -99,7 +99,7 @@ func loop() {
 }
 ```
 
-Please note that all changes on your program have to be stored with the "Save" button. Any other actions will lose your changes.
+Please note that all changes on your program have to be stored with the "Save" button.
 
 Your program can now:
 
@@ -194,32 +194,47 @@ Router allow to set an address filter. By default, messages from all other contr
 
 The broker is used for a server/broker based communication between controllers. The broker will store received messages and provides the messages to other controllers, even if the original message source/sender is not available anymore.
 
-Messages for the broker have to have a topic value. The topic is used to publish and request a dedicated messages.
+Messages for the broker have to have a topic value. The topic is used to publish, fetch, and request a dedicated messages.
 
 Each broker automatically gets an unique number/address, which is used for the addressing.
 
 ```c
 // Send a message to the broker.
 // `address` is the router destination address
-// `topic` value is used as message identifier
+// `topic` is a string used as message identifier
 func publish_msg(address, topic, msg);
-    
+
 // Read a message from the broker.
 // Function returns 1 (success) or 0 (no msg).
+// `address` is the router destination address
+// `topic` is a string used as message identifier
 // `buff` is a buffer, used for the received message
-// `size` ist the buffer size in words
-func request_msg(address, topic, buff, size);
+// `size` is the buffer size in words
+func fetch_msg(address, topic, buff, size) {
+  buff[0] = size;
+  system(0x043, address, topic, buff);
+}
+
+// Request to a message from the broker.
+// Response is received asynchron.
+// Function returns 1 (success) or 0 (no msg).
+// `address` is the router destination address
+// `topic` is a string used as message identifier
+func request_msg(address, topic) {
+  system(0x044, address, topic);
+}
 ```
 
-The maximum messages length is 64 words. Valid values for a topic are 1..100.
+The maximum messages length is 32 words. The maximum number of messages a broken can store is 100.
 
 > **Note**
 > Word 0 of each messages buffer is the msg size, which is the number of words without the size itself (see example pub_demo.c`).
 
-The broker comes with two example programs to demonstrate the publish/request process:
+The broker comes with three example programs to demonstrate the publish/request process:
 
 - `pub_demo.c`  to cyclically publish/send a message to broker #5
-- `req_demo.c` to request/receive a messages from broker #5
+- `fec_demo.c` to  cyclically fetch/read a message from broker #5
+- `req_demo.c` to request and asynchron receive a messages from broker #5
 
 Copy the demo code into your own files and adapt the broker address to your needs.
 
@@ -228,6 +243,20 @@ Copy the demo code into your own files and adapt the broker address to your need
 Broker (like router) allow to set an address filter. By default, messages from all controllers are received. By means of the address list (white list) the number of valid addressed can be limited. Enter the addresses of the allowed publishing controllers in the broker menu. Addresses must be separated by spaces, e.g.: "123 234 235".
 
 Only the receipt of messages can be restricted, requesting a message from the broker is always allowed (if the topic number is known).
+
+#### Broker Message List
+
+The broker menu provides a list of stored messages and pending requests:
+
+```c
+### Messages ###
+// Topic:  message as hex string
+- MyTopic:  00010353
+- State:  00010002
+### Requests ###
+// Topic: router numbers
+ - MyTopic:  #2, #5
+```
 
 
 

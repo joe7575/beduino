@@ -203,42 +203,11 @@ local function sys_receive_msg(cpu_pos, address, regA, regB, regC)
 	return src_addr
 end
 
--- address is fix 0x042, regA = dst_addr, regB = topic, regC = msg
-local function sys_publish_msg(cpu_pos, address, regA, regB, regC)
-	local size = vm16.peek(cpu_pos, regC) + 1
-	local msg = vm16.read_mem_as_str(cpu_pos, regC, math.min(size, MAX_MSG_SIZE))
-	local my_addr = M(cpu_pos):get_int("router_addr")
-	if lib.valid_route(my_addr, regA) then
-		local res = comm.publish_msg(my_addr, regA, regB, msg)
-		if res then
-			count_transmit(my_addr)
-			return res
-		end
-	end
-	return 0
-end
-
--- address is fix 0x043, regA = dst_addr, regB = topic, regC = buff
-local function sys_request_msg(cpu_pos, address, regA, regB, regC)
-	local my_addr = M(cpu_pos):get_int("router_addr")
-	if lib.router_available(my_addr) then
-		local msg = comm.request_msg(regA, regB)
-		if msg then
-			local size = vm16.peek(cpu_pos, regC) + 1
-			msg = msg:sub(1, size * 4)
-			vm16.write_mem_as_str(cpu_pos, regC, msg)
-			count_receive(my_addr)
-			return 1
-		end
-	end
-	return 0
-end
-
 lib.register_SystemHandler(0x040, sys_send_msg)
 lib.register_SystemHandler(0x041, sys_receive_msg)
-lib.register_SystemHandler(0x042, sys_publish_msg)
-lib.register_SystemHandler(0x043, sys_request_msg)
 
 minetest.register_on_shutdown(function()
 	storage:set_string("MsgQue", minetest.serialize(MsgQue))
 end)
+
+comm.router_send_msg = send_msg

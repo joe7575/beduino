@@ -35,6 +35,7 @@ func send_tas_cmnd(port, ident, add_data) {
 }
 
 // 'ident' and 'add_data' are strings, 'resp' is a pointer
+// Deprecated: Use send_cmnd and the native Beduino commands!
 func request_tas_data(port, ident, add_data, resp) {
   system(0x101, port, resp);
   system(0x102, port, ident, add_data);

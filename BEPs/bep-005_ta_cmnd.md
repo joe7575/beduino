@@ -57,14 +57,23 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 | [PDP-13] 7-Segment       | 15          | [num]                  | Ouput value (0-15) to the 7-segment block (values > 15 will turn off the block) |
 | [PDP-13] 14-Segment      | 16          | [num]                  | Ouput value (0-0x3FFF) to the 14-segment block<br />See: [PDP-13 Manual](https://github.com/joe7575/pdp13/blob/main/manuals/manualXL_EN.md#pdp-13-14-segment) |
 | Display Clear            | 17          | -                      | Clear the display                                            |
+| TA4 Pusher Limit         | 20          | [limit]                | Configure a TA4 Pusher with the number of items that are allowed to be pushed ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
+| TA4 Pump Limit           | 21          | [limit]                | Configure a TA4 Pump with the number of liquid units that are allowed to be pumped ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
+| Color                    | 22          | [color]                | Set the color of the TechAge Signal Lamp and TechAge Signal Lamp 2 (color = 0..255) |
+|                          |             |                        |                                                              |
+|                          |             |                        |                                                              |
+| **=============**        | **====**    | **========**           | **For Topics >=64 the payload is a string**                  |
+|                          | 64          |                        |                                                              |
+|                          | 65          |                        |                                                              |
+|                          | 66          |                        |                                                              |
 | Display Add Line         | 67          | "text string"          | Add a new line to the display                                |
 | Display Write Line       | 68          | "\<num>text string"    | Overwrite a text line with the given string. <br />The first string character is the line number (1..5)<br />Examples: "1Hello World", "2Minetest" |
 | Config TA4 Pusher        | 65          | "\<item name>"         | Configure the TA4 pusher.<br/>Example: `wool:blue`           |
 | Sensor Chest Text        | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
 | Distri. Filter Config    | 67          | "\<slot> \<item list>" | Configure a Distributor filter slot, like: "red default:dirt dye:blue" |
-| TA4 Pusher Limit         | 68          | [limit]                | Configure a TA4 Pusher with the number of items that are allowed to be pushed ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
-| TA4 Pump Limit           | 69          | [limit]                | Configure a TA4 Pump with the number of liquid units that are allowed to be pumped ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
-| Color                    | 70          | [color]                | Set the color of the TechAge Signal Lamp and TechAge Signal Lamp 2 (color = 0..255) |
+|                          |             |                        |                                                              |
+|                          |             |                        |                                                              |
+|                          |             |                        |                                                              |
 
 
 

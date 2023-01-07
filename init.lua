@@ -20,7 +20,7 @@ if minetest.global_exists("techage") and techage.version < 1.08 then
 end
 
 beduino = {}
-beduino.version = 0.7
+beduino.version = 0.8
 beduino.lib = {}
 beduino.comm = {}
 beduino.tech = {}

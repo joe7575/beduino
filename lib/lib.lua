@@ -93,6 +93,11 @@ function beduino.lib.valid_route(my_addr, dst_addr)
 end
 
 function beduino.lib.on_receive_fields(pos, fields)
+	if fields.larger then
+		M(pos):set_int("textsize", math.min(M(pos):get_int("textsize") + 1, 8))
+	elseif fields.smaller then
+		M(pos):set_int("textsize", math.max(M(pos):get_int("textsize") - 1, -8))
+	end
 	if fields.save then
 		local s = fields.address:gsub("^%s*(.-)%s*$", "%1")
 		if s == "" then
