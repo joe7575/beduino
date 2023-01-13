@@ -33,6 +33,15 @@ if minetest.global_exists("techage") then
 	})
 
 	minetest.register_craft({
+		output = "vm16:sdcard",
+		recipe = {
+			{"", "basic_materials:plastic_sheet", ""},
+			{"", "basic_materials:ic", ""},
+			{"", "basic_materials:plastic_sheet", ""},
+		},
+	})
+
+	minetest.register_craft({
 		output = "beduino:controller",
 		recipe = {
 			{"", "dye:blue", ""},
@@ -137,6 +146,11 @@ if minetest.global_exists("techage") then
 		input = {"basic_materials:plastic_sheet 1", "techage:ta4_silicon_wafer 2"}
 	})
 
+	techage.recipes.add("ta4_electronic_fab", {
+		output = "beduino:ram4k 1",
+		input = {"basic_materials:plastic_sheet 1", "techage:ta4_silicon_wafer 2"}
+	})
+
 elseif minetest.global_exists("tubelib") then
 
 	minetest.register_craft({
@@ -154,6 +168,15 @@ elseif minetest.global_exists("tubelib") then
 			{"dye:black", "basic_materials:copper_wire", "dye:black"},
 			{"basic_materials:ic", "basic_materials:ic", "basic_materials:ic"},
 			{"default:steelblock", "basic_materials:gold_wire", "default:steelblock"},
+		},
+	})
+
+	minetest.register_craft({
+		output = "vm16:sdcard",
+		recipe = {
+			{"", "basic_materials:plastic_sheet", ""},
+			{"", "basic_materials:ic", ""},
+			{"", "basic_materials:plastic_sheet", ""},
 		},
 	})
 

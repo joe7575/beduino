@@ -54,6 +54,17 @@ local function has_eeprom(pos)
 	return inv:contains_item("memory", e2p2k)
 end
 
+local function get_sdcard_code(pos)
+	local inv = M(pos):get_inventory()
+	local item = ItemStack("vm16:sdcard")
+	if inv:contains_item("memory", item) then
+		local stack = inv:remove_item("memory", item)
+		inv:add_item("memory", stack)
+		local data = stack:get_meta():to_table().fields
+		return data.text or ""
+	end
+end
+
 local function ram_size(pos)
 	local inv = M(pos):get_inventory()
 	local ram2k = ItemStack("beduino:ram2k")
@@ -140,7 +151,8 @@ local function formspec()
 	return "size[8,7]"..
 		"label[3,0;Memory Slots]" ..
 		"list[context;memory;3,0.6;2,2;]" ..
-		"list[current_player;main;0,3.2;8,4;]"
+		"list[current_player;main;0,3.2;8,4;]" ..
+		"button[5.5,1.2;2,0.8;reset;Reset]"
 end
 
 -- CPU definition
@@ -217,6 +229,25 @@ local cpu_def = {
 	end,
 }
 
+local function start_cpu(pos)
+	if vm16.is_loaded(pos) then
+		vm16.destroy(pos)
+	end
+	local mem_size = cpu_def.on_mem_size(pos) or 3
+	vm16.create(pos, mem_size)
+	if vm16.is_loaded(pos) then
+		local h16 = get_sdcard_code(pos)
+		if h16 then
+			vm16.write_h16(pos, h16)
+			vm16.set_pc(pos, 0)
+			M(pos):set_string("infotext", "Beduino Controller (running)")
+			M(pos):set_int("running", 1)
+			on_start_cpu(pos)
+			minetest.get_node_timer(pos):start(cpu_def.cycle_time)
+		end
+	end
+end
+
 minetest.register_node("beduino:controller", {
 	description = "Beduino Controller",
 	inventory_image = "beduino_controller_inventory.png",
@@ -253,6 +284,12 @@ minetest.register_node("beduino:controller", {
 		local prog_pos = S2P(M(pos):get_string("prog_pos"))
 		return vm16.keep_running(pos, prog_pos, cpu_def)
 	end,
+	on_receive_fields = function(pos, formname, fields, player)
+		if player and minetest.is_protected(pos, player:get_player_name()) then
+			return
+		end
+		start_cpu(pos)
+	end,
 	after_dig_node = function(pos)
 		local prog_pos = S2P(M(pos):get_string("prog_pos"))
 		vm16.unload_cpu(pos, prog_pos)
@@ -268,15 +305,19 @@ minetest.register_node("beduino:controller", {
 		if minetest.is_protected(pos, player:get_player_name()) then
 			return 0
 		end
+		local name = stack:get_name()
+		local inv = minetest.get_meta(pos):get_inventory()
+		if inv:contains_item("memory", {name = name}) then
+			return 0
+		end
+		-- put sdcard is allowed, even if cpu is running
+		if name == "vm16:sdcard" then
+			return 1
+		end
 		if vm16.is_loaded(pos) then
 			return 0
 		end
-		local name = stack:get_name()
 		if not Memory[name] then
-			return 0
-		end
-		local inv = minetest.get_meta(pos):get_inventory()
-		if inv:contains_item("memory", {name = name}) then
 			return 0
 		end
 		if name == "beduino:ram4k" and not inv:contains_item("memory", {name = "beduino:ram2k"}) then
@@ -292,10 +333,14 @@ minetest.register_node("beduino:controller", {
 		if minetest.is_protected(pos, player:get_player_name()) then
 			return 0
 		end
+		-- take sdcard is allowed, even if cpu is running
+		local name = stack:get_name()
+		if name == "vm16:sdcard" then
+			return 1
+		end
 		if vm16.is_loaded(pos) then
 			return 0
 		end
-		local name = stack:get_name()
 		if name == "beduino:eeprom2k" then
 			local inv = minetest.get_meta(pos):get_inventory()
 			local stack = inv:get_stack(listname, index)
