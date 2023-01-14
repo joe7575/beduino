@@ -33,11 +33,11 @@ if minetest.global_exists("techage") then
 	})
 
 	minetest.register_craft({
-		output = "vm16:sdcard",
+		output = "vm16:sdcard 4",
 		recipe = {
-			{"", "basic_materials:plastic_sheet", ""},
-			{"", "basic_materials:ic", ""},
-			{"", "basic_materials:plastic_sheet", ""},
+			{"basic_materials:plastic_sheet", "basic_materials:plastic_sheet", "basic_materials:plastic_sheet"},
+			{"basic_materials:ic", "basic_materials:ic", "basic_materials:ic"},
+			{"dye:blue", "basic_materials:gold_wire", "dye:black"},
 		},
 	})
 
@@ -172,11 +172,11 @@ elseif minetest.global_exists("tubelib") then
 	})
 
 	minetest.register_craft({
-		output = "vm16:sdcard",
+		output = "vm16:sdcard 4",
 		recipe = {
-			{"", "basic_materials:plastic_sheet", ""},
-			{"", "basic_materials:ic", ""},
-			{"", "basic_materials:plastic_sheet", ""},
+			{"basic_materials:plastic_sheet", "basic_materials:plastic_sheet", "basic_materials:plastic_sheet"},
+			{"basic_materials:ic", "basic_materials:ic", "basic_materials:ic"},
+			{"dye:blue", "basic_materials:gold_wire", "dye:black"},
 		},
 	})
 

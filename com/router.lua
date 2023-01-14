@@ -18,25 +18,66 @@ local P2S = function(pos) if pos then return minetest.pos_to_string(pos) end end
 
 local DESCRIPTION = "Beduino Router"
 local MAX_MSG_SIZE = 64
-local MAX_NUM_MSG = 32
+local MAX_NUM_MSG = 16
 
 local lib = beduino.lib
 local comm = beduino.comm
 local storage = beduino.storage
 
 local MsgQue = minetest.deserialize(storage:get_string("MsgQue")) or {}
-local MsgCnt = {}
 
-local function count_transmit(addr)
-	MsgCnt[addr] = MsgCnt[addr] or {rx = 0, tx = 0}
-	MsgCnt[addr].tx = MsgCnt[addr].tx + 1
+local function store_data()
+	storage:set_string("MsgQue", minetest.serialize(MsgQue))
+	minetest.after(74*60, function() store_data() end)
 end
 
-local function count_receive(addr)
-	MsgCnt[addr] = MsgCnt[addr] or {rx = 0, tx = 0}
-	MsgCnt[addr].rx = MsgCnt[addr].rx + 1
+minetest.register_on_shutdown(store_data)
+minetest.after(74*60, store_data)
+
+----------------------------------------------------------------------
+-- Formspec
+----------------------------------------------------------------------
+local function get_textsize(pos)
+	local textsize = M(pos):get_int("textsize")
+	if textsize >= 0 then
+		textsize = "+" .. textsize
+	else
+		textsize = tostring(textsize)
+	end
+	return textsize
 end
 
+local function get_msg_text(my_addr)
+	local out = {}
+	local default = "  No message"
+	for _,v in ipairs(MsgQue[my_addr] or {}) do
+		table.insert(out, string.format("%4u", v.src_addr) .. ": " .. v.msg)
+		default = nil
+	end
+	table.insert(out, default)
+	return table.concat(out, "\n")
+end
+
+local function formspec(pos)
+	local my_addr = M(pos):get_int("my_addr")
+	local s = M(pos):get_string("beduino_address_list")
+	local textsize = get_textsize(pos)
+	local text = get_msg_text(my_addr)
+	return "formspec_version[4]" ..
+		"size[14,12]" ..
+		"button[12.6,0;0.6,0.6;larger;+]" ..
+		"button[13.2,0;0.6,0.6;smaller;-]" ..
+		"field[0.2,1.0;13.6,0.7;address;Valid Addresses (separated by spaces);" .. s .. "]"..
+		"box[0.2,2.4;13.6,8.4;#000]" ..
+		"style_type[textarea;font=mono;textcolor=#FFF;border=false;font_size="  .. textsize .. "]" ..
+		"textarea[0.2,2.4;13.6,8.4;;Pending receive messages (source-address: message);" .. text .. "]" ..
+		"button[4.4,11;2,0.7;update;Update]" ..
+		"button_exit[7.0,11;2,0.7;save;Save]"
+end
+
+----------------------------------------------------------------------
+-- Communication
+----------------------------------------------------------------------
 local function send_msg(my_addr, dst_addr, msg)
 	--print("send_msg", my_addr, dst_addr)
 	if lib.valid_route(my_addr, dst_addr) then
@@ -45,8 +86,6 @@ local function send_msg(my_addr, dst_addr, msg)
 		if #MsgQue[dst_addr] > MAX_NUM_MSG then
 			table.remove(MsgQue[dst_addr], 1)
 		end
-		count_transmit(my_addr)
-		count_receive(dst_addr)
 		return 1
 	end
 	return 0
@@ -87,17 +126,6 @@ local function preserve_metadata(pos, oldnode, oldmetadata, drops)
 		meta:set_int("my_addr", oldmetadata.my_addr)
 		meta:set_string("description", DESCRIPTION .. " #" .. oldmetadata.my_addr)
 	end
-end
-
-local function formspec(pos, tx_cnt, rx_cnt)
-	local my_addr = M(pos):get_int("my_addr")
-	local s = M(pos):get_string("beduino_address_list")
-	local cnts = MsgCnt[my_addr] or {rx = 0, tx = 0}
-	return "size[8,3]"..
-		"label[0.2,0.0;Messages: " .. cnts.rx .. " received,   ".. cnts.tx .. " sent]" ..
-		"field[0.2,1.6;8.1,1;address;Valid Addresses (separated by spaces);" .. s .. "]"..
-		"button[3.4,2.2;2,1;update;Update]" ..
-		"button_exit[6.0,2.2;2,1;save;Save]"
 end
 
 local function after_place_node(pos, placer, itemstack, pointed_thing)
@@ -188,26 +216,23 @@ beduino.register_io_nodes({"beduino:router"})
 
 -- address is fix 0x040, regA = dst_addr, regB = msg
 local function sys_send_msg(cpu_pos, address, regA, regB, regC)
-	local size = vm16.peek(cpu_pos, regB) + 1
-	local msg = vm16.read_mem_as_str(cpu_pos, regB, math.min(size, MAX_MSG_SIZE))
+	local size = math.min(vm16.peek(cpu_pos, regB) + 1, MAX_MSG_SIZE)
+	local msg = vm16.read_mem_as_str(cpu_pos, regB, size)
 	local my_addr = M(cpu_pos):get_int("router_addr")
 	return send_msg(my_addr, regA, msg)
 end
 
 -- address is fix 0x041, regA = buff, regB = buff_size
-local function sys_receive_msg(cpu_pos, address, regA, regB, regC)
+local function sys_recv_msg(cpu_pos, address, regA, regB, regC)
 	local my_addr = M(cpu_pos):get_int("router_addr")
 	local src_addr, msg = receive_msg(my_addr)
-	msg = msg:sub(1, regB * 4)
+	local size = math.min(regB, MAX_MSG_SIZE)
+	msg = msg:sub(1, size * 4)
 	vm16.write_mem_as_str(cpu_pos, regA, msg)
 	return src_addr
 end
 
 lib.register_SystemHandler(0x040, sys_send_msg)
-lib.register_SystemHandler(0x041, sys_receive_msg)
-
-minetest.register_on_shutdown(function()
-	storage:set_string("MsgQue", minetest.serialize(MsgQue))
-end)
+lib.register_SystemHandler(0x041, sys_recv_msg)
 
 comm.router_send_msg = send_msg

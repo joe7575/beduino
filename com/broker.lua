@@ -23,9 +23,21 @@ local MAX_MSG_SIZE = 32
 local lib = beduino.lib
 local comm = beduino.comm
 
-local MsgTbl = {} -- received messages
-local ReqTbl = {} -- received requests
-local TopicCnt = {} -- to limit the max topic number
+local storage = beduino.storage
+
+local MsgTbl = minetest.deserialize(storage:get_string("MsgTbl")) or {}  -- received messages
+local ReqTbl = minetest.deserialize(storage:get_string("ReqTbl")) or {}  -- received requests
+local TpcCnt = minetest.deserialize(storage:get_string("TpcCnt")) or {}  -- to limit the max topic number
+
+local function store_data()
+	storage:set_string("MsgTbl", minetest.serialize(MsgTbl))
+	storage:set_string("ReqTbl", minetest.serialize(ReqTbl))
+	storage:set_string("TpcCnt", minetest.serialize(TpcCnt))
+	minetest.after(73*60, function() store_data() end)
+end
+
+minetest.register_on_shutdown(store_data)
+minetest.after(73*60, store_data)
 
 ----------------------------------------------------------------------
 -- Formspec
@@ -57,18 +69,18 @@ end
 
 local function get_msg_text(my_addr)
 	local out = {}
-	table.insert(out, "### Messages ###")
+	table.insert(out, "### Messages (topic: message) ###")
 	local default = "  No message"
 	for k,v in pairs(MsgTbl[my_addr] or {}) do
-		table.insert(out, "- " .. k .. ":  " .. v)
+		table.insert(out, "- " .. string.format("%5u", k) .. ": " .. v)
 		default = nil
 	end
 	table.insert(out, default)
-	table.insert(out, "### Requests ###")
+	table.insert(out, "### Requests (topic: requester) ###")
 	default = "  No request"
 
 	for k,v in pairs(ReqTbl[my_addr] or {}) do
-		table.insert(out, "- " .. k .. ":  " .. dump_table(v))
+		table.insert(out, "- " .. string.format("%5u", k) .. ":  " .. dump_table(v))
 		default = nil
 	end
 	table.insert(out, default)
@@ -79,14 +91,14 @@ local function below_topic_limit(dst_addr, topic)
 	if MsgTbl[dst_addr][topic] then
 		return true
 	end
-	if TopicCnt[dst_addr] < MAX_NUM_MSG then
-		TopicCnt[dst_addr] = TopicCnt[dst_addr] + 1
+	if TpcCnt[dst_addr] < MAX_NUM_MSG then
+		TpcCnt[dst_addr] = TpcCnt[dst_addr] + 1
 		return true
 	end
 	return false
 end
 
-local function formspec(pos, tx_cnt, rx_cnt)
+local function formspec(pos)
 	local my_addr = M(pos):get_int("my_addr")
 	local s = M(pos):get_string("beduino_address_list")
 	local textsize = get_textsize(pos)
@@ -118,7 +130,7 @@ end
 local function publish_msg(src_addr, dst_addr, topic, msg)
 	--print("publish_msg", src_addr, dst_addr, topic)
 	MsgTbl[dst_addr] = MsgTbl[dst_addr] or {}
-	TopicCnt[dst_addr] = TopicCnt[dst_addr] or 0
+	TpcCnt[dst_addr] = TpcCnt[dst_addr] or 0
 	if below_topic_limit(dst_addr, topic) then
 		MsgTbl[dst_addr][topic] = msg
 		answer_requests(dst_addr, topic, msg)
@@ -184,7 +196,7 @@ local function after_dig_node(pos, oldnode, oldmetadata, digger)
 	local my_addr = tonumber(oldmetadata.fields.my_addr) or 0
 	lib.del_filter_address(pos, my_addr)
 	MsgTbl[my_addr] = nil
-	TopicCnt[my_addr] = nil
+	TpcCnt[my_addr] = nil
 end
 
 local function on_receive_fields(pos, formname, fields, player)
@@ -243,11 +255,12 @@ beduino.register_io_nodes({"beduino:broker"})
 ----------------------------------------------------------------------
 -- Beduino API
 ----------------------------------------------------------------------
--- regA = dst_addr, regB = topic_str, regC = msg
+-- regA = dst_addr, regB = msg
 local function sys_publish_msg(cpu_pos, address, regA, regB, regC)
-	local topic = vm16.read_ascii(cpu_pos, regB, 16)
-	local size = vm16.peek(cpu_pos, regC) + 1
-	local msg = vm16.read_mem_as_str(cpu_pos, regC, math.min(size, MAX_MSG_SIZE))
+	-- msg = [size, topic, data...]
+	local size = math.min(vm16.peek(cpu_pos, regB) + 1, MAX_MSG_SIZE)
+	local topic = vm16.peek(cpu_pos, regB + 1)
+	local msg = vm16.read_mem_as_str(cpu_pos, regB, size)
 	local my_addr = M(cpu_pos):get_int("router_addr")
 	if lib.valid_route(my_addr, regA) then
 		return publish_msg(my_addr, regA, topic, msg)
@@ -255,11 +268,11 @@ local function sys_publish_msg(cpu_pos, address, regA, regB, regC)
 	return 0
 end
 
--- regA = dst_addr, regB = topic_str, regC = buff
+-- regA = dst_addr, regB = topic, regC = buff
 local function sys_fetch_msg(cpu_pos, address, regA, regB, regC)
 	local my_addr = M(cpu_pos):get_int("router_addr")
 	if lib.router_available(my_addr) then
-		local topic = vm16.read_ascii(cpu_pos, regB, 16)
+		local topic = regB
 		local msg = fetch_msg(regA, topic)
 		if msg then
 			local size = vm16.peek(cpu_pos, regC) + 1
@@ -271,9 +284,9 @@ local function sys_fetch_msg(cpu_pos, address, regA, regB, regC)
 	return 0
 end
 
--- regA = dst_addr, regB = topic_str
+-- regA = dst_addr, regB = topic
 local function sys_request_msg(cpu_pos, address, regA, regB, regC)
-	local topic = vm16.read_ascii(cpu_pos, regB, 16)
+	local topic = regB
 	local my_addr = M(cpu_pos):get_int("router_addr")
 	if lib.valid_route(my_addr, regA) then
 		return request_msg(my_addr, regA, topic)
@@ -284,3 +297,4 @@ end
 lib.register_SystemHandler(0x042, sys_publish_msg)
 lib.register_SystemHandler(0x043, sys_fetch_msg)
 lib.register_SystemHandler(0x044, sys_request_msg)
+

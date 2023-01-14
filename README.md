@@ -51,6 +51,11 @@ Licensed under the GNU AGPLv3 (See LICENSE.txt)
 
 ## History
 
+### v0.8 (2023-01-13)
+
+- Add support for SD cards
+- Rework broker and router
+
 ### v0.7 (2023-01-01)
 
 - Add support for external terminals

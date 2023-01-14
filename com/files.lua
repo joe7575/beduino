@@ -16,33 +16,47 @@ local lib = beduino.lib
 
 local comm_c = [[
 // Send a message via router.
-func send_msg(address, msg) {
-  system(0x040, address, msg);
+// addr = destination address
+// msg = [size, topic, data...]
+// size = number of following words (1..63)
+func send_msg(addr, msg) {
+  system(0x040, addr, msg);
 }
 
 // Receive a message via router.
+// buff = buffer for the message: [size, topic, data...]
+// size = buffer size in words
 // Function returns the sender address or 0.
 func recv_msg(buff, size) {
   system(0x041, buff, size);
 }
 
 // Send a message to the broker.
-func publish_msg(address, topic, msg) {
-  system(0x042, address, topic, msg);
+// addr = broker address
+// msg = [size, topic, data...]
+// size = number of following words (1..63)
+func publish_msg(addr, msg) {
+  system(0x042, addr, msg);
 }
 
 // Read a message from the broker.
+// addr = broker address
+// topic = topic number
+// buff = buffer for the message: [size, topic, data...]
+// size = buffer size in words
 // Function returns 1 (success) or 0 (no msg).
-func fetch_msg(address, topic, buff, size) {
+func fetch_msg(addr, topic, buff, size) {
   buff[0] = size;
-  system(0x043, address, topic, buff);
+  system(0x043, addr, topic, buff);
 }
 
 // Request to a message from the broker.
-// Response is received asynchron.
-// Function returns 1 (success) or 0 (no msg).
-func request_msg(address, topic) {
-  system(0x044, address, topic);
+// Response is received asynchron via 'recv_msg'.
+// addr = broker address
+// topic = topic number
+// Function returns 1 (success) or 0 (error).
+func request_msg(addr, topic) {
+  system(0x044, addr, topic);
 }
 ]]
 
@@ -53,21 +67,24 @@ local tx_demo_c = [[
 
 import "sys/comm.c"
 
+const STRING = 1; // topic
+const DEST = 2;   // address
+
 static var cnt = 0;
-static var buff1[] = {2, '\b', '\0'};  // clear screen
-static var buff2[] = {4, 'He', 'll', 'o', '\0'};
-static var buff3[] = {5, 'Be', 'du', 'in', 'o!', '\0'};
+static var buff1[] = {3, STRING, '\b', '\0'};  // clear screen
+static var buff2[] = {5, STRING, 'He', 'll', 'o', '\0'};
+static var buff3[] = {6, STRING, 'Be', 'du', 'in', 'o!', '\0'};
 
 func init() {
-  send_msg(2, buff1);
+  send_msg(DEST, buff1);
 }
 
 func loop() {
   cnt++;
   if(cnt % 8 == 0) {
-    send_msg(2, buff2);
+    send_msg(DEST, buff2);
   } else if(cnt % 8 == 4) {
-    send_msg(2, buff3);
+    send_msg(DEST, buff3);
   }
 }
 ]]
@@ -80,6 +97,7 @@ local rx_demo_c = [[
 import "sys/stdio.asm"
 import "sys/comm.c"
 
+const STRING = 1; // topic
 const MAX = 64;
 
 static var buff[MAX];
@@ -94,9 +112,9 @@ func loop() {
   var addr = recv_msg(buff, MAX);
 
   if(addr != 0) {
-    len = buff[0];    // string length
+    len = buff[0];    // msg length
     buff[len] = 0;    // to be safe
-    putstr(buff + 1); // output string
+    putstr(buff + 2); // output string
     putchar('\n');    // flush output stream
   }
 }
@@ -106,11 +124,14 @@ local pub_demo_c = [[
 // Broker Publish Demo
 // Send messages to the broker #5.
 // Word 0 of the messages array is the msg size.
+// Word 1 of the messages array is the topic.
 
 import "sys/comm.c"
 
+const TOPIC = 123;
+
 static var cnt = 0;
-static var msg[] = {1, 0};
+static var msg[] = {2, TOPIC, 0};
 
 func init() {
 }
@@ -118,8 +139,8 @@ func init() {
 func loop() {
   cnt++;
   if(cnt % 8 == 0) {
-    msg[1]++;
-    publish_msg(5, "MyTopic", msg);
+    msg[2]++;
+    publish_msg(5, msg);
   }
 }
 ]]
@@ -134,6 +155,7 @@ import "sys/stdio.asm"
 import "sys/comm.c"
 
 const MAX = 32;
+const TOPIC = 123;
 
 static var cnt = 0;
 static var buff[MAX];
@@ -147,10 +169,12 @@ func loop() {
 
   cnt++;
   if(cnt % 8 == 0) {
-    sts = fetch_msg(5, "MyTopic", buff, MAX);
+    sts = fetch_msg(5, TOPIC, buff, MAX);
     if(sts == 1) {
-      putstr("MyTopic: ");
+      putstr("Topic ");
       putnum(buff[1]);
+      putstr(": ");
+      putnum(buff[2]);
       putchar('\n'); // flush output stream
     }
   }
@@ -166,22 +190,25 @@ import "sys/comm.c"
 import "sys/stdio.asm"
 
 const MAX = 32;
+const TOPIC = 123;
 
 static var buff[MAX];
 
 func init() {
   setstdout(1); // use terminal windows for stdout
-  request_msg(5, "MyTopic");  // initial
+  request_msg(5, TOPIC);  // initial
 }
 
 func loop() {
   var addr = recv_msg(buff, MAX);
 
   if(addr != 0) {
-    putstr("MyTopic: ");
+    putstr("Topic ");
     putnum(buff[1]);
+    putstr(": ");
+    putnum(buff[2]);
     putchar('\n'); // flush output stream
-    request_msg(5, "MyTopic");  // again
+    request_msg(5, TOPIC);  // again
   }
 }
 ]]

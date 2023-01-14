@@ -1,6 +1,6 @@
 # Beduino
 
-Beduino is a 16-bit micro-controller system inspired by Arduino boards and kits. It can be programmed in a C like programming language [Cipol](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference).
+Beduino is a 16-bit micro-controller system inspired by Arduino boards and kits. It can be programmed in a C like programming language [mC](https://github.com/joe7575/vm16/wiki/mC-Language-Reference).
 
 To be able to use Beduino, a basic knowledge of programming languages would be useful.
 
@@ -76,7 +76,7 @@ To test this program:
 
 ## Editor/Debugger
 
-The programmer has an integrated editor and debugger. It allows to implement and debug/test your own programs. Programs can be implemented in the C like language [Cipol](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference) or in [Assembler](https://github.com/joe7575/vm16/blob/master/doc/asm.md). The file system on the right provides example programs in both languages and many system and library modules to be used in your programs.
+The programmer has an integrated editor and debugger. It allows to implement and debug/test your own programs. Programs can be implemented in the C like language [mC](https://github.com/joe7575/vm16/wiki/mC-Language-Reference) or in [Assembler](https://github.com/joe7575/vm16/blob/master/doc/asm.md). The file system on the right provides example programs in both languages and many system and library modules to be used in your programs.
 
 For the first debugging steps we use the following modified "Hello world" program. Copy the code below and generate a new program "test.c".
 
@@ -158,6 +158,12 @@ Now you can step in/out as expected without generating extra code.
 
 
 
+## SD Cards
+
+The VM16 programmer supports SD cards. SD cards can be used to transfer programs between programmers and to boot Beduino controllers from SD cards. SD cards with a program in h16 format can be placed in the inventory of the Beduino controller. After pressing the "Reset" button, the controller loads the h16 program from the CD card and executes it. A file in h16 format can be generated from the programmer using the "Build" button.
+
+
+
 ## Router
 
 Routers are used to send messages from one to another controller. Each controller needs its own router. Each router automatically gets an unique number/address, which is used for the addressing. The 16 bit address allows up to 65535 routers.
@@ -200,32 +206,27 @@ Each broker automatically gets an unique number/address, which is used for the a
 
 ```c
 // Send a message to the broker.
-// `address` is the router destination address
-// `topic` is a string used as message identifier
-func publish_msg(address, topic, msg);
+// `address` is the broker destination address
+// msg = [size, topic, data...]
+func publish_msg(address, msg);
 
 // Read a message from the broker.
 // Function returns 1 (success) or 0 (no msg).
-// `address` is the router destination address
-// `topic` is a string used as message identifier
+// `address` is the broker destination address
+// `topic` is the topic number
 // `buff` is a buffer, used for the received message
 // `size` is the buffer size in words
-func fetch_msg(address, topic, buff, size) {
-  buff[0] = size;
-  system(0x043, address, topic, buff);
-}
+func fetch_msg(address, topic, buff, size);
 
 // Request to a message from the broker.
-// Response is received asynchron.
-// Function returns 1 (success) or 0 (no msg).
+// Response is received asynchron via 'recv_msg'.
 // `address` is the router destination address
-// `topic` is a string used as message identifier
-func request_msg(address, topic) {
-  system(0x044, address, topic);
-}
+// `topic` is the topic number
+// Function returns 1 (success) or 0 (error).
+func request_msg(address, topic);
 ```
 
-The maximum messages length is 32 words. The maximum number of messages a broken can store is 100.
+The maximum messages length is 32 words. The maximum number of messages a broker can store is 100.
 
 > **Note**
 > Word 0 of each messages buffer is the msg size, which is the number of words without the size itself (see example pub_demo.c`).
@@ -262,7 +263,7 @@ The broker menu provides a list of stored messages and pending requests:
 
 ## Further Information
 
-- [Cipol Language Reference](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference)
+- [mC Language Reference](https://github.com/joe7575/vm16/wiki/mC-Language-Reference)
 - [VM16 Instruction Set](https://github.com/joe7575/vm16/blob/master/doc/introduction.md)
 - [Assembler Manual](https://github.com/joe7575/vm16/blob/master/doc/asm.md)
 
