@@ -17,7 +17,7 @@ Download: [GitHub](https://github.com/joe7575/beduino/archive/master.zip)
 
 Documentation: [Wiki](https://github.com/joe7575/beduino/wiki)
 
-A new page to the [Cipol-Programming-Language](https://github.com/joe7575/vm16/wiki/Cipol-Language-Reference) is in the making...
+A new page to the [mC-Programming-Language](https://github.com/joe7575/vm16/wiki/mC-Language-Reference) is in the making...
 
 
 ## Configuration

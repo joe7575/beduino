@@ -7,7 +7,7 @@ techage.add_to_manual('DE', {
 }, {
   "Beduino ist ein 16-Bit-Mikrocontrollersystem\\, das von Arduino-Boards und -Kits\n"..
   "inspiriert ist.\n"..
-  "Beduino kann in der C-ähnlichen Programmiersprache Cipol programmiert werden.\n"..
+  "Beduino kann in der C-ähnlichen Programmiersprache mC programmiert werden.\n"..
   "Um Beduino nutzen zu können\\, sind Grundkenntnisse in Programmiersprachen von Vorteil.\n"..
   "\n"..
   "Beduino ist komplett in die Mod Techage integriert und\n"..

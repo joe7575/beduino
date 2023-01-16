@@ -16,7 +16,7 @@ local lib = beduino.lib
 
 if minetest.global_exists("techage") then
 
-local iom_c = [[
+local techage_c = [[
 func event() {
   var ptr = 2;
   var res = *ptr;
@@ -24,42 +24,30 @@ func event() {
   return res;
 }
 
-func read(port, cmnd) {
-  output(port, cmnd);
-  return input(port);
-}
-
-// 'ident' and 'add_data' are strings
-func send_tas_cmnd(port, ident, add_data) {
-  system(0x100, port, ident, add_data);
-}
-
-// 'ident' and 'add_data' are strings, 'resp' is a pointer
-// Deprecated: Use send_cmnd and the native Beduino commands!
-func request_tas_data(port, ident, add_data, resp) {
-  system(0x101, port, resp);
-  system(0x102, port, ident, add_data);
-}
-
+// Send a command to a techage block
 // 'topic' is a number, 'payload' is an array or string
 func send_cmnd(port, topic, payload) {
   system(0x106, port, topic, payload);
 }
 
+// Read data from a techage block
 // 'topic' is a number, 'payload' and 'resp' is arr[8]
 func request_data(port, topic, payload, resp) {
   system(0x101, port, resp);
   system(0x107, port, topic, payload);
 }
 
+// Clear screen on a TA4 Display
 func clear_screen(port) {
   system(0x103, port);
 }
 
+// Append a line on a TA4 Display
 func append_line(port, text) {
   system(0x104, port, text);
 }
 
+// Write a line on a TA4 Display
 func write_line(port, row, text) {
   system(0x105, port, row, text);
 }
@@ -285,9 +273,9 @@ loop:
   jump loop
 ]]
 
-vm16.register_ro_file("beduino", "lib/ta_iom.c",   iom_c)
-vm16.register_ro_file("beduino", "lib/seg14.c",    seg14_c)
-vm16.register_ro_file("beduino", "lib/ta_cmnd.c",  lib.get_command_file())
+vm16.register_ro_file("beduino", "lib/techage.c",   techage_c)
+vm16.register_ro_file("beduino", "lib/seg14.c",     seg14_c)
+--vm16.register_ro_file("beduino", "lib/ta_cmnd.c",  lib.get_command_file())
 vm16.register_ro_file("beduino", "demo/example1.c", example1_c)
 vm16.register_ro_file("beduino", "demo/example2.c", example2_c)
 vm16.register_ro_file("beduino", "demo/example3.c", example3_c)

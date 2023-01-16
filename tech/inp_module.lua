@@ -3,7 +3,7 @@
 	Beduino
 	=======
 
-	Copyright (C) 2022 Joachim Stolberg
+	Copyright (C) 2022-2023 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
@@ -24,6 +24,23 @@ local tech = beduino.tech
 local DESCRIPTION = "Beduino Input Module"
 
 local BaseAddr2Idx = {[0]=1, [8]=2, [16]=3, [24]=4, [32]=5, [40]=6, [48]=7, [56]=8}
+local Events = {}
+
+local function set_event(cpu_pos, inp_port)
+	local hash = H(cpu_pos)
+	Events[hash] = Events[hash] or {}
+	if #Events[hash] < 8 then
+		table.insert(Events[hash], inp_port)
+	end
+end
+
+local function get_event(cpu_pos)
+	local hash = H(cpu_pos)
+	Events[hash] = Events[hash] or {}
+	if Events[hash] and #Events[hash] > 0 then
+		return table.remove(Events[hash], 1)
+	end
+end
 
 local function on_input(pos, address)
 	local baseaddr = M(pos):get_int("baseaddr")
@@ -179,9 +196,15 @@ beduino.tech.register_node({"beduino:inp_module"}, {
 		local nvm = tech.get_nvm(pos)
 		if not nvm.input_val then
 			nvm.input_val = lib.get_num_cmnd(topic) or tonumber(topic) or 0
+			local baseaddr = M(pos):get_int("baseaddr")
 			local cpu_pos = S2P(M(pos):get_string("cpu_pos"))
-			beduino.set_event(cpu_pos, 1)
+			set_event(cpu_pos, baseaddr)
 		end
 	end,
 })
 
+local function sys_get_event(cpu_pos, address, regA, regB, regC)
+	return get_event(cpu_pos) or 0xffff
+end
+
+lib.register_SystemHandler(0x108, sys_get_event)

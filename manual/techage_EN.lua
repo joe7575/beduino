@@ -6,7 +6,7 @@ techage.add_to_manual('EN', {
   "2,Techage Commands",
 }, {
   "Beduino is a 16-bit microcontroller system inspired by Arduino boards and kits.\n"..
-  "Beduino can be programmed in the C-like programming language Cipol.\n"..
+  "Beduino can be programmed in the C-like programming language mC.\n"..
   "In order to be able to use Beduino\\, basic knowledge of\n"..
   "programming languages is an advantage.\n"..
   "\n"..

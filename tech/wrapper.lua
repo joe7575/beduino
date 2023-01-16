@@ -30,6 +30,7 @@ if minetest.global_exists("techage") then
 	beduino.tech.remove_node = techage.remove_node
 	beduino.tech.register_node = techage.register_node
 	beduino.tech.check_numbers = techage.check_numbers
+	beduino.tech.determine_node_number = techage.get_node_number
 
 elseif minetest.global_exists("tubelib") then
 
@@ -62,6 +63,7 @@ elseif minetest.global_exists("tubelib") then
 		tubelib.register_node(names[1], add_names, node_definition)
 	end
 	beduino.tech.check_numbers = tubelib.check_numbers
+	beduino.tech.determine_node_number = tubelib.get_node_number
 
 end
 

@@ -28,7 +28,7 @@ beduino.tech = {}
 local MP = minetest.get_modpath("beduino")
 
 dofile(MP.."/lib/lib.lua")
-dofile(MP.."/lib/kv_store.lua")
+--dofile(MP.."/lib/kv_store.lua")
 dofile(MP.."/lib/dispatch.lua")
 dofile(MP.."/lib/os.lua")
 dofile(MP.."/lib/eeprom.lua")
@@ -50,6 +50,7 @@ if minetest.global_exists("techage") or minetest.global_exists("tubelib") then
 	dofile(MP.."/tech/14segment.lua")
 	dofile(MP.."/tech/sys_calls.lua")
 	dofile(MP.."/tech/files.lua")
+	dofile(MP.."/tech/iot_sensor.lua")
 	dofile(MP.."/tech/recipes.lua")
 end
 if minetest.global_exists("techage") then

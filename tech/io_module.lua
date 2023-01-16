@@ -3,7 +3,7 @@
 	Beduino
 	=======
 
-	Copyright (C) 2022 Joachim Stolberg
+	Copyright (C) 2022-2023 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
@@ -11,16 +11,6 @@
 	I/O Module
 
 ]]--
-
-local HELP = minetest.formspec_escape([[
-
-
-value = input(port);
-output(port, value);
-state = read(port, IO_STATE);
-send_cmnd(port, topic, payload);
-request_data(port, topic, payload, resp_buff);
-]]):gsub("\n", ",")
 
 -- for lazy programmers
 local M = minetest.get_meta
@@ -85,15 +75,6 @@ local function formspec_place(pos)
 		"button_exit[2.0,0.55;2,1;exit;Save]"
 end
 
-local function formspec_help()
-	return "size[13,10]"..
-		"real_coordinates[true]"..
-		"tabheader[0,0;tab;I/O,config,help;3;;true]"..
-		"style_type[table;font=mono]"..
-		"table[0.35,0.25;12.3,9;help;"..lib.get_description().. HELP .. ";1]"
-end
-
-
 local function formspec_use(pos)
 	local numbers = S2T(M(pos):get_string("numbers"))
 	local labels  = S2T(M(pos):get_string("labels"))
@@ -125,7 +106,7 @@ local function formspec_use(pos)
 
 	return "size[13,10]"..
 		"real_coordinates[true]"..
-		"tabheader[0,0;tab;I/O,config,help;" .. tab .. ";;true]"..
+		"tabheader[0,0;tab;I/O,config;" .. tab .. ";;true]"..
 		"container[0.3,1]"..
 		"box[0.2,0.5;12,6.7;#333]"..
 		"label[0.5,0;Port]"..
@@ -186,9 +167,7 @@ local function on_receive_fields(pos, formname, fields, player)
 
 	local meta = M(pos)
 	local nvm = tech.get_nvm(pos)
-	if fields.tab == "3" then
-		meta:set_string("formspec", formspec_help())
-	elseif fields.tab == "2" then
+	if fields.tab == "2" then
 		nvm.in_use = false
 		meta:set_string("formspec", formspec_use(pos))
 	elseif fields.tab == "1" then
@@ -284,8 +263,6 @@ beduino.tech.register_node({"beduino:io_module"}, {
 			local nvm = tech.get_nvm(pos)
 			local port = tech.get_node_port(pos, src)
 			tech.set_input(nvm, port, val)
-			local cpu_pos = S2P(M(pos):get_string("cpu_pos"))
-			beduino.set_event(cpu_pos, 1)
 		else
 			return "unsupported"
 		end

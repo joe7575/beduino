@@ -34,10 +34,10 @@ local Info = [[
 
 The Beduino controller is used to control and
 monitor your machines.
-This controller can be programmed in Cipol,
+This controller can be programmed in mC,
 a C like language.
 
-Learn more about Cipol on:
+Learn more about mC on:
 https://github.com/joe7575/vm16/wiki
 
 ]]
@@ -440,12 +440,5 @@ function beduino.unregister_address(pos, cpu_pos, address)
 		local hash = H(cpu_pos)
 		Inputs[hash] = Inputs[hash] or {}
 		Inputs[hash][address] = nil
-	end
-end
-
-function beduino.set_event(cpu_pos, address)
-	if cpu_pos and address then
-		-- Set event variable on address 2
-		vm16.poke(cpu_pos, 0x0002, address)
 	end
 end
