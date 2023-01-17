@@ -45,34 +45,6 @@ local function sys_resp_buff(cpu_pos, address, regA, regB, regC)
 	return 1
 end
 
-local function sys_send_tas_cmnd(cpu_pos, address, regA, regB, regC)
-	local own_num, dest_num = get_numbers(cpu_pos, regA)
-	if own_num and dest_num then
-		local ident = vm16.read_ascii(cpu_pos, regB, 16)
-		local add_data = vm16.read_ascii(cpu_pos, regC, 32)
-		techage.counting_start(M(cpu_pos):get_string("owner"))
-		tech.send_single(own_num, dest_num, ident, add_data)
-		techage.counting_stop()
-		return 1
-	end
-	return 0
-end
-
-local function sys_request_tas_data(cpu_pos, address, regA, regB, regC)
-	local own_num, dest_num = get_numbers(cpu_pos, regA)
-	if own_num and dest_num then
-		local ident = vm16.read_ascii(cpu_pos, regB, 16)
-		local add_data = vm16.read_ascii(cpu_pos, regC, 32)
-		local resp = tech.send_single(own_num, dest_num, ident, add_data)
-		local resp_addr = RespAddr[H(cpu_pos)]
-		if resp_addr and resp_addr ~= 0 then
-			vm16.write_ascii(cpu_pos, resp_addr, resp)
-		end
-		return 1
-	end
-	return 0
-end
-
 local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = get_numbers(cpu_pos, regA)
 	if own_num and dest_num then

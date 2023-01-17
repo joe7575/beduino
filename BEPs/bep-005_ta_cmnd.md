@@ -1,6 +1,6 @@
-| Author     | Version | Status   | Modified   |
-| ---------- | ------- | -------- | ---------- |
-| J.Stolberg | 0.4     | Proposal | 3 Sep 2022 |
+| Author     | Version | Status   | Modified    |
+| ---------- | ------- | -------- | ----------- |
+| J.Stolberg | 0.5     | Proposal | 16 Jan 2023 |
 
 
 
@@ -104,6 +104,7 @@ The function `request_data` request a response from a node specified by *port*. 
 | State for Techage Machines | 129         | -                      | [num]                   | RUNNING = 1, BLOCKED = 2,<br /> STANDBY = 3, NOPOWER = 4,<br />FAULT = 5, STOPPED = 6,<br />UNLOADED = 7, INACTIVE = 8 |
 | Signal Tower Color         | 130         | -                      | [num]                   | OFF = 0, GREEN = 1, AMBER = 2, RED = 3                       |
 | Chest State                | 131         | -                      | [num]                   | State of a TA3/TA4 chest or Sensor Chest<br />EMPTY = 0, LOADED = 1, FULL = 2 |
+| TA4 Button State           | 131         | -                      | [num]                   | OFF = 0, ON = 1                                              |
 | Fuel Level                 | 132         | -                      | [num]                   | Fuel level of a fuel consuming block (0..65535)              |
 | Quarry Depth               | 133         | -                      | [num]                   | Current depth value of a quarry block (1..80)                |
 | Load Percent               | 134         | [1]                    | [num]                   | Load value in percent  (0..100) of a tank, silo, accu, fuelcell, or battery block. |
@@ -240,7 +241,7 @@ The function `request_data` request a response from a node specified by *port*. 
 Signal tower on port #1:
 
 ```c
-import "ta_iom.c"
+import "lib/techage.c"
 
 func init() {
 }
@@ -264,8 +265,8 @@ func loop() {
 Example to play a sound with Sound Block on port #0:
 
 ```c
-import "ta_iom.c"
-import "stdlib.asm"
+import "sys/stdlib.asm"
+import "lib/techage.c"
 
 const CMD_SOUND_BLOCK = 14;
 const CMD_START_STOP = 1;
@@ -290,8 +291,8 @@ func loop() {
 The same example in compact form (based on octal strings):
 
 ```c
-import "ta_iom.c"
-import "stdlib.asm"
+import "sys/stdlib.asm"
+import "lib/techage.c"
 
 func init() {
   send_cmnd(0, 14, "\002\044"); // select sound file
@@ -311,14 +312,16 @@ func loop() {
  Example to read the machine state on port #2:
 
 ```c
-import "ta_iom.c"
-import "stdio.asm"
-import "stdlib.asm"
+import "sys/stdio.asm"
+import "sys/stdlib.asm"
+import "lib/techage.c"
 
 var response[1];
 
 func init() {
   var sts;
+
+  setstdout(1);  // use terminal windows for stdout
 
   sts = request_data(2, 129, 0, response);
   if(sts == 0) {
@@ -327,6 +330,7 @@ func init() {
     putstr("err ");
     putnum(sts);
   }
+  putstr("\n");
 }
 
 func loop() {

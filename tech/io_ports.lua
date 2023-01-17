@@ -8,12 +8,13 @@
 	AGPL v3
 	See LICENSE.txt for more information
 
-	I(O port handling I/O modules
+	I/O port handling I/O modules
 
 ]]--
 
 -- for lazy programmers
 local H = minetest.hash_node_position
+local NUM_PORTS = 16
 
 -- Port is a I/O module local number (0..7)
 
@@ -21,79 +22,56 @@ local NodeInfo = {}    -- [pos_hash][port] = {....}
 local Num2port = {}
 local Port2num = {}
 
-function beduino.tech.set_input(nvm, port, val)
-	if port and port < 8 then
-		nvm.input = nvm.input or {}
-		nvm.input[port] = val
+local function get_node_name(dest_num)
+	local info = beduino.tech.get_node_info(dest_num)
+	if info then
+		local ndef = minetest.registered_nodes[info.name]
+		return ndef and ndef.description
 	end
 end
 
-function beduino.tech.get_input(nvm, port)
-	if port and port < 8 then
-		nvm.input = nvm.input or {}
-		return nvm.input[port] or 0
-	end
-end
-
-function beduino.tech.set_output(nvm, port, val)
-	if port and port < 8 then
-		nvm.output = nvm.output or {}
-		if nvm.output[port] ~= val then
-			nvm.output[port] = val
-			return true
-		end
-	end
-end
-
-function beduino.tech.get_output(nvm, port)
-	if port and port < 8 then
-		nvm.output = nvm.output or {}
-		return nvm.output[port] or 0
-	end
-end
-
--- techage/tubelib like numbers
-function beduino.tech.add_node_data(pos, port, number)
-	if port and port < 8 then
-		local hash = H(pos)
+-- techage like numbers
+function beduino.tech.add_number_port_relation(cpu_pos, port, own_num, dest_num)
+	--print("add_number_port_relation", port, own_num, dest_num)
+	if port and port < NUM_PORTS then
+		local hash = H(cpu_pos)
 		Num2port[hash] = Num2port[hash] or {}
 		Port2num[hash] = Port2num[hash] or {}
 		NodeInfo[hash] = NodeInfo[hash] or {}
 
-		if number and number:match("[%d]+") then
-			Num2port[hash][number] = port
-			Port2num[hash][port] = number
-			local info = beduino.tech.get_node_info(number)
-			if info then
-				local ndef = minetest.registered_nodes[info.name]
-				if ndef and ndef.description then
-					NodeInfo[hash][port] = {pos = pos, name = ndef.description}
-				end
+		if dest_num and dest_num:match("[%d]+") then
+			Num2port[hash][dest_num] = port
+			Port2num[hash][port] = {own_num = own_num, dest_num = dest_num}
+			local name = get_node_name(dest_num)
+			if name then
+				NodeInfo[hash][port] = {pos = cpu_pos, name = name}
 			end
 		end
 	end
 end
 
-function beduino.tech.get_node_data(pos, port)
-	local hash = H(pos)
+function beduino.tech.get_node_name(cpu_pos, port, dest_num)
+	local hash = H(cpu_pos)
 	NodeInfo[hash] = NodeInfo[hash] or {}
-	return NodeInfo[hash][port]
+	return NodeInfo[hash][port] or get_node_name(dest_num)
 end
 
-function beduino.tech.get_node_number(pos, port)
-	local hash = H(pos)
+function beduino.tech.get_node_numbers(cpu_pos, port)
+	local hash = H(cpu_pos)
 	Port2num[hash] = Port2num[hash] or {}
-	return Port2num[hash][port]
+	if Port2num[hash][port] then
+		return Port2num[hash][port].own_num, Port2num[hash][port].dest_num
+	end
 end
 
-function beduino.tech.get_node_port(pos, number)
-	local hash = H(pos)
+function beduino.tech.get_node_port(cpu_pos, number)
+	local hash = H(cpu_pos)
 	Num2port[hash] = Num2port[hash] or {}
 	return Num2port[hash][number]
 end
 
-function beduino.tech.reset_node_data(pos)
-	local hash = H(pos)
+function beduino.tech.reset_node_data(cpu_pos)
+	local hash = H(cpu_pos)
 	NodeInfo[hash] = {}
 	Num2port[hash] = {}
 	Port2num[hash] = {}

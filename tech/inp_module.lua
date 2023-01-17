@@ -8,7 +8,7 @@
 	AGPL v3
 	See LICENSE.txt for more information
 
-	Input block
+	Input block to collect and pass on received techage commands
 
 ]]--
 
@@ -21,9 +21,12 @@ local S2P = function(s) return minetest.string_to_pos(s) end
 local lib = beduino.lib
 local tech = beduino.tech
 
-local DESCRIPTION = "Beduino Input Module"
+local MP = minetest.get_modpath("beduino")
+local fs = dofile(MP.."/tech/fs_lib.lua")
 
-local BaseAddr2Idx = {[0]=1, [8]=2, [16]=3, [24]=4, [32]=5, [40]=6, [48]=7, [56]=8}
+----------------------------------------------------------------------
+-- Event queue
+----------------------------------------------------------------------
 local Events = {}
 
 local function set_event(cpu_pos, inp_port)
@@ -42,6 +45,11 @@ local function get_event(cpu_pos)
 	end
 end
 
+----------------------------------------------------------------------
+-- Node definition
+----------------------------------------------------------------------
+fs.DESCRIPTION = "Beduino Input Module"
+
 local function on_input(pos, address)
 	local baseaddr = M(pos):get_int("baseaddr")
 	--print("on_input", baseaddr, address)
@@ -54,87 +62,23 @@ local function on_input(pos, address)
 	return 65535
 end
 
-local function on_output(pos, address, value)
-end
-
-local function formspec_place(pos)
-	local baseaddr = M(pos):get_int("baseaddr")
-	local val = BaseAddr2Idx[baseaddr] or 0
-
-	return "size[4,2]"..
-		"label[0.1,0.0;I/O base port:]"..
-		"dropdown[0.1,0.6;1.5;baseaddr;0,8,16,24,32,40,48,56;"..val.."]"..
-		"button_exit[2.0,0.55;2,1;exit;Save]"
-end
-
-local function formspec_use(pos)
-	local baseaddr = M(pos):get_int("baseaddr")
-	local nvm = tech.get_nvm(pos)
-	local val = nvm.input_val or "-"
-
-	return "size[5,3]"..
-		"real_coordinates[true]"..
-		"label[0.5,0.8;Input Port:]"..
-		"label[3.5,0.8;#" .. baseaddr .. "]"..
-		"label[0.5,1.4;Input value:]"..
-		"label[3.5,1.4;" .. val .. "]"..
-		"button[1.0,2;3.0,0.8;update;Update]"
-end
-
 local function on_init_io(pos, cpu_pos)
 	local meta = M(pos)
-	meta:set_int("running", 0)
 	meta:set_string("cpu_pos", P2S(cpu_pos))
+	fs.store_port_number_relation(pos)
 	local baseaddr = meta:get_int("baseaddr")
-	beduino.register_input_address(pos, cpu_pos, baseaddr, on_input)
-	beduino.register_output_address(pos, cpu_pos, baseaddr, on_output)
+	for addr = baseaddr, baseaddr + 7 do
+		beduino.register_input_address(pos, cpu_pos, addr, on_input)
+	end
 	return baseaddr
 end
 
 local function on_start_io(pos, cpu_pos)
-	local nvm = tech.get_nvm(pos)
-	nvm.input_val = nil
-end
-
-local function store_settings(pos, meta, fields)
-	local numbers = {}
-	local labels = {}
-	for i = 0,7 do
-		numbers[i] = fields["num"..i]
-		labels[i] = fields["lbl"..i]
-	end
-	meta:set_string("numbers", T2S(numbers))
-	meta:set_string("labels", T2S(labels))
-end
-
-local function on_receive_fields(pos, formname, fields, player)
-	if not player or minetest.is_protected(pos, player:get_player_name()) then
-		return
-	end
-
-	local meta = M(pos)
-	local nvm = tech.get_nvm(pos)
-	if fields.update then
-		meta:set_string("formspec", formspec_use(pos))
-	elseif fields.exit and fields.baseaddr then
-		local baseaddr = tonumber(fields.baseaddr) or 1
-		meta:set_int("baseaddr", baseaddr)
-		lib.infotext(meta, DESCRIPTION)
-		meta:set_string("formspec", formspec_use(pos))
-	end
-end
-
-local function on_rightclick(pos, node, clicker, itemstack, pointed_thing)
-	if not clicker or minetest.is_protected(pos, clicker:get_player_name()) then
-		return
-	end
-	if M(pos):contains("baseaddr") then
-		M(pos):set_string("formspec", formspec_use(pos))
-	end
+	fs.store_port_number_relation(pos)
 end
 
 minetest.register_node("beduino:inp_module", {
-	description = DESCRIPTION,
+	description = fs.DESCRIPTION,
 	inventory_image = "beduino_inp_inventory.png",
 	wield_image = "beduino_inp_inventory.png",
 	tiles = {
@@ -156,27 +100,26 @@ minetest.register_node("beduino:inp_module", {
 	after_place_node = function(pos, placer)
 		local meta = M(pos)
 		local own_num = tech.add_node(pos, "beduino:inp_module")
-		meta:set_string("node_number", own_num)  -- for techage
-		meta:set_string("own_number", own_num)  -- for tubelib
+		meta:set_string("node_number", own_num)
 		meta:set_string("owner", placer:get_player_name())
-		lib.infotext(meta, DESCRIPTION)
-		meta:set_string("formspec", formspec_place(pos))
+		lib.infotext(meta, fs.DESCRIPTION)
+		meta:set_string("formspec", fs.formspec_place(pos))
 	end,
 	after_dig_node = function(pos)
 		local meta = M(pos)
 		tech.reset_node_data(pos)
 		local cpu_pos = S2P(meta:get_string("cpu_pos"))
 		local baseaddr = meta:get_int("baseaddr")
-		for addr = baseaddr, baseaddr + 8 do
+		for addr = baseaddr, baseaddr + 7 do
 			beduino.unregister_address(pos, cpu_pos, addr)
 		end
 		tech.del_mem(pos)
 	end,
 
-	on_receive_fields = on_receive_fields,
+	on_receive_fields = fs.on_receive_fields,
 	on_init_io = on_init_io,
 	on_start_io = on_start_io,
-	on_rightclick = on_rightclick,
+	on_rightclick = fs.on_rightclick,
 
 	paramtype = "light",
 	use_texture_alpha = "clip",
@@ -195,14 +138,20 @@ beduino.tech.register_node({"beduino:inp_module"}, {
 		end
 		local nvm = tech.get_nvm(pos)
 		if not nvm.input_val then
-			nvm.input_val = lib.get_num_cmnd(topic) or tonumber(topic) or 0
+			nvm.input_val = topic == "on" and 1 or 0
 			local baseaddr = M(pos):get_int("baseaddr")
 			local cpu_pos = S2P(M(pos):get_string("cpu_pos"))
 			set_event(cpu_pos, baseaddr)
 		end
 	end,
+	on_node_load = function(pos)
+		fs.store_port_number_relation(pos)
+	end,
 })
 
+----------------------------------------------------------------------
+-- System calls
+----------------------------------------------------------------------
 local function sys_get_event(cpu_pos, address, regA, regB, regC)
 	return get_event(cpu_pos) or 0xffff
 end

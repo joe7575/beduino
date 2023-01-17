@@ -112,8 +112,9 @@ func seg14_putstr(base_port, s) {
 local example1_c = [[
 // Output some characters on the
 // programmer status line (system #0).
+// Start program with: "Debug" -> "Run"
+
 import "sys/stdlib.asm"
-import "lib/ta_iom.c"
 
 const MAX = 32;
 
@@ -135,23 +136,33 @@ func loop() {
 ]]
 
 local example2_c = [[
-// Read button on input #0 and
-// control signal tower on output #1.
-import "lib/ta_cmnd.c"
-import "lib/ta_iom.c"
+// Read button on port #0 and
+// control signal tower on port #1.
+
+import "lib/techage.c"
+
+const OFF = 0;
+const COLOR = 2;
+const STATE = 131;
+const GREEN = 1;
 
 static var idx = 0;
 
 func init() {
-  output(1, IO_OFF);
+  send_cmnd(1, COLOR, OFF);
 }
 
 func loop() {
-  if(input(0) == 1) {
-    output(1, IO_GREEN + idx);
+  var resp;
+  var data;
+  var sts = request_data(0, STATE, "\000", &resp);
+
+  if((sts == 0) and (resp == 1)) {
+    data = GREEN + idx;
     idx = (idx + 1) % 3;
+    send_cmnd(1, COLOR, &data);
   } else {
-    output(1, 0);
+    send_cmnd(1, COLOR, OFF);
   }
 }
 ]]

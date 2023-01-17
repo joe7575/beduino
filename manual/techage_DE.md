@@ -24,34 +24,27 @@ findest du hier: https://github.com/joe7575/beduino/wiki
 
 ## I/O Modul
 
-Jedes I/O Modul benötigt eine eigene Basisadresse.
-Von der Basisadresse abgeleitet besitzt jedes I/O Modul 8 Ports zu den techage Blöcken.
-Es können bis zu 8 I/O Module pro Controller verwendet werden.
-Für jeden Port muss die techage Block-Adresse eingegeben werden.
-Sind die Adressen korrekt eingegeben, wird unter Description der Blockname angezeigt.
+Der Hauptzweck eines I/O-Moduls besteht darin, Techage-Blocknummern in Beduino-Portnummern umzuwandeln und umgekehrt. Dies ist notwendig, da Beduino-Nummern nur einen begrenzten Bereich von 0 bis 65535 haben und Techage-Blocknummern viel größer sein können.
 
-Der I/O Block hat ein Hilfe-Menü, welches einige techage Kommandos zeigt,
-die direkt genutzt werden können, wie bspw.:
+Jedes I/O Modul benötigt eine eigene Basis-Portnummer. Von der Basis-Portnummer abgeleitet besitzt jedes I/O Modul 8 Ports zu den techage Blöcken.
+
+Es können bis zu 8 I/O Module pro Controller verwendet werden.
+
+Um eine Verbindung von einem Techage Block zum I/O Modul herzustellen, muss die Techage Block Nummer im Menü des I/O Moduls eingegeben werden. Ist die Techage Block Nummer korrekt eingegeben, wird unter Description der Blockname angezeigt.
+
+Um mit Techage-Blöcken zu kommunizieren, unterstützt das I/O-Modul die folgenden Befehle:
 
 ```c
-val = input(2);           // Einlesen eines Wertes von Port #2
-output(0, IO_ON);         // Einschalten eines Blockes am Port #0
-output(1, IO_GREEN);      // Signal Tower am Port #1 auf grün stellen
-sts = read(3, IO_STATE);  // Einlesen eines Maschinen Status
+// Sende ein Kommando zu einem techage Block
+send_cmnd(port, topic, payload);
+
+// Lese Daten von einem techage Block
+request_data(port, topic, payload, resp);
 ```
 
-`input(port)` liest nur den Wert vom Port. Dazu muss bspw. ein Schalter
-mit dem I/O Modul verbunden werden (beide Nummern gegenseitig eintragen).
-`read(port, IO_STATE)` fordert dagegen den Status von der Maschine an.
+Für Details siehe [Beduino commands](https://github.com/joe7575/beduino/blob/main/BEPs/bep-005_ta_cmnd.md).
 
-Jedes Signal, das an ein I/O Modul gesendet wird, löst auf dem Controller
-einen Event aus. Events können über die Funktion `event()` abgefragt werden.
-Liefert die Funktion den Wert `1` zurück, wurden ein oder mehrere Signale empfangen.
-Der Aufruf von `event()` setzt das Event-Flag zurück.
-
-
-
-## Input Modul
+# Input Modul
 
 Auch jedes Input Modul benötigt eine eigene Basisadresse,
 hat aber nur einen Port, an dem alle eingehenden Kommandos ankommen.
