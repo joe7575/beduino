@@ -24,7 +24,6 @@ local tech = beduino.tech
 local RAM_SIZE = 3
 local DESC = "Beduino IOT Sensor"
 
-local NodeNumbers = {}
 local Cache = {} -- used for CPU intermediate results
 
 local Info = [[
@@ -41,28 +40,25 @@ https://github.com/joe7575/vm16/wiki
 ]]
 
 ----------------------------------------------------------------------
+-- Input handling
+----------------------------------------------------------------------
+local Input = {}
+
+local function set_input(cpu_pos, value)
+	local hash = H(cpu_pos)
+	Input[hash] = value
+end
+
+local function get_input(cpu_pos)
+	local hash = H(cpu_pos)
+	return Input[hash] or 0
+end
+
+----------------------------------------------------------------------
 -- system call handling
 ----------------------------------------------------------------------
-local function get_number(cpu_pos, port)
-	assert(cpu_pos and port)
-	local hash = H(cpu_pos)
-	NodeNumbers[hash] = NodeNumbers[hash] or {}
-	if NodeNumbers[hash][port] then
-		return NodeNumbers[hash][port]
-	end
-end
-
--- dummy function, only needed for the function 'read(...)'
 local function on_input(cpu_pos, port)
-	print("on_input", port)
-	return Cache[H(cpu_pos)] or 0xffff
-end
-
-local function on_output(cpu_pos, port, value)
-	print("on_output", port, value)
-	local meta = M(cpu_pos)
-	local dest_num = get_number(cpu_pos, port)
-	Cache[H(cpu_pos)] = techage.beduino_send_cmnd(0, dest_num, value, nil)
+	return get_input(cpu_pos) or 0xffff
 end
 
 local function sys_resp_buff(cpu_pos, address, regA, regB, regC)
@@ -72,7 +68,7 @@ end
 
 -- regA = port, regB = topic, regC = payload
 local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
-	local dest_num = get_number(cpu_pos, regA)
+	local own_num, dest_num = tech.get_node_numbers(cpu_pos, regA)
 	if dest_num then
 		local topic = regB
 		local payload
@@ -82,7 +78,7 @@ local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
 			payload = vm16.read_mem(cpu_pos, regC, 8)
 		end
 		techage.counting_add(M(cpu_pos):get_string("owner"), 1)
-		return techage.beduino_send_cmnd(0, dest_num, topic, payload)
+		return techage.beduino_send_cmnd(own_num, dest_num, topic, payload)
 	end
 	return 1
 end
@@ -90,11 +86,11 @@ end
 -- regA = port, regB = topic, regC = payload
 -- response adress in Cache
 local function sys_request_data(cpu_pos, address, regA, regB, regC)
-	local dest_num = get_number(cpu_pos, regA)
+	local own_num, dest_num = tech.get_node_numbers(cpu_pos, regA)
 	if dest_num then
 		local topic = regB
 		local payload = vm16.read_mem(cpu_pos, regC, 8)
-		local sts, resp = techage.beduino_request_data(0, dest_num, topic, payload)
+		local sts, resp = techage.beduino_request_data(own_num, dest_num, topic, payload)
 		local resp_addr = Cache[H(cpu_pos)]
 		if sts == 0 and resp and resp_addr and resp_addr ~= 0 then
 			if type(resp) == "table" then
@@ -146,28 +142,24 @@ local Wall2Facedir = {
 	[23] = 17,
 }
 
-local function get_node_number(pos, num, sides, param2)
+local function get_node_number(pos, sides, param2)
 	local pos2 = networks.get_relpos(pos, sides, param2)
-	--networks.set_marker(pos2, num, 1.1, 2)
 	return tech.determine_node_number(pos2)
 end
 
 local function find_io_nodes(cpu_pos)
-	local hash = H(cpu_pos)
 	local node = minetest.get_node(cpu_pos)
 	local param2 = Wall2Facedir[node.param2] or node.param2
-
-	NodeNumbers[hash] = {}
-	NodeNumbers[hash][0] = get_node_number(cpu_pos, 0, "B",  param2)
-	NodeNumbers[hash][1] = get_node_number(cpu_pos, 1, "BU", param2)
-	NodeNumbers[hash][2] = get_node_number(cpu_pos, 2, "BR", param2)
-	NodeNumbers[hash][3] = get_node_number(cpu_pos, 3, "BD", param2)
-	NodeNumbers[hash][4] = get_node_number(cpu_pos, 4, "BL", param2)
-	print("NodeNumbers[hash]", dump(NodeNumbers[hash]))
+	local own_num = M(cpu_pos):get_string("node_number")
+	
+	tech.add_number_port_relation(cpu_pos, 0, own_num, get_node_number(cpu_pos, "B",   param2))
+	tech.add_number_port_relation(cpu_pos, 1, own_num, get_node_number(cpu_pos, "BU",  param2))
+	tech.add_number_port_relation(cpu_pos, 2, own_num, get_node_number(cpu_pos, "BR",  param2))
+	tech.add_number_port_relation(cpu_pos, 3, own_num, get_node_number(cpu_pos, "BD",  param2))
+	tech.add_number_port_relation(cpu_pos, 4, own_num, get_node_number(cpu_pos, "BL",  param2))
 end
 
 local function on_init_cpu(cpu_pos)
-	local hash = H(cpu_pos)
 	local out = {}
 
 	out[#out + 1] = "The Controller has:"
@@ -177,20 +169,17 @@ local function on_init_cpu(cpu_pos)
 	out[#out + 1] = "The Controller is connected to:"
 
 	local default = " - nothing yet"
-	for idx, number in pairs(NodeNumbers[hash] or {}) do
-		local info = tech.get_node_info(number)
-		if info then
-			local ndef = minetest.registered_nodes[info.name]
-			if ndef then
-				table.insert(out, string.format(" - #%u: %s (%s)", idx, ndef.description, number))
-				default = nil
-			end
+	for port = 0,4 do
+		local own_num, dest_num = tech.get_node_numbers(cpu_pos, port)
+		if dest_num then
+			local name = tech.get_node_name(cpu_pos, port, dest_num)
+			table.insert(out, string.format(" - #%u: %s (%s)", port, name, dest_num))
+			default = nil
 		end
 	end
 	table.insert(out, default)
 	return table.concat(out, "\n")
 end
-
 
 ----------------------------------------------------------------------
 -- CPU definition
@@ -215,8 +204,6 @@ local cpu_def = {
 	},
 	-- Called for each 'input' instruction.
 	on_input = on_input,
-	-- Called for each 'output' instruction.
-	on_output = on_output,
 	-- Called for each 'system' instruction.
 	on_system = on_system,
 	-- Called when CPU stops.
@@ -239,11 +226,11 @@ local cpu_def = {
 		return RAM_SIZE
 	end,
 	on_start = function(pos)
-		M(pos):set_string("infotext", DESC .. " (running)")
+		lib.infotext(M(pos), DESC, "(running)")
 		M(pos):set_int("running", 1)
 	end,
 	on_stop = function(pos)
-		M(pos):set_string("infotext", DESC .. " (stopped)")
+		lib.infotext(M(pos), DESC, "(stopped)")
 		M(pos):set_int("running", 0)
 	end,
 	on_check_connection = function(pos)
@@ -310,8 +297,10 @@ minetest.register_node("beduino:iot_sensor", {
 	on_place = on_place,
 	after_place_node = function(pos, placer)
 		local meta = M(pos)
-		meta:set_string("infotext", DESC)
+		local own_num = tech.add_node(pos, "beduino:io_module")
+		meta:set_string("node_number", own_num)
 		meta:set_string("owner", placer:get_player_name())
+		lib.infotext(meta, DESC)
 		swap_node_depending_on_aligment(pos)
 		find_io_nodes(pos)
 	end,
@@ -398,16 +387,19 @@ minetest.register_node("beduino:iot_sensor3", {
 	drop = "beduino:iot_sensor",
 })
 
-minetest.register_lbm({
-	label = "Beduino Load IOT Sensor",
-	name = "beduino:load_iott_sensor",
-	nodenames = {"beduino:iot_sensor", "beduino:iot_sensor2", "beduino:iot_sensor3"},
-	run_at_every_load = true,
-	action = function(pos, node)
+beduino.tech.register_node({"beduino:iot_sensor", "beduino:iot_sensor2", "beduino:iot_sensor3"}, {
+	on_recv_message = function(pos, src, topic, payload)
+		if tech.tubelib then
+			pos, src, topic = pos, topic, src
+		end
+		local val = tonumber(topic) or topic == "on" and 1 or 0
+		set_input(pos, val)
+	end,
+	on_node_load = function(pos)
 		find_io_nodes(pos)
 		local prog_pos = S2P(M(pos):get_string("prog_pos"))
 		if M(pos):get_int("running") == 1 then
 			vm16.load_cpu(pos, prog_pos, cpu_def)
 		end
-	end
+	end,
 })

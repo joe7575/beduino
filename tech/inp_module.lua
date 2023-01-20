@@ -138,7 +138,7 @@ beduino.tech.register_node({"beduino:inp_module"}, {
 		end
 		local nvm = tech.get_nvm(pos)
 		if not nvm.input_val then
-			nvm.input_val = topic == "on" and 1 or 0
+			nvm.input_val = tonumber(topic) or topic == "on" and 1 or 0
 			local baseaddr = M(pos):get_int("baseaddr")
 			local cpu_pos = S2P(M(pos):get_string("cpu_pos"))
 			set_event(cpu_pos, baseaddr)
