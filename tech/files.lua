@@ -17,11 +17,10 @@ local lib = beduino.lib
 if minetest.global_exists("techage") then
 
 local techage_c = [[
-func event() {
-  var ptr = 2;
-  var res = *ptr;
-  *ptr = 0;
-  return res;
+// Read port number of the next Input Module port that
+// received a command.
+func get_next_inp_port() {
+  system(0x100, 0);
 }
 
 // Send a command to a techage block
@@ -55,7 +54,7 @@ func write_line(port, row, text) {
 
 local seg14_c = [[
 import "sys/string.asm"
-import "lib/ta_iom.c"
+import "lib/techage.c"
 
 static var Chars[] = {
   0x2237, 0x0A8F, 0x0039, 0x088F, 0x2039, 0x2031, 0x023D, 0x2236,
@@ -136,49 +135,60 @@ func loop() {
 ]]
 
 local example2_c = [[
-// Read button on port #0 and
-// control signal tower on port #1.
+// Read button on port #0,
+// light detector on port #1 and
+// control signal tower on port #2.
 
 import "lib/techage.c"
 
 const OFF = 0;
 const COLOR = 2;
 const STATE = 131;
+const LIGHT = 143;
 const GREEN = 1;
+const P_SWITCH = 0;
+const P_DETECT = 1;
+const P_STOWER = 2;
 
 static var idx = 0;
 
 func init() {
-  send_cmnd(1, COLOR, OFF);
+  send_cmnd(P_STOWER, COLOR, OFF);
 }
 
 func loop() {
   var resp;
-  var data;
-  var sts = request_data(0, STATE, "\000", &resp);
+  var color;
+  var sts = request_data(P_SWITCH, STATE, 0, &resp); // Read switch
 
   if((sts == 0) and (resp == 1)) {
-    data = GREEN + idx;
-    idx = (idx + 1) % 3;
-    send_cmnd(1, COLOR, &data);
+    sts = request_data(P_DETECT, LIGHT, 0, &resp);  // Read detector
+   
+    if((sts == 0) and (resp < 10)) { // turn on at night
+      color = GREEN + idx;
+      idx = (idx + 1) % 3;
+      send_cmnd(P_STOWER, COLOR, &color);
+    } else {
+      send_cmnd(P_STOWER, COLOR, OFF);
+    }
   } else {
-    send_cmnd(1, COLOR, OFF);
+    send_cmnd(P_STOWER, COLOR, OFF);
   }
 }
 ]]
 
 local example3_c = [[
-// SmartLine Display/Player Detector example
-// Connect detector to port #0 and display to port #1
-// The detector event is used to read the detector input
-// and output the player name to the display (row 3)
+// SmartLine Display/Player Detector example.
+// Connect detector to port #0 and display to port #1.
+// If the detector is "on", read and output the player
+// name to the display (row 3).
 
-import "sys/stdlib.asm"
-import "sys/string.asm"
-import "lib/ta_cmnd.c"
-import "lib/ta_iom.c"
+import "lib/techage.c"
 
-static var buff[80];
+const STATE = 142;
+const PLAYER = 144;
+
+static var buff[32];
 
 func init() {
   clear_screen(1);
@@ -188,14 +198,14 @@ func init() {
 func loop() {
   var sts;
 
-  if(event()) {
-    if(input(0) == 1) {
-      request_tas_data(0, "name", "", buff);
-      write_line(1, 3, buff);
-    } else {
-      write_line(1, 3, "~");
-    }
+  sts = request_data(0, STATE, 0, buff);
+  if((sts == 0) and (buff[0] == 1)) {
+    request_data(0, PLAYER, 0, buff);
+    write_line(1, 3, buff);
+  } else {
+    write_line(1, 3, "~");
   }
+  sleep(5);
 }
 ]]
 
@@ -203,8 +213,7 @@ local example4_c = [[
 // Block/machine state example
 // Output the block state on the signal tower
 // Connect block to port #0 and tower to port #1
-import "lib/ta_cmnd.c"
-import "lib/ta_iom.c"
+import "lib/techage.c"
 
 func init() {
   output(1, IO_OFF);

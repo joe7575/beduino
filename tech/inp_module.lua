@@ -46,20 +46,27 @@ local function get_event(cpu_pos)
 end
 
 ----------------------------------------------------------------------
+-- Input handling
+----------------------------------------------------------------------
+local function set_input(pos, port, value)
+	local nvm = tech.get_nvm(pos)
+	nvm.inputs = nvm.inputs or {}
+	nvm.inputs[port] = value
+end
+
+local function get_input(pos, port)
+	local nvm = tech.get_nvm(pos)
+	nvm.inputs = nvm.inputs or {}
+	return nvm.inputs[port] or 0
+end
+
+----------------------------------------------------------------------
 -- Node definition
 ----------------------------------------------------------------------
 fs.DESCRIPTION = "Beduino Input Module"
 
-local function on_input(pos, address)
-	local baseaddr = M(pos):get_int("baseaddr")
-	--print("on_input", baseaddr, address)
-	if baseaddr == address then
-		local nvm = tech.get_nvm(pos)
-		local resp = nvm.input_val
-		nvm.input_val = nil
-		return resp or 65535
-	end
-	return 65535
+local function on_input(pos, port)
+	return get_input(pos, port)
 end
 
 local function on_init_io(pos, cpu_pos)
@@ -105,6 +112,7 @@ minetest.register_node("beduino:inp_module", {
 		lib.infotext(meta, fs.DESCRIPTION)
 		meta:set_string("formspec", fs.formspec_place(pos))
 	end,
+	
 	after_dig_node = function(pos)
 		local meta = M(pos)
 		tech.reset_node_data(pos)
@@ -132,16 +140,16 @@ minetest.register_node("beduino:inp_module", {
 
 beduino.register_io_nodes({"beduino:inp_module"})
 beduino.tech.register_node({"beduino:inp_module"}, {
-	on_recv_message = function(pos, src, topic, payload)
+	on_recv_message = function(pos, src_num, topic, payload)
 		if tech.tubelib then
-			pos, src, topic = pos, topic, src
+			pos, src_num, topic = pos, topic, src_num
 		end
-		local nvm = tech.get_nvm(pos)
-		if not nvm.input_val then
-			nvm.input_val = tonumber(topic) or topic == "on" and 1 or 0
-			local baseaddr = M(pos):get_int("baseaddr")
-			local cpu_pos = S2P(M(pos):get_string("cpu_pos"))
-			set_event(cpu_pos, baseaddr)
+		local val = tonumber(topic) or topic == "on" and 1 or 0
+		local cpu_pos = S2P(M(pos):get_string("cpu_pos"))
+		local port = tech.get_node_port(cpu_pos, src_num)
+		if port then
+			set_input(pos, port, val)
+			set_event(cpu_pos, port)
 		end
 	end,
 	on_node_load = function(pos)
@@ -152,8 +160,8 @@ beduino.tech.register_node({"beduino:inp_module"}, {
 ----------------------------------------------------------------------
 -- System calls
 ----------------------------------------------------------------------
-local function sys_get_event(cpu_pos, address, regA, regB, regC)
+local function sys_event(cpu_pos, address, regA, regB, regC)
 	return get_event(cpu_pos) or 0xffff
 end
 
-lib.register_SystemHandler(0x108, sys_get_event)
+lib.register_SystemHandler(0x100, sys_event)

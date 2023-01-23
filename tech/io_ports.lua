@@ -14,7 +14,6 @@
 
 -- for lazy programmers
 local H = minetest.hash_node_position
-local NUM_PORTS = 16
 
 -- Port is a I/O module local number (0..7)
 
@@ -33,7 +32,7 @@ end
 -- techage like numbers
 function beduino.tech.add_number_port_relation(cpu_pos, port, own_num, dest_num)
 	print("add_number_port_relation", port, own_num, dest_num)
-	if port and port < NUM_PORTS then
+	if port then
 		local hash = H(cpu_pos)
 		Num2port[hash] = Num2port[hash] or {}
 		Port2num[hash] = Port2num[hash] or {}

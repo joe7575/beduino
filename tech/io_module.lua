@@ -128,10 +128,13 @@ local function sys_request_data(cpu_pos, address, regA, regB, regC)
 		local sts, resp = techage.beduino_request_data(own_num, dest_num, topic, payload)
 		local resp_addr = RespAddr[H(cpu_pos)]
 		if sts == 0 and resp and resp_addr and resp_addr ~= 0 then
-			if type(resp) == "table" then
+			if type(resp) == "number" then
+				vm16.poke(cpu_pos, resp_addr, resp)
+			elseif type(resp) == "table" then
 				vm16.write_mem(cpu_pos, resp_addr, resp)
 			else
-				vm16.write_ascii_16(cpu_pos, resp_addr, resp .. "\0")
+				resp = string.sub(resp .. "\0", 1, 32)
+				vm16.write_ascii_16(cpu_pos, resp_addr, resp)
 			end
 		end
 		return sts

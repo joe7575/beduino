@@ -49,6 +49,11 @@ local function store_settings(pos, meta, fields)
 	meta:set_string("labels", T2S(labels))
 end
 
+local function input_value(cpu_pos, port)
+	local nvm = tech.get_nvm(cpu_pos)
+	return nvm.inputs and nvm.inputs[port] or "-"
+end
+
 function lib.formspec_place(pos)
 	local baseaddr = M(pos):get_int("baseaddr")
 	local val = BaseAddr2Idx[baseaddr] or 0
@@ -60,39 +65,47 @@ function lib.formspec_place(pos)
 end
 
 function lib.formspec_use(pos)
-	local numbers = S2T(M(pos):get_string("numbers"))
-	local labels  = S2T(M(pos):get_string("labels"))
-	local baseaddr = M(pos):get_int("baseaddr")
+	local meta = M(pos)
+	local numbers = S2T(meta:get_string("numbers"))
+	local labels  = S2T(meta:get_string("labels"))
+	local baseaddr = meta:get_int("baseaddr")
 	local nvm = tech.get_nvm(pos)
 	local lines = {}
 	local buttons = ""
+	local has_inputs = nvm.in_use and minetest.get_node(pos).name == "beduino:inp_module"
+	local desc_posX = has_inputs and "6.5" or "5.0"
 	local tab = nvm.in_use and 1 or 2
 	if not nvm.in_use then
 		buttons = "button[6.7,8.6;3.5,1.0;save;Save]"
+	elseif has_inputs then
+		buttons = "button[6.7,8.6;3.5,1.0;update;Update]"
 	end
 
 	for i = 0,7 do
 		local y = i * 0.8 + 1
-		lines[#lines+1] = "label[0.5,"..y..";#"..S(i + baseaddr).."]"
+		lines[#lines+1] = "label[0.5," .. y .. ";#" .. S(i + baseaddr) .. "]"
 		if nvm.in_use then
-			lines[#lines+1] = "label[2.3,"..y..";"..S(numbers[i]).."]"
-			lines[#lines+1] = "label[5.0,"..y..";"..get_node_name(pos, labels[i], i, numbers[i]).."]"
+			lines[#lines+1] = "label[2.3," .. y .. ";" .. S(numbers[i]) .. "]"
+			if has_inputs then
+				lines[#lines+1] = "label[4.8," .. y .. ";" .. input_value(pos, i + baseaddr) .. "]"
+			end
+			lines[#lines+1] = "label[" .. desc_posX .. ","..y..";"..get_node_name(pos, labels[i], i, numbers[i]).."]"
 		else
-			lines[#lines+1] = "field[2.3,"..(y-0.3)..";2.3,0.7;num"..S(i)..";;"..S(numbers[i]).."]"
-			lines[#lines+1] = "field[5.0,"..(y-0.3)..";4.9,0.7;lbl"..S(i)..";;"..S(labels[i]).."]"
+			lines[#lines+1] = "field[2.3," .. (y-0.3) .. ";2.3,0.7;num" .. S(i) .. ";;" .. S(numbers[i]) .. "]"
+			lines[#lines+1] = "field[5.0," .. (y-0.3) .. ";5.9,0.7;lbl" .. S(i) .. ";;" .. S(labels[i]) .. "]"
 		end
 	end
 
-	return "size[11,10]"..
-		"real_coordinates[true]"..
-		"tabheader[0,0;tab;I/O,config;" .. tab .. ";;true]"..
-		"container[0.3,1]"..
-		"box[0.2,0.5;12,6.7;#333]"..
-		"label[0.5,0;Port]"..
-		"label[2.3,0;Number]"..
-		"label[5.0,0;Description]"..
-		table.concat(lines)..
-		"container_end[]"..
+	return "size[12,10]"..
+		"real_coordinates[true]" ..
+		"tabheader[0,0;tab;I/O,config;" .. tab .. ";;true]" ..
+		"container[0.3,1]" ..
+		"label[0.5,0;Port]" ..
+		"label[2.3,0;Number]" ..
+		(has_inputs and "label[4.8,0;Input]" or "") ..
+		"label[" .. desc_posX .. ",0;Description]" ..
+		table.concat(lines) ..
+		"container_end[]" ..
 		buttons
 end
 
@@ -103,8 +116,9 @@ function lib.store_port_number_relation(pos)
 	local numbers = S2T(meta:get_string("numbers"))
 	local baseaddr = meta:get_int("baseaddr")
 	
-	for port = baseaddr, baseaddr + 7 do
-		tech.add_number_port_relation(cpu_pos, port, own_num, numbers[port])
+	for i = 0, 7 do
+		local port = i + baseaddr
+		tech.add_number_port_relation(cpu_pos, port, own_num, numbers[i])
 	end
 end
 

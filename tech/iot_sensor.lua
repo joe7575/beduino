@@ -42,23 +42,23 @@ https://github.com/joe7575/vm16/wiki
 ----------------------------------------------------------------------
 -- Input handling
 ----------------------------------------------------------------------
-local Input = {}
-
-local function set_input(cpu_pos, value)
-	local hash = H(cpu_pos)
-	Input[hash] = value
+local function set_input(cpu_pos, port, value)
+	local nvm = tech.get_nvm(cpu_pos)
+	nvm.inputs = nvm.inputs or {}
+	nvm.inputs[port] = value
 end
 
-local function get_input(cpu_pos)
-	local hash = H(cpu_pos)
-	return Input[hash] or 0
+local function get_input(cpu_pos, port)
+	local nvm = tech.get_nvm(cpu_pos)
+	nvm.inputs = nvm.inputs or {}
+	return nvm.inputs[port] or 0
 end
 
 ----------------------------------------------------------------------
 -- system call handling
 ----------------------------------------------------------------------
 local function on_input(cpu_pos, port)
-	return get_input(cpu_pos) or 0xffff
+	return get_input(cpu_pos, port)
 end
 
 local function sys_resp_buff(cpu_pos, address, regA, regB, regC)
@@ -172,6 +172,7 @@ local function on_init_cpu(cpu_pos)
 	for port = 0,4 do
 		local own_num, dest_num = tech.get_node_numbers(cpu_pos, port)
 		if dest_num then
+			beduino.register_input_address(cpu_pos, cpu_pos, port, on_input)
 			local name = tech.get_node_name(cpu_pos, port, dest_num)
 			table.insert(out, string.format(" - #%u: %s (%s)", port, name, dest_num))
 			default = nil
@@ -388,12 +389,15 @@ minetest.register_node("beduino:iot_sensor3", {
 })
 
 beduino.tech.register_node({"beduino:iot_sensor", "beduino:iot_sensor2", "beduino:iot_sensor3"}, {
-	on_recv_message = function(pos, src, topic, payload)
+	on_recv_message = function(pos, src_num, topic, payload)
 		if tech.tubelib then
-			pos, src, topic = pos, topic, src
+			pos, src_num, topic = pos, topic, src_num
 		end
 		local val = tonumber(topic) or topic == "on" and 1 or 0
-		set_input(pos, val)
+		local port = tech.get_node_port(pos, src_num)
+		if port then
+			set_input(pos, port, val)
+		end
 	end,
 	on_node_load = function(pos)
 		find_io_nodes(pos)
