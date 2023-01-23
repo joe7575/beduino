@@ -8,7 +8,7 @@
 	AGPL v3
 	See LICENSE.txt for more information
 
-   Beduino Controller / CPU
+	Beduino Controller / CPU
 
 ]]--
 
@@ -288,7 +288,11 @@ minetest.register_node("beduino:controller", {
 		if player and minetest.is_protected(pos, player:get_player_name()) then
 			return
 		end
-		start_cpu(pos)
+		if fields.reset then
+			local prog_pos = S2P(M(pos):get_string("prog_pos"))
+			start_cpu(pos)
+			vm16.cpu_started(prog_pos, pos)
+		end
 	end,
 	after_dig_node = function(pos)
 		local prog_pos = S2P(M(pos):get_string("prog_pos"))

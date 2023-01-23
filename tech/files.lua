@@ -14,8 +14,6 @@
 
 local lib = beduino.lib
 
-if minetest.global_exists("techage") then
-
 local techage_c = [[
 // Read port number of the next Input Module port that
 // received a command.
@@ -210,28 +208,29 @@ func loop() {
 ]]
 
 local example4_c = [[
-// Block/machine state example
-// Output the block state on the signal tower
-// Connect block to port #0 and tower to port #1
+// Read input ports from one or more
+// Input Modules and output the data to 
+// the Programmer's internal terminal.
+
+import "sys/stdio.asm"
 import "lib/techage.c"
 
 func init() {
-  output(1, IO_OFF);
+  setstdout(1);  // use terminal windows for stdout
+  putchar('\b'); // clear entire screen
 }
 
 func loop() {
-  var sts = read(0, IO_STATE);
-  if(sts > IO_FAULT) {
-    output(1, IO_OFF);
-  }
-  else if(sts > IO_STANDBY) {
-    output(1, IO_RED);
-  }
-  else if(sts > IO_RUNNING) {
-    output(1, IO_AMBER);
-  }
-  else {
-    output(1, IO_GREEN);
+  var port;
+  var val;
+
+  port = get_next_inp_port();
+  if(port != 0xffff) {
+    val = input(port);
+    putnum(port);
+    putstr(" = ");
+    putnum(val);
+    putchar('\n');
   }
 }
 ]]
@@ -295,223 +294,9 @@ loop:
 
 vm16.register_ro_file("beduino", "lib/techage.c",   techage_c)
 vm16.register_ro_file("beduino", "lib/seg14.c",     seg14_c)
---vm16.register_ro_file("beduino", "lib/ta_cmnd.c",  lib.get_command_file())
 vm16.register_ro_file("beduino", "demo/example1.c", example1_c)
 vm16.register_ro_file("beduino", "demo/example2.c", example2_c)
 vm16.register_ro_file("beduino", "demo/example3.c", example3_c)
 vm16.register_ro_file("beduino", "demo/example4.c", example4_c)
 vm16.register_ro_file("beduino", "demo/example5.c", example5_c)
 vm16.register_ro_file("beduino", "demo/example1.asm", example1_asm)
-
-elseif minetest.global_exists("tubelib") then
-
-local iom_c = [[
-func event() {
-  var ptr = 2;
-  var res = *ptr;
-  *ptr = 0;
-  return res;
-}
-
-func read(port, cmnd) {
-  output(port, cmnd);
-  return input(port);
-}
-
-func send_cmnd(address, ident, add_data) {
-  system(0x120, address, ident, add_data);
-}
-
-func request_data(address, ident, add_data, resp) {
-  system(0x121, address, resp);
-  system(0x122, address, ident, add_data);
-}
-
-func clear_screen(address) {
-  system(0x123, address);
-}
-
-func append_line(address, text) {
-  system(0x124, address, text);
-}
-
-func write_line(address, row, text) {
-  system(0x125, address, row, text);
-}
-]]
-
-local example1_c = [[
-// Output some characters on the
-// programmer status line (system #0).
-import "sys/stdlib.asm"
-import "lib/tp_iom.c"
-
-const MAX = 32;
-
-func bin_to_ascii(i) {
-  return 0x40 + i;
-}
-
-func init() {
-  var i;
-
-  for(i = 0; i < MAX; i++) {
-    system(0, bin_to_ascii(i));
-  }
-}
-
-func loop() {
-  halt(); // abort execution
-}
-]]
-
-local example2_c = [[
-// Read button on input #0 and
-// control signal tower on output #1.
-import "lib/tp_cmnd.c"
-import "lib/tp_iom.c"
-
-static var idx = 0;
-
-func init() {
-  output(1, IO_OFF);
-}
-
-func loop() {
-  if(input(0) == 1) {
-    output(1, IO_GREEN + idx);
-    idx = (idx + 1) % 3;
-  } else {
-    output(1, 0);
-  }
-}
-]]
-
-local example3_c = [[
-// SmartLine Display/Player Detector example
-// Connect detector to port #0 and display to port #1
-// The detector event is used to read the detector input
-// and output the player name to the display (row 5)
-
-import "sys/stdlib.asm"
-import "sys/string.asm"
-import "lib/tp_cmnd.c"
-import "lib/tp_iom.c"
-
-static var buff[80];
-
-func init() {
-  clear_screen(1);
-  write_line(1, 3, "Hello");
-}
-
-func loop() {
-  var sts;
-
-  if(event()) {
-    if(input(0) == 1) {
-      request_tas_data(0, "name", "", buff);
-      write_line(1, 5, buff);
-    } else {
-      write_line(1, 5, "~");
-    }
-  }
-}
-]]
-
-local example4_c = [[
-// Block/machine state example
-// Output the block state on the signal tower
-// Connect block to port #0 and tower to port #1
-import "lib/tp_cmnd.c"
-import "lib/tp_iom.c"
-
-func init() {
-  output(1, IO_OFF);
-}
-
-func loop() {
-  var sts = read(0, IO_STATE);
-  if(sts == IO_STOPPED) {
-    output(1, IO_OFF);
-  }
-  else if(sts > IO_STANDBY) {
-    output(1, IO_RED);
-  }
-  else if(sts > IO_RUNNING) {
-    output(1, IO_AMBER);
-  }
-  else {
-    output(1, IO_GREEN);
-  }
-}
-]]
-
-local example5_c = [[
-// Programmer Terminal Window example
-import "sys/stdio.asm"
-import "sys/os.c"
-
-func timerstamp() {
-    putchar('[');
-    putnumf(get_day_count());
-    putchar(':');
-    putnumf(get_timeofday());
-    putchar('] ');
-}
-
-func init() {
-  setstdout(1);  // use terminal windows for stdout
-  putchar('\b'); // clear entire screen
-  putstr("+----------------------------------------------------------+\n");
-  putstr("|                Terminal Window Demo V1.0                 |\n");
-  putstr("+----------------------------------------------------------+\n");
-  putstr("\n");
-}
-
-func loop() {
-    timerstamp();
-    putstr("Something strange happend!\n");
-    sleep(10);
-    timerstamp();
-    putstr("These Romans are crazy!\n");
-    sleep(10);
-    timerstamp();
-    putstr("Cogito, ergo sum!\n");
-    sleep(10);
-    timerstamp();
-    putstr("Lorem ipsum dolor sit amet, consetetur sadipscing elitr.\n");
-    sleep(10);
-}
-]]
-
-local example1_asm = [[
-; Read button on IOM port #0 and
-; turn on/off lamp on port #1.
-
-  jump 8
-  .org 8       ; the first 8 words are reserved
-
-loop:
-  nop          ; 100 ms delay
-  nop          ; 100 ms delay
-  in   A, #0   ; read switch value
-  skne  A, B   ; data changed?
-  jump loop    ; no change: read again
-
-  move B, A    ; store value in B
-  out  #01, A  ; output value
-  jump loop
-]]
-
-
-vm16.register_ro_file("beduino", "lib/tp_iom.c",   iom_c)
-vm16.register_ro_file("beduino", "lib/tp_cmnd.c",  lib.get_command_file())
-vm16.register_ro_file("beduino", "demo/example1.c", example1_c)
-vm16.register_ro_file("beduino", "demo/example2.c", example2_c)
-vm16.register_ro_file("beduino", "demo/example3.c", example3_c)
-vm16.register_ro_file("beduino", "demo/example4.c", example4_c)
-vm16.register_ro_file("beduino", "demo/example5.c", example5_c)
-vm16.register_ro_file("beduino", "demo/example1.asm", example1_asm)
-
-end

@@ -3,7 +3,7 @@
 	Beduino
 	=======
 
-	Copyright (C) 2022 Joachim Stolberg
+	Copyright (C) 2022-2023 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
@@ -31,7 +31,6 @@ end
 
 -- techage like numbers
 function beduino.tech.add_number_port_relation(cpu_pos, port, own_num, dest_num)
-	print("add_number_port_relation", port, own_num, dest_num)
 	if port then
 		local hash = H(cpu_pos)
 		Num2port[hash] = Num2port[hash] or {}

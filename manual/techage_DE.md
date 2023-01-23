@@ -8,29 +8,38 @@ Um Beduino nutzen zu können, sind Grundkenntnisse in Programmiersprachen von Vo
 Beduino ist komplett in die Mod Techage integriert und
 kann alternativ zum Lua-Controller verwendet werden.
 
-Weiter Hinweise zu Beduino, der Programmiersprache und den techage Kommandos
+Weitere Hinweise zu Beduino, der Programmiersprache und den techage Kommandos
 findest du hier: https://github.com/joe7575/beduino/wiki
 
 [beduino_controller|image]
 
 ## Erste Schritte
 
-- Crafte die vier Blöcke "VM16 Programmer", "VM16 File Server", "Beduino Controller" und "Beduino I/O Module"
+- Crafte die vier Blöcke "VM16 Programmer", "VM16 File Server", "Beduino Controller"
+  und "Beduino I/O Module"
 - Platziere Controller und I/O Modul neben- oder übereinander (maximaler Abstand sind 3 Blöcke)
-- Beim  I/O Modul muss eine Basisadresse eingegeben werden
+- Beim  I/O Modul muss eine Basis-Port-Nummer eingegeben werden
 - Platziere den Server irgendwo
-- Paare den Programmer mit Server und Controller, indem du mit dem Programmer auf beide Blöcke klickst
-- Zuletzt platziere den Programmierer vor dem Controller (in Wirklichkeit kann der Programmierer überall platziert werden, da er bereits durch das Pairing mit dem Controller verbunden ist)
+- Paare den Programmer mit Server und Controller, indem du mit dem Programmer auf
+  beide Blöcke klickst
+- Zuletzt platziere den Programmierer vor dem Controller (in Wirklichkeit kann der
+  Programmierer überall platziert werden, da er bereits durch das Pairing mit dem
+  Controller verbunden ist)
 
 ## I/O Modul
 
-Der Hauptzweck eines I/O-Moduls besteht darin, Techage-Blocknummern in Beduino-Portnummern umzuwandeln und umgekehrt. Dies ist notwendig, da Beduino-Nummern nur einen begrenzten Bereich von 0 bis 65535 haben und Techage-Blocknummern viel größer sein können.
+Der Hauptzweck eines I/O-Moduls besteht darin, Techage-Blocknummern in Beduino-Portnummern
+umzuwandeln und umgekehrt. Dies ist notwendig, da Beduino-Nummern nur einen begrenzten
+Bereich von 0 bis 65535 haben und Techage-Blocknummern viel größer sein können.
 
-Jedes I/O Modul benötigt eine eigene Basis-Portnummer. Von der Basis-Portnummer abgeleitet besitzt jedes I/O Modul 8 Ports zu den techage Blöcken.
+Jedes I/O Modul benötigt eine eigene Basis-Portnummer. Von der Basis-Portnummer abgeleitet
+besitzt jedes I/O Modul 8 Ports zu den techage Blöcken.
 
 Es können bis zu 8 I/O Module pro Controller verwendet werden.
 
-Um eine Verbindung von einem Techage Block zum I/O Modul herzustellen, muss die Techage Block Nummer im Menü des I/O Moduls eingegeben werden. Ist die Techage Block Nummer korrekt eingegeben, wird unter Description der Blockname angezeigt.
+Um eine Verbindung von einem Techage Block zum I/O Modul herzustellen, muss die
+Techage Block Nummer im Menü des I/O Moduls eingegeben werden. Ist die Techage Block Nummer
+korrekt eingegeben, wird unter Description der Blockname angezeigt.
 
 Um mit Techage-Blöcken zu kommunizieren, unterstützt das I/O-Modul die folgenden Befehle:
 
@@ -46,35 +55,25 @@ Für Details siehe [Beduino commands](https://github.com/joe7575/beduino/blob/ma
 
 # Input Modul
 
-Auch jedes Input Modul benötigt eine eigene Basisadresse,
-hat aber nur einen Port, an dem alle eingehenden Kommandos ankommen.
-Dies hat den Vorteil, dass vom Beduino Controller aus nur ein Port abgefragt werden muss.
+Input Module dienen nur zum Empfang von Kommandos anderer Techage Blöcke (Schalter, Detektoren, usw.).
 
-Das erste empfangene Kommando wird vom Modul gespeichert und ein Event
-wird an den Beduino Controller ausgelöst. Events können über die 
-Funktion `event()` abgefragt werden.
+Jedes Input Modul benötigt eine eigene Basis-Portnummer. Von der Basis-Portnummer abgeleitet besitzt
+jedes Input Modul wieder 8 Ports zu den techage Blöcken.
 
-Alle weiteren Kommandos werden solange verworfen, bis der Wert vom 
-Beduino Controller über `input()` ausgelesen und das Input-Register damit gelöscht wurde.
+Die Ports sind notwendig, um Techage-Blocknummern in Beduino-Portnummern umzuwandeln. 
+Dies ist notwendig, da Beduino-Nummern nur einen begrenzten Bereich von 0 bis 65535 haben
+und Techage-Blocknummern viel größer sein können.
 
-Der Aufruf von `event()` setzt das Event-Flag zurück.
+Zusätzlich wird bei Empfang eines Kommandos ein Event mit der Port-Nummer an die CPU gesendet.
 
-
-
-## Techage Kommandos
-
-Für komplexere Kommandos zur Steuerung von techage Maschinen dienen
-folgende Kommandos. Auch hierfür muss eine Verbindung vom I/O Modul
-zum techage Block vorhanden sein, da für die Addressierung immer
-auch ein Port benötigt wird:
+Damit kann von Controller sehr einfach abgefragt werden, ob Kommandos empfangen wurden:
 
 ```c
-send_cmnd(port, topic, payload);
-request_data(port, topic, payload, resp);
+port = get_next_inp_port();  // Read next port number
+if(port != 0xffff) {
+    val = input(port);       // Read input value
+    ...
+}
 ```
 
-- *port* ist die I/O Modul Port Nummer
-- *topic* ist eine Nummer aus der Liste der [Beduino Kommandos](https://github.com/joe7575/beduino/blob/main/BEPs/bep-005_ta_cmnd.md)
-- *payload* ist je nach Kommando ein Array oder ein String mit zusätzlichen Informationen Werden keine zusätzlichen Kommandos benötigt, kann "" angegeben werden
-- *resp* ist ein Array für die Antwortdaten. Das Array muss groß genug definiert werden, so dass es die Antwortdaten aufnehmen kann
-
+Der Controller speichert bis zu 8 Events von bis zu 16 Input Modulen mit jeweils bis zu 8 belegten Ports.
