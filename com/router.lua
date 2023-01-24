@@ -147,7 +147,6 @@ local function after_dig_node(pos, oldnode, oldmetadata, digger)
 	local my_addr = tonumber(oldmetadata.fields.my_addr) or 0
 	lib.del_filter_address(pos, my_addr)
 	MsgQue[my_addr] = nil
-	MsgCnt[my_addr] = nil
 end
 
 local function on_receive_fields(pos, formname, fields, player)

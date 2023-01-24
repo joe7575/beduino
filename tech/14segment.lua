@@ -96,7 +96,7 @@ register_segment("beduino:14segment3", "beduino_segment_bg2.png")
 
 beduino.tech.register_node({"beduino:14segment1", "beduino:14segment2", "beduino:14segment3"}, {
 	on_recv_message = function(pos, src, topic, payload)
-		if pdp13.tubelib then
+		if tech.tubelib then
 			pos, src, topic, payload = pos, "000", src, topic
 		end
 		if topic == "value" then

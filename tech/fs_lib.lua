@@ -32,7 +32,7 @@ local function get_node_name(pos, lbl, port, dest_num)
 	if lbl and lbl ~= "" and lbl ~= "-" then
 		return lbl
 	end
-	if port then
+	if port and dest_num and tonumber(dest_num) then
 		return tech.get_node_name(pos, port, dest_num) or "-"
 	end
 	return "-"
