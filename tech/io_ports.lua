@@ -31,7 +31,7 @@ end
 
 -- techage like numbers
 function beduino.tech.add_number_port_relation(cpu_pos, port, own_num, dest_num)
-	if port then
+	if port and cpu_pos then
 		local hash = H(cpu_pos)
 		Num2port[hash] = Num2port[hash] or {}
 		Port2num[hash] = Port2num[hash] or {}

@@ -146,11 +146,9 @@ beduino.tech.register_node({"beduino:inp_module"}, {
 		end
 		local val = tonumber(topic) or topic == "on" and 1 or 0
 		local cpu_pos = S2P(M(pos):get_string("cpu_pos"))
-		local port = tech.get_node_port(cpu_pos, src_num)
-		if port then
-			set_input(pos, port, val)
-			set_event(cpu_pos, port)
-		end
+		local port = tech.get_node_port(cpu_pos, src_num) or M(pos):get_int("baseaddr")
+		set_input(pos, port, val)
+		set_event(cpu_pos, port)
 	end,
 	on_node_load = function(pos)
 		fs.store_port_number_relation(pos)
