@@ -5,9 +5,10 @@
 ![screenshot](https://github.com/joe7575/beduino/blob/main/screenshot.png)
 
 Beduino is a 16-bit microcontroller and development environment with
-editor, file system, compiler, assembler, and debugger based on the mod vm16. The controller can be programmed in a C like language.
+editor, file system, compiler, assembler, and debugger based on the mod vm16. 
+The controller can be programmed in a C like language.
 
-Beside vm16, the mod has no dependencies. However, it comes with an I/O modules for techpack.
+Beside vm16, the mod has no dependencies. However, it comes with I/O modules for techage.
 
 Support for other technology related games or mods is possible.
 

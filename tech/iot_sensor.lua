@@ -151,7 +151,7 @@ local function find_io_nodes(cpu_pos)
 	local node = minetest.get_node(cpu_pos)
 	local param2 = Wall2Facedir[node.param2] or node.param2
 	local own_num = M(cpu_pos):get_string("node_number")
-	
+
 	tech.add_number_port_relation(cpu_pos, 0, own_num, get_node_number(cpu_pos, "B",   param2))
 	tech.add_number_port_relation(cpu_pos, 1, own_num, get_node_number(cpu_pos, "BU",  param2))
 	tech.add_number_port_relation(cpu_pos, 2, own_num, get_node_number(cpu_pos, "BR",  param2))

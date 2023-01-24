@@ -19,7 +19,7 @@ techage.add_to_manual('DE', {
   "\n",
   "  - Crafte die vier Blöcke \"VM16 Programmer\"\\, \"VM16 File Server\"\\, \"Beduino Controller\"\nund \"Beduino I/O Module\"\n"..
   "  - Platziere Controller und I/O Modul neben- oder übereinander (maximaler Abstand sind 3 Blöcke)\n"..
-  "  - Beim  I/O Modul muss eine Basis-Port-Nummer eingegeben werden\n"..
+  "  - Beim I/O Modul muss eine Basis-Port-Nummer eingegeben werden\n"..
   "  - Platziere den Server irgendwo\n"..
   "  - Paare den Programmer mit Server und Controller\\, indem du mit dem Programmer auf\nbeide Blöcke klickst\n"..
   "  - Zuletzt platziere den Programmierer vor dem Controller (in Wirklichkeit kann der\nProgrammierer überall platziert werden\\, da er bereits durch das Pairing mit dem\nController verbunden ist)\n"..
@@ -45,9 +45,9 @@ techage.add_to_manual('DE', {
   "    // Lese Daten von einem techage Block\n"..
   "    request_data(port\\, topic\\, payload\\, resp)\\;\n"..
   "\n"..
-  "Für Details siehe Beduino commands.\n"..
+  "Für Details siehe Techage Funktionen.\n"..
   "\n",
-  "Input Module dienen nur zum Empfang von Kommandos anderer Techage Blöcke (Schalter\\, Detektoren\\, usw.).\n"..
+  "Input Module dienen zum Empfang von Kommandos anderer Techage Blöcke (Schalter\\, Detektoren\\, usw.).\n"..
   "\n"..
   "Jedes Input Modul benötigt eine eigene Basis-Portnummer. Von der Basis-Portnummer abgeleitet besitzt\n"..
   "jedes Input Modul wieder 8 Ports zu den techage Blöcken.\n"..
@@ -56,9 +56,9 @@ techage.add_to_manual('DE', {
   "Dies ist notwendig\\, da Beduino-Nummern nur einen begrenzten Bereich von 0 bis 65535 haben\n"..
   "und Techage-Blocknummern viel größer sein können.\n"..
   "\n"..
-  "Zusätzlich wird bei Empfang eines Kommandos ein Event mit der Port-Nummer an die CPU gesendet.\n"..
+  "Zusätzlich wird bei Empfang eines Kommandos ein Event mit der Port-Nummer an den Controller gesendet.\n"..
   "\n"..
-  "Damit kann von Controller sehr einfach abgefragt werden\\, ob Kommandos empfangen wurden:\n"..
+  "Damit kann vom Controller sehr einfach abgefragt werden\\, ob Kommandos empfangen wurden:\n"..
   "\n"..
   "    port = get_next_inp_port()\\;  // Read next port number\n"..
   "    if(port != 0xffff) {\n"..

@@ -115,7 +115,7 @@ function lib.store_port_number_relation(pos)
 	local own_num = meta:get_string("node_number")
 	local numbers = S2T(meta:get_string("numbers"))
 	local baseaddr = meta:get_int("baseaddr")
-	
+
 	for i = 0, 7 do
 		local port = i + baseaddr
 		tech.add_number_port_relation(cpu_pos, port, own_num, numbers[i])

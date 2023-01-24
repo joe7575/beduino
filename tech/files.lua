@@ -161,7 +161,7 @@ func loop() {
 
   if((sts == 0) and (resp == 1)) {
     sts = request_data(P_DETECT, LIGHT, 0, &resp);  // Read detector
-   
+
     if((sts == 0) and (resp < 10)) { // turn on at night
       color = GREEN + idx;
       idx = (idx + 1) % 3;
@@ -209,7 +209,7 @@ func loop() {
 
 local example4_c = [[
 // Read input ports from one or more
-// Input Modules and output the data to 
+// Input Modules and output the data to
 // the Programmer's internal terminal.
 
 import "sys/stdio.asm"

@@ -47,7 +47,7 @@ see [VM16 Instruction Set](https://github.com/joe7575/vm16/blob/master/doc/intro
 - Place the programmer in front of the controller (in reality, the programmer can be
   placed anywhere since it is already connected).
 - Open the programmer menu and press the "Init" button. This will initialize the
-  controller and connect any existing I/O module to the controller.
+  controller and connect any existing I/O modules to the controller.
 - Open the file "demo/example1.c" with a double-click on the file name. 
 - Translate the example into machine language with the button "Debug" and start
   the program with "Run". The program will send some ASCII characters to the
@@ -147,7 +147,7 @@ using memory chips.
 
 The highlighted line with the ">>" marker is the current code line to be executed next. 
 
-You can new single-step through the program with the "Step" button. After several steps,
+You can single-step through the program with the "Step" button. After several steps,
 you see the value of your variable 'i' in hexadecimal and decimal notation.
 
 You can set a breakpoint with a double-click on a code line. Breakpoints are highlighted

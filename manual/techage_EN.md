@@ -48,20 +48,20 @@ send_cmnd(port, topic, payload);
 request_data(port, topic, payload, resp);
 ```
 
-See [Beduino commands](https://github.com/joe7575/beduino/blob/main/BEPs/bep-005_ta_cmnd.md) for details.
+See [Techage Functions](https://github.com/joe7575/beduino/blob/main/manual/techage.md). for details.
 
 ## Input Module
 
-Input modules are only used to receive commands from other techage blocks (switches, detectors, etc.).
+Input modules are used to receive commands from other techage blocks (switches, detectors, etc.).
 
 Each input module requires its own base port number. Derived from the base port number
-each input module again 8 ports to the techage blocks.
+each input module has 8 ports to the techage blocks.
 
 The ports are necessary to convert Techage block numbers to Beduino port numbers.
 This is necessary because Beduino numbers only have a limited range from 0 to 65535
 and Techage block numbers can be much larger.
 
-In addition, when a command is received, an event with the port number is sent to the CPU.
+In addition, when a command is received, an event with the port number is sent to the controller.
 
 This makes it very easy for the controller to query whether commands have been received:
 

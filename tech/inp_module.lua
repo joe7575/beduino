@@ -112,7 +112,7 @@ minetest.register_node("beduino:inp_module", {
 		lib.infotext(meta, fs.DESCRIPTION)
 		meta:set_string("formspec", fs.formspec_place(pos))
 	end,
-	
+
 	after_dig_node = function(pos)
 		local meta = M(pos)
 		tech.reset_node_data(pos)

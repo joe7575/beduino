@@ -18,7 +18,7 @@ findest du hier: https://github.com/joe7575/beduino/wiki
 - Crafte die vier Blöcke "VM16 Programmer", "VM16 File Server", "Beduino Controller"
   und "Beduino I/O Module"
 - Platziere Controller und I/O Modul neben- oder übereinander (maximaler Abstand sind 3 Blöcke)
-- Beim  I/O Modul muss eine Basis-Port-Nummer eingegeben werden
+- Beim I/O Modul muss eine Basis-Port-Nummer eingegeben werden
 - Platziere den Server irgendwo
 - Paare den Programmer mit Server und Controller, indem du mit dem Programmer auf
   beide Blöcke klickst
@@ -51,11 +51,11 @@ send_cmnd(port, topic, payload);
 request_data(port, topic, payload, resp);
 ```
 
-Für Details siehe [Beduino commands](https://github.com/joe7575/beduino/blob/main/BEPs/bep-005_ta_cmnd.md).
+Für Details siehe [Techage Funktionen](https://github.com/joe7575/beduino/blob/main/manual/techage.md).
 
 # Input Modul
 
-Input Module dienen nur zum Empfang von Kommandos anderer Techage Blöcke (Schalter, Detektoren, usw.).
+Input Module dienen zum Empfang von Kommandos anderer Techage Blöcke (Schalter, Detektoren, usw.).
 
 Jedes Input Modul benötigt eine eigene Basis-Portnummer. Von der Basis-Portnummer abgeleitet besitzt
 jedes Input Modul wieder 8 Ports zu den techage Blöcken.
@@ -64,9 +64,9 @@ Die Ports sind notwendig, um Techage-Blocknummern in Beduino-Portnummern umzuwan
 Dies ist notwendig, da Beduino-Nummern nur einen begrenzten Bereich von 0 bis 65535 haben
 und Techage-Blocknummern viel größer sein können.
 
-Zusätzlich wird bei Empfang eines Kommandos ein Event mit der Port-Nummer an die CPU gesendet.
+Zusätzlich wird bei Empfang eines Kommandos ein Event mit der Port-Nummer an den Controller gesendet.
 
-Damit kann von Controller sehr einfach abgefragt werden, ob Kommandos empfangen wurden:
+Damit kann vom Controller sehr einfach abgefragt werden, ob Kommandos empfangen wurden:
 
 ```c
 port = get_next_inp_port();  // Read next port number

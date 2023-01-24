@@ -1,6 +1,6 @@
 | Author     | Version | Status   | Modified    |
 | ---------- | ------- | -------- | ----------- |
-| J.Stolberg | 0.5     | Proposal | 16 Jan 2023 |
+| J.Stolberg | 0.6     | Proposal | 24 Jan 2023 |
 
 
 
@@ -8,26 +8,7 @@
 
 ### Send Command / Trigger Action
 
-```c
-sts = send_cmnd(port, topic, payload);
-```
-
-The function `send_cmnd` sends a command to the node specified by *port* .
-
-- *port* is the I/O module port number
-- *topic* specifies the command. *topic* is a numeric value.
-- *payload* is used for additional data. If not needed, you can provide an empty string (`""`).
-  - *topic* < 64: *payload* is an array
-  - *topic* >= 64:  *payload* is a string
-
-`send_cmnd` returns:
-
-- `0` if successful
-- `1` if destination is unknown
-- `2` if *topic* or *payload*  is unknown or invalid
-- `3` if command failed for other reasons
-
-
+See [Techage related functions](https://github.com/joe7575/beduino/blob/main/manual/techage.md).
 
 | Command                  | Topic (num) | Payload (array/string) | Remarks                                                      |
 | ------------------------ | ----------- | ---------------------- | ------------------------------------------------------------ |
@@ -79,24 +60,7 @@ The function `send_cmnd` sends a command to the node specified by *port* .
 
 ### Request Data
 
-```c
-sts = request_data(port, topic, payload, response);
-```
-
-The function `request_data` request a response from a node specified by *port*. The response is return by reference in form of an array or string.
-
-- *port* is the I/O module port number
-
-- *topic* specifies the data to be read. *Topic* is a numeric value.
-- *payload* is an array and is used for additional data. If not needed, you can provide `NULL`.
-- *response* is a buffer for the result. It is returned as array or as string (see table below).
-
-`request_data` returns:
-
-- `0` if successful
-- `1` if destination is unknown
-- `2` if *topic* or *payload*  is unknown or invalid
-- `3` if command failed for other reasons
+See [Techage related functions](https://github.com/joe7575/beduino/blob/main/manual/techage.md).
 
 | Command                    | Topic (num) | Payload (array/string) | Response (array/string) | Remarks to the response                                      |
 | -------------------------- | ----------- | ---------------------- | ----------------------- | ------------------------------------------------------------ |
@@ -228,113 +192,4 @@ The function `request_data` request a response from a node specified by *port*. 
 | pdp13:14segment | 16 |
 | pdp13:7segment | 15 |
 
-
-
-### Examples
-
-> **Note**
->
-> Octal strings can be used as alternative to an array: `"\001\002"` corresponds to `{1, 2}`
-
-#### Signal Tower
-
-Signal tower on port #1:
-
-```c
-import "lib/techage.c"
-
-func init() {
-}
-
-func loop() {
-  send_cmnd(1, 2, "\000");  // off
-  sleep(5);                 // sleep 5 cycles
-  send_cmnd(1, 2, "\001");  // green
-  sleep(5);
-  send_cmnd(1, 2, "\002");  // amber
-  sleep(5);
-  send_cmnd(1, 2, "\003");  // red
-  sleep(5);
-}
-```
-
-
-
-#### Sound Block
-
-Example to play a sound with Sound Block on port #0:
-
-```c
-import "sys/stdlib.asm"
-import "lib/techage.c"
-
-const CMD_SOUND_BLOCK = 14;
-const CMD_START_STOP = 1;
-
-var sound[] = {2, 36};
-var volume[] = {1, 5};
-var start[] = {1};
-
-func init() {
-  send_cmnd(0, CMD_SOUND_BLOCK, sound);
-  send_cmnd(0, CMD_SOUND_BLOCK, volume);
-  send_cmnd(0, CMD_START_STOP,  start);
-}
-
-func loop() {
-  halt();
-}
-```
-
-
-
-The same example in compact form (based on octal strings):
-
-```c
-import "sys/stdlib.asm"
-import "lib/techage.c"
-
-func init() {
-  send_cmnd(0, 14, "\002\044"); // select sound file
-  send_cmnd(0, 14, "\001\005"); // set volume
-  send_cmnd(0, 1,  "\001");     // play sound
-}
-
-func loop() {
-  halt();
-}
-```
-
-
-
-#### Machine State
-
- Example to read the machine state on port #2:
-
-```c
-import "sys/stdio.asm"
-import "sys/stdlib.asm"
-import "lib/techage.c"
-
-var response[1];
-
-func init() {
-  var sts;
-
-  setstdout(1);  // use terminal windows for stdout
-
-  sts = request_data(2, 129, 0, response);
-  if(sts == 0) {
-    putnum(response[0]);
-  } else{
-    putstr("err ");
-    putnum(sts);
-  }
-  putstr("\n");
-}
-
-func loop() {
-  halt();
-}
-```
 

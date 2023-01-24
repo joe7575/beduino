@@ -45,18 +45,18 @@ techage.add_to_manual('EN', {
   "    // Read data from a techage block\n"..
   "    request_data(port\\, topic\\, payload\\, resp)\\;\n"..
   "\n"..
-  "See Beduino commands for details.\n"..
+  "See Techage Functions. for details.\n"..
   "\n",
-  "Input modules are only used to receive commands from other techage blocks (switches\\, detectors\\, etc.).\n"..
+  "Input modules are used to receive commands from other techage blocks (switches\\, detectors\\, etc.).\n"..
   "\n"..
   "Each input module requires its own base port number. Derived from the base port number\n"..
-  "each input module again 8 ports to the techage blocks.\n"..
+  "each input module has 8 ports to the techage blocks.\n"..
   "\n"..
   "The ports are necessary to convert Techage block numbers to Beduino port numbers.\n"..
   "This is necessary because Beduino numbers only have a limited range from 0 to 65535\n"..
   "and Techage block numbers can be much larger.\n"..
   "\n"..
-  "In addition\\, when a command is received\\, an event with the port number is sent to the CPU.\n"..
+  "In addition\\, when a command is received\\, an event with the port number is sent to the controller.\n"..
   "\n"..
   "This makes it very easy for the controller to query whether commands have been received:\n"..
   "\n"..
