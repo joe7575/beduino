@@ -89,7 +89,7 @@ minetest.register_node("beduino:io_module", {
 })
 
 beduino.register_io_nodes({"beduino:io_module"})
-beduino.tech.register_node({"beduino:inp_module"}, {
+beduino.tech.register_node({"beduino:io_module"}, {
 	on_node_load = function(pos)
 		fs.store_port_number_relation(pos)
 	end,
