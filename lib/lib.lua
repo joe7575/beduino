@@ -120,10 +120,7 @@ end
 ----------------------------------------------------------------------------------
 function beduino.lib.infotext(meta, descr, text)
 	local own_num = meta:get_string("node_number") or ""
-	local numbers = meta:get_string("numbers") or ""
-	if numbers ~= "" then
-		meta:set_string("infotext", descr .. " " .. own_num .. ": " .. "connected to " .. numbers)
-	elseif text then
+	if text then
 		meta:set_string("infotext", descr .. " " .. own_num .. ": " .. text)
 	else
 		meta:set_string("infotext", descr .. " " .. own_num)

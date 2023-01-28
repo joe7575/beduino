@@ -173,7 +173,7 @@ local function preserve_metadata(pos, oldnode, oldmetadata, drops)
 	if oldmetadata.my_addr then
 		local meta = drops[1]:get_meta()
 		meta:set_int("my_addr", oldmetadata.my_addr)
-		meta:set_string("description", DESCRIPTION .. " #" .. oldmetadata.my_addr)
+		meta:set_string("description", DESCRIPTION .. " @" .. oldmetadata.my_addr)
 	end
 end
 
@@ -187,7 +187,7 @@ local function after_place_node(pos, placer, itemstack, pointed_thing)
 		local my_addr = meta:get_int("my_addr")
 		lib.claim_address(pos, my_addr)
 	end
-	meta:set_string("infotext", DESCRIPTION .. " #" .. M(pos):get_int("my_addr"))
+	meta:set_string("infotext", DESCRIPTION .. " @" .. M(pos):get_int("my_addr"))
 	meta:set_string("formspec", formspec(pos))
 	meta:set_string("beduino_address_list", "-")
 end

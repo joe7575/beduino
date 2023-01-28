@@ -79,8 +79,9 @@ end
 -- Communication
 ----------------------------------------------------------------------
 local function send_msg(my_addr, dst_addr, msg)
-	--print("send_msg", my_addr, dst_addr)
+	print("send_msg", my_addr, dst_addr)
 	if lib.valid_route(my_addr, dst_addr) then
+		print("send_msg2", msg)
 		MsgQue[dst_addr] = MsgQue[dst_addr] or {}
 		table.insert(MsgQue[dst_addr], {src_addr = my_addr, msg = msg})
 		if #MsgQue[dst_addr] > MAX_NUM_MSG then
@@ -124,7 +125,7 @@ local function preserve_metadata(pos, oldnode, oldmetadata, drops)
 	if oldmetadata.my_addr then
 		local meta = drops[1]:get_meta()
 		meta:set_int("my_addr", oldmetadata.my_addr)
-		meta:set_string("description", DESCRIPTION .. " #" .. oldmetadata.my_addr)
+		meta:set_string("description", DESCRIPTION .. " @" .. oldmetadata.my_addr)
 	end
 end
 
@@ -138,7 +139,7 @@ local function after_place_node(pos, placer, itemstack, pointed_thing)
 		local my_addr = meta:get_int("my_addr")
 		lib.claim_address(pos, my_addr)
 	end
-	meta:set_string("infotext", DESCRIPTION .. " #" .. M(pos):get_int("my_addr"))
+	meta:set_string("infotext", DESCRIPTION .. " @" .. M(pos):get_int("my_addr"))
 	meta:set_string("formspec", formspec(pos))
 	meta:set_string("beduino_address_list", "-")
 end

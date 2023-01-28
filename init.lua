@@ -53,4 +53,7 @@ if minetest.global_exists("techage") then
 	dofile(MP.."/manual/techage_DE.lua")
 	dofile(MP.."/manual/techage_EN.lua")
 	techage.add_manual_items({beduino_controller = "beduino_controller_inventory.png"})
+	techage.add_manual_items({beduino_io_module = "beduino_iom_inventory.png"})
+	techage.add_manual_items({beduino_input_module = "beduino_inp_inventory.png"})
+	techage.add_manual_items({beduino_iot_sensor = "beduino_sensor_inventory.png"})
 end

@@ -3,6 +3,7 @@ techage.add_to_manual('EN', {
   "2,First Steps",
   "2,I/O Module",
   "2,Input Module",
+  "2,IOT Sensor",
 }, {
   "Beduino is a 16-bit microcontroller system inspired by Arduino boards and kits.\n"..
   "Beduino can be programmed in the C-like programming language mC.\n"..
@@ -46,6 +47,8 @@ techage.add_to_manual('EN', {
   "    request_data(port\\, topic\\, payload\\, resp)\\;\n"..
   "\n"..
   "See Techage Functions. for details.\n"..
+  "\n"..
+  "\n"..
   "\n",
   "Input modules are used to receive commands from other techage blocks (switches\\, detectors\\, etc.).\n"..
   "\n"..
@@ -67,13 +70,29 @@ techage.add_to_manual('EN', {
   "    }\n"..
   "\n"..
   "The controller saves up to 8 events from up to 16 input modules\\, each with up to 8 occupied ports.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The IOT Sensor is a small microcontroller that can be placed directly on a Techage machine. \n"..
+  "\n"..
+  "It can be programmed like the Beduino controller. However\\, there are also differences:\n"..
+  "\n"..
+  "  - The IOT sensor has less program memory (512 words). The program memory can also not be extended.\nHowever\\, it is sufficient for typical applications\\, such as checking the status of a machine\nand sending an alarm if necessary.\n"..
+  "  - The IOT sensor does not support IO modules\\, input modules or routers. However\\, it has a\n\"combi\" module internally\\, so it can communicate with machines\\, brokers and other controllers\nlike Beduino controllers.\n"..
+  "  - The IOT Sensor has 5 I/O ports for 5 positions in its environment. The block directly\nbehind the IOT sensor has port number 0\\, the 4 positions above\\, below\\, left and right\nof the block have port numbers 1 to 4. The numbers are mapped as dots on the IOT sensor.\n"..
+  "  - OT sensor stores its code internally and can be set to another position without program loss.\nThis can be useful\\, for example\\, for quarries\\, since these must be regularly set further.\nThe code restarts automatically\\, so you do not need a programmer.\n"..
+  "  - To give the IOT sensor a name\\, the sensor supports the wrench menu .\nThe entered name is then displayed as info to the item in the inventory.\n"..
+  "\n"..
+  "\n"..
   "\n",
 }, {
   "beduino_controller",
   "",
-  "",
-  "",
+  "beduino_io_module",
+  "beduino_input_module",
+  "beduino_iot_sensor",
 }, {
+  "",
   "",
   "",
   "",

@@ -50,6 +50,8 @@ request_data(port, topic, payload, resp);
 
 See [Techage Functions](https://github.com/joe7575/beduino/blob/main/manual/techage.md). for details.
 
+[beduino_io_module|image]
+
 ## Input Module
 
 Input modules are used to receive commands from other techage blocks (switches, detectors, etc.).
@@ -75,3 +77,29 @@ if(port != 0xffff) {
 ```
 
 The controller saves up to 8 events from up to 16 input modules, each with up to 8 occupied ports.
+
+[beduino_input_module|image]
+
+## IOT Sensor
+
+The IOT Sensor is a small microcontroller that can be placed directly on a Techage machine. 
+
+
+It can be programmed like the Beduino controller. However, there are also differences:
+
+- The IOT sensor has less program memory (512 words). The program memory can also not be extended.
+  However, it is sufficient for typical applications, such as checking the status of a machine  
+  and sending an alarm if necessary.
+- The IOT sensor does not support IO modules, input modules or routers. However, it has a  
+  "combi" module internally, so it can communicate with machines, brokers and other controllers  
+  like Beduino controllers.
+- The IOT Sensor has 5 I/O ports for 5 positions in its environment. The block directly  
+  behind the IOT sensor has port number 0, the 4 positions above, below, left and right  
+  of the block have port numbers 1 to 4. The numbers are mapped as dots on the IOT sensor.
+- OT sensor stores its code internally and can be set to another position without program loss.  
+  This can be useful, for example, for quarries, since these must be regularly set further.   
+  The code restarts automatically, so you do not need a programmer.
+- To give the IOT sensor a name, the sensor supports the wrench menu .  
+  The entered name is then displayed as info to the item in the inventory. 
+
+[beduino_iot_sensor|image]

@@ -38,11 +38,17 @@ Licensed under the GNU AGPLv3 (See LICENSE.txt)
 
 ## History
 
+#### v1.0 (2023-01-28)
+
+- Improve IOT Sensor
+- Add IOT Sensor docu
+
 #### v1.0 (2023-01-23)
 
 - Rework I/O and Input Modules
 - Rework techage support
 - Stop TechPack support
+- Add IOT Sensor
 
 #### v0.8 (2023-01-13)
 

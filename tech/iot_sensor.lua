@@ -69,6 +69,7 @@ end
 -- regA = port, regB = topic, regC = payload
 local function sys_send_cmnd(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = tech.get_node_numbers(cpu_pos, regA)
+	--print("sys_send_cmnd", own_num, dest_num)
 	if dest_num then
 		local topic = regB
 		local payload
@@ -185,6 +186,16 @@ end
 ----------------------------------------------------------------------
 -- CPU definition
 ----------------------------------------------------------------------
+local function infotext(pos)
+	local meta = M(pos)
+	local mynum = "@" .. meta:get_int("my_addr")
+	if meta:get_int("running") == 1 then
+		lib.infotext(M(pos), DESC, mynum .. " (running)")
+	else
+		lib.infotext(M(pos), DESC, mynum .. " (stopped)")
+	end
+end
+
 local cpu_def = {
 	cpu_type = "beduino",
 	cycle_time = 0.2, -- timer cycle time
@@ -227,12 +238,12 @@ local cpu_def = {
 		return RAM_SIZE
 	end,
 	on_start = function(pos)
-		lib.infotext(M(pos), DESC, "(running)")
 		M(pos):set_int("running", 1)
+		infotext(pos)
 	end,
 	on_stop = function(pos)
-		lib.infotext(M(pos), DESC, "(stopped)")
 		M(pos):set_int("running", 0)
+		infotext(pos)
 	end,
 	on_check_connection = function(pos)
 		return S2P(M(pos):get_string("prog_pos"))
@@ -245,6 +256,58 @@ local cpu_def = {
 ----------------------------------------------------------------------
 -- Node definition
 ----------------------------------------------------------------------
+local WRENCH_MENU = {
+	{
+		type = "ascii",
+		name = "user_desc",
+		label = "Name",
+		tooltip = "Text to identify this IOT sensor",
+		default = "",
+	},
+}
+
+local function start_cpu(pos, code)
+	vm16.create(pos, RAM_SIZE)
+	vm16.set_vm(pos, code)
+	vm16.set_pc(pos, 0)
+	minetest.get_node_timer(pos):start(cpu_def.cycle_time)
+end
+
+local function preserve_data(pos, oldnode, oldmetadata, drops)
+	local meta = drops[1]:get_meta()
+	meta:set_int("my_addr", oldmetadata.my_addr or 0)
+	meta:set_string("user_desc", oldmetadata.user_desc or "")
+	meta:set_string("description", DESC .. " @" .. (oldmetadata.my_addr or "0") ..
+		"\n" .. (oldmetadata.user_desc or ""))
+	meta:set_int("running", oldmetadata.running or 0)
+	if oldmetadata.running == "1" then
+		meta:set_string("code", vm16.get_vm(pos) or "")
+	end
+end
+
+local function unpreserve_data(pos, itemstack)
+	local imeta = itemstack:get_meta()
+	local meta = M(pos)
+
+	if imeta and imeta:contains("my_addr") then
+		local my_addr = imeta:get_int("my_addr")
+		meta:set_int("my_addr", my_addr)
+		-- needed in addition!
+		meta:set_int("router_addr", my_addr)
+		meta:set_int("running", imeta:get_int("running") or 0)
+		meta:set_string("user_desc", imeta:get_string("user_desc") or 0)
+		lib.claim_address(pos, my_addr)
+		if imeta:get_int("running") == 1 then
+			start_cpu(pos, imeta:get_string("code") or "")
+		end
+	else
+		local my_addr = lib.get_next_address(pos)
+		meta:set_int("my_addr", my_addr)
+		 -- needed in addition!
+		meta:set_int("router_addr", my_addr)
+	end
+end
+
 local function on_place(itemstack, placer, pointed_thing)
 	if pointed_thing.type ~= "node" then
 		return itemstack
@@ -296,16 +359,21 @@ minetest.register_node("beduino:iot_sensor", {
 	},
 	vm16_cpu = cpu_def,
 	on_place = on_place,
-	after_place_node = function(pos, placer)
+	after_place_node = function(pos, placer, itemstack, pointed_thing)
 		local meta = M(pos)
 		local own_num = tech.add_node(pos, "beduino:io_module")
 		meta:set_string("node_number", own_num)
 		meta:set_string("owner", placer:get_player_name())
-		lib.infotext(meta, DESC)
+		-- To be able to receive messages (as router)
+		meta:set_string("beduino_address_list", "-")
 		swap_node_depending_on_aligment(pos)
 		find_io_nodes(pos)
+		unpreserve_data(pos, itemstack)
+		infotext(pos)
 	end,
+	ta4_formspec = WRENCH_MENU,
 	on_timer = on_timer,
+	preserve_metadata = preserve_data,
 	after_dig_node = after_dig_node,
 	paramtype = "light",
 	use_texture_alpha = "clip",
@@ -340,7 +408,9 @@ minetest.register_node("beduino:iot_sensor2", {
 	},
 	vm16_cpu = cpu_def,
 	on_place = on_place,
+	ta4_formspec = WRENCH_MENU,
 	on_timer = on_timer,
+	preserve_metadata = preserve_data,
 	after_dig_node = after_dig_node,
 	paramtype = "light",
 	use_texture_alpha = "clip",
@@ -376,7 +446,9 @@ minetest.register_node("beduino:iot_sensor3", {
 	},
 	vm16_cpu = cpu_def,
 	on_place = on_place,
+	ta4_formspec = WRENCH_MENU,
 	on_timer = on_timer,
+	preserve_metadata = preserve_data,
 	after_dig_node = after_dig_node,
 	paramtype = "light",
 	use_texture_alpha = "clip",

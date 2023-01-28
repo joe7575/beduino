@@ -292,6 +292,39 @@ loop:
   jump loop
 ]]
 
+local iot_demo1_c = [[
+// Demo for a IOT sensor,
+// a Player Detector on the right (#2),
+// and a Techage Color Lamp 2 above (#1).
+
+import "lib/techage.c"
+
+const STATE = 142; // player detector state
+const COLOR = 22;  // color lamp command
+var OFF = "\377";
+
+static var data;
+
+func init() {
+  send_cmnd(1, COLOR, OFF); // Turn color lamp off
+}
+
+func loop() {
+  var resp;
+  var sts;
+
+  sts = request_data(2, STATE, 0, &resp);
+  if((sts == 0) and (resp == 1)) {
+    // Turn color lamp on
+    send_cmnd(1, COLOR, &data);
+    data = (data + 1) % 256;
+  } else {
+    send_cmnd(1, COLOR, OFF);
+  }
+  sleep(2);
+}
+]]
+
 vm16.register_ro_file("beduino", "lib/techage.c",   techage_c)
 vm16.register_ro_file("beduino", "lib/seg14.c",     seg14_c)
 vm16.register_ro_file("beduino", "demo/example1.c", example1_c)
@@ -300,3 +333,4 @@ vm16.register_ro_file("beduino", "demo/example3.c", example3_c)
 vm16.register_ro_file("beduino", "demo/example4.c", example4_c)
 vm16.register_ro_file("beduino", "demo/example5.c", example5_c)
 vm16.register_ro_file("beduino", "demo/example1.asm", example1_asm)
+vm16.register_ro_file("beduino", "demo/iot_demo1.c", iot_demo1_c)
