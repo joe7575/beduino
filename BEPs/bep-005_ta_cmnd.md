@@ -73,6 +73,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Quarry Depth               | 133         | -                      | [num]                   | Current depth value of a quarry block (1..80)                |
 | Load Percent               | 134         | [1]                    | [num]                   | Load value in percent  (0..100) of a tank, silo, accu, fuelcell, or battery block. |
 | Load Absolute              | 134         | [2]                    | [num]                   | Absolute value in units for silos and tanks                  |
+| Storage Percent            | 134         | -                      | [num]                   | Read the grid storage amount in percent  (0..100) from a TA3 Power Terminal. |
 | Delivered Power            | 135         | -                      | [num]                   | Current providing power value of a generator block           |
 | Accu Power                 | 136         | -                      | [providing, charging]   | Current providing/charging power value of an accu block<br />(byte 0: providing, byte 1: charging) |
 | Total Flow Rate            | 137         | -                      | [num]                   | Total flow rate in liquid units for TA4 Pumps (0..65535)     |
@@ -141,6 +142,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | techage:ta3_tank | 128, 134 |
 | techage:ta3_soundblock | 1, 14 |
 | techage:ta3_valve_open | 1, 142 |
+| techage:ta3_power_terminal | 134 |
 | techage:ta4_battery | 134 |
 | techage:ta4_button_off | 144, 149 |
 | techage:ta4_chest | 131, 140 |
