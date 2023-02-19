@@ -137,7 +137,8 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | techage:ta3_rinser_pas | 1, 128, 129 |
 | techage:ta3_sequencer | 7 |
 | techage:ta3_sieve_pas | 1, 128, 129 |
-| techage:ta3_silo | 129, 134 |
+| techage:ta3_silo | 131, 134 |
+| techage:ta3_tank | 128, 134 |
 | techage:ta3_soundblock | 1, 14 |
 | techage:ta3_valve_open | 1, 142 |
 | techage:ta4_battery | 134 |
@@ -175,6 +176,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | techage:ta4_signaltower | 2, 13 |
 | techage:ta4_signaltower | 2, 130 |
 | techage:ta4_silo | 131, 134 |
+| techage:ta4_tank | 128, 134 |
 | techage:ta4_solar_inverter | 1, 128, 129, 135 |
 | techage:ta4_solar_minicell | 145 |
 | techage:ta4_transformer | 1, 128, 129 |
