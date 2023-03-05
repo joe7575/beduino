@@ -89,7 +89,8 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Light Level                | 143         | -                      | [num]                   | Light level value between 0  and 15 (15 is high)             |
 | Player Name                | 144         | -                      | "\<player name>"        | Player name of the TA3/TA4 Player Detector or TA4 Button     |
 | Solar Cell State           | 145         | -                      | [num]                   | 0 = UNUSED, 1 = CHARGING, 2 = UNCHARGING                     |
-| Consumption                | 146         | -                      | [num]                   | TA4 Electric Meter total power consumption                   |
+| Consumption                | 146         | [0]                    | [num]                   | TA4 Electric Meter total power consumption                   |
+| Countdown                  | 146         | [1]                    | [num]                   | TA4 Electric Meter power countdown value                     |
 | DC2 Block Name             | 147         | [idx]                  | "\<node name>"          | Name of the placed block<br />*idx* is the inventory slot number (1..n) of the related the block position |
 | Distri. Filter Get         | 148         | "\<slot>"              | "\<item list>"          | *idx* is the slot number: <br />1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />Return a string like: "default:dirt dye:blue" |
 | Time Stamp                 | 149         | -                      | [time]                  | Time in system ticks (norm. 100 ms) when the TA4 Button is clicked |
