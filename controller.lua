@@ -290,8 +290,10 @@ minetest.register_node("beduino:controller", {
 		end
 		if fields.reset then
 			local prog_pos = S2P(M(pos):get_string("prog_pos"))
-			start_cpu(pos)
-			vm16.cpu_started(prog_pos, pos)
+			if prog_pos then
+				start_cpu(pos)
+				vm16.cpu_started(prog_pos, pos)
+			end
 		end
 	end,
 	after_dig_node = function(pos)
