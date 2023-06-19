@@ -55,6 +55,13 @@ local function get_description(cpu_pos, address, regA, regB, regC)
 	end
 end
 
+local function get_my_pos(cpu_pos, address, regA, regB, regC)
+	vm16.poke(cpu_pos, regA, cpu_pos.x)
+	vm16.poke(cpu_pos, regA + 1, cpu_pos.y)
+	vm16.poke(cpu_pos, regA + 2, cpu_pos.z)
+	return 1
+end
+
 beduino.lib.register_SystemHandler(0x20, get_timeofday)
 beduino.lib.register_SystemHandler(0x21, get_day_count)
 beduino.lib.register_SystemHandler(0x22, get_sec_time)
@@ -62,6 +69,7 @@ beduino.lib.register_SystemHandler(0x23, get_time)
 beduino.lib.register_SystemHandler(0x24, get_random)
 beduino.lib.register_SystemHandler(0x25, chat_msg)
 beduino.lib.register_SystemHandler(0x26, get_description)
+beduino.lib.register_SystemHandler(0x27, get_my_pos)
 
 local os_c = [[
 // Returns the time of day in minutes(0 - 1439)
@@ -98,6 +106,12 @@ func chat_msg(text) {
 // 'lang_code' is needed for the translation (e.g. "en" or "de")
 func get_description(name, lang_code, desc_buff) {
   system(0x26, name, lang_code, desc_buff);
+}
+
+// Get x, y, z position of controller itself
+// (x = array[0], y = array[1], z = array[2])
+func get_my_pos(array) {
+  system(0x27, array);
 }
 ]]
 
