@@ -73,7 +73,8 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Quarry Depth               | 133         | -                      | [num]                   | Current depth value of a quarry block (1..80)                |
 | Load Percent               | 134         | [1]                    | [num]                   | Load value in percent  (0..100) of a tank, silo, accu, fuelcell, or battery block. |
 | Load Absolute              | 134         | [2]                    | [num]                   | Absolute value in units for silos and tanks                  |
-| Storage Percent            | 134         | -                      | [num]                   | Read the grid storage amount in percent  (0..100) from a TA3 Power Terminal. |
+| Storage Percent            | 134         | -                      | [num]                   | Read the grid storage amount (state of charge) in percent  (0..100) from a TA3 Power Terminal. |
+| Consumer Current           | 135         | -                      | [num]                   | TA3 Power Terminal: Total power consumption (current) of all consumers |
 | Delivered Power            | 135         | -                      | [num]                   | Current providing power value of a generator block           |
 | Accu Power                 | 136         | -                      | [providing, charging]   | Current providing/charging power value of an accu block<br />(byte 0: providing, byte 1: charging) |
 | Total Flow Rate            | 137         | -                      | [num]                   | Total flow rate in liquid units for TA4 Pumps (0..65535)     |
@@ -89,8 +90,9 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Light Level                | 143         | -                      | [num]                   | Light level value between 0  and 15 (15 is high)             |
 | Player Name                | 144         | -                      | "\<player name>"        | Player name of the TA3/TA4 Player Detector or TA4 Button     |
 | Solar Cell State           | 145         | -                      | [num]                   | 0 = UNUSED, 1 = CHARGING, 2 = UNCHARGING                     |
-| Consumption                | 146         | [0]                    | [num]                   | TA4 Electric Meter total power consumption                   |
-| Countdown                  | 146         | [1]                    | [num]                   | TA4 Electric Meter power countdown value                     |
+| Consumption                | 146         | [0]                    | [num]                   | TA4 Electric Meter: Amount of electrical energy passed through |
+| Countdown                  | 146         | [1]                    | [num]                   | TA4 Electric Meter: Countdown value for the amount of electrical energy passed through |
+| Current                    | 146         | [2]                    | [num]                   | TA4 Electric Meter: Current flow of electricity (current)    |
 | DC2 Block Name             | 147         | [idx]                  | "\<node name>"          | Name of the placed block<br />*idx* is the inventory slot number (1..n) of the related the block position |
 | Distri. Filter Get         | 148         | "\<slot>"              | "\<item list>"          | *idx* is the slot number: <br />1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />Return a string like: "default:dirt dye:blue" |
 | Time Stamp                 | 149         | -                      | [time]                  | Time in system ticks (norm. 100 ms) when the TA4 Button is clicked |
