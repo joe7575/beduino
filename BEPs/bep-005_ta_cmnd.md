@@ -138,6 +138,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | techage:ta3_pusher_pas | 1, 64, 65 |
 | techage:ta3_quarry_pas | 1, 128, 129, 133 |
 | techage:ta3_recycler_pas | 1, 128, 129 |
+| techage:ta3_repeater | 1 |
 | techage:ta3_rinser_pas | 1, 128, 129 |
 | techage:ta3_sequencer | 7 |
 | techage:ta3_sieve_pas | 1, 128, 129 |
