@@ -201,7 +201,7 @@ func loop() {
     request_data(0, PLAYER, 0, buff);
     write_line(1, 3, buff);
   } else {
-    write_line(1, 3, "~");
+    write_line(1, 3, "\t~"); // center the text
   }
   sleep(5);
 }

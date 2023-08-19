@@ -151,10 +151,20 @@ local function sys_clear_screen(cpu_pos, address, regA, regB, regC)
 	return 0
 end
 
+-- Needed to center the text on the display
+local function patch_ctrl_char(cpu_pos, src_addr, text)
+	local first_char = math.floor(vm16.peek(cpu_pos, src_addr) / 256)
+	if first_char == 9 then -- '\t'
+		return '\t' .. text:sub(2, -1)
+	end
+	return text
+end
+
 local function sys_add_line(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = tech.get_node_numbers(cpu_pos, regA)
 	if own_num and dest_num then
 		local text = vm16.read_ascii(cpu_pos, regB, 64)
+		text = patch_ctrl_char(cpu_pos, regB, text)
 		if tech.tubelib then
 			tech.send_single(own_num, dest_num, "text", text)
 		else
@@ -170,6 +180,7 @@ local function sys_write_line(cpu_pos, address, regA, regB, regC)
 	if own_num and dest_num then
 		local row = regB
 		local text = vm16.read_ascii(cpu_pos, regC, 64)
+		text = patch_ctrl_char(cpu_pos, regC, text)
 		if tech.tubelib then
 			tech.send_single(own_num, dest_num, "row", {row = row, str = text})
 		else
