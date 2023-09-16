@@ -1,6 +1,7 @@
 | Author     | Version | Status   | Modified    |
 | ---------- | ------- | -------- | ----------- |
 | J.Stolberg | 0.6     | Proposal | 24 Jan 2023 |
+| J.Stolberg | 0.7     | Proposal | 16 Sep 2023 |
 
 
 
@@ -23,6 +24,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | DC2 Set Block            | 9           | [1, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Set/add a block<br />*idx* is the inventory slot number (1..n) with the block to be set |
 | DC2 Dig Block            | 9           | [2, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Dig/remove a block<br />*idx* is the empty inventory slot number (1..n) for the block |
 | Autocrafter              | 10          | [num1, num2, idx]      | Set the TA4 Autocrafter recipe with a recipe from a TA4 Recipe Block.<br/>*num1/num2* is the TA4 Recipe Block number (num1 * 65536 + num2)<br/>*idx* is the number of the recipe in the TA4 Recipe Block |
+| Autocrafter              | 11          | -                      | Move all items from input inventory to output inventory. Returns 1 if the input inventory was emptied in the process. Otherwise return 0 |
 | Move Contr. 1            | 11          | [1]                    | TA4 Move Controller command to move the block(s) from position A to B |
 | Move Contr. 2            | 11          | [2]                    | TA4 Move Controller command to move the block(s) from position B to A |
 | Move Contr. 3            | 11          | [3]                    | TA4 Move Controller command to move the block(s) to the opposite position |
@@ -196,6 +198,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | techage:ta5_pump | 1, 128, 129 |
 | techage:ta5_tele_pipe | 1, 128, 129 |
 | techage:ta5_tele_tube | 1, 128, 129 |
+| techage:ta5_generator | 1, 128, 129, 135 |
 | techage:tiny_generator | 1, 128, 129, 132, 135 |
 | pdp13:14segment | 16 |
 | pdp13:7segment | 15 |
