@@ -87,6 +87,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Item Counter               | 139         |                        | [num]                   | Item counter of the TA4 Item Detector block (0..n)           |
 | Inventory Item Count       | 140         | [1, idx]               | [num]                   | Amount of TA4 8x2000 Chest items<br />*idx* is the inventory slot number <br />(1..8 from left to right, or 0 for the total number) |
 | Inventory Item Name        | 140         | [2, idx]               | "\<node name>"          | Name of TA4 8x2000 Chest items<br />*idx* is the inventory slot number <br />(1..8 from left to right) |
+| Inventory Store Size       | 140         | [3]                    | [num]                   | Size of one of the eight stores of the TA4 8x2000 Chest.<br />Returns e.g. 6000 |
 | Furnace Output             | 141         | -                      | "\<node name>"          | Node name of the Industrial Furnace output. <br />Returns "none", if no recipe is active |
 | Binary State               | 142         | -                      | [num]                   | Current block state: OFF = 0, ON = 1                         |
 | Light Level                | 143         | -                      | [num]                   | Light level value between 0  and 15 (15 is high)             |
