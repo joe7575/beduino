@@ -91,7 +91,7 @@ Er kann wie der Beduino Controller programmiert werden. Es gibt aber auch Unters
 - Der IOT Sensor besitzt weniger Programmspeicher (512 Worte). Den Programmspeicher kann man auch nicht erweitern. Für typische Anwendungen, wie bspw. den Status einer Maschine zu überprüfen und bei Bedarf einen Alarm abzusetzen, reicht es aber.
 - Der IOT Sensor unterstützt keine IO Module, Input Module oder Router. Er hat aber intern ein "Kombi" Modul, so dass er wie Beduino Controller mit Maschinen, Brokern und andern Controllern kommunizieren kann.
 - Der IOT Sensor hat 5 I/O Ports für 5 Positionen in seinem Umfeld. Der Block direkt hinter dem IOT Sensor hat die Portnummer 0, die 4 Positionen über, unter, links unbd rechts des Blocks haben die Portnummern 1 bis 4. Die Nummern sind als Punkte auf dem IOT Sensor abgebildet.
-- OT Sensor speichert seinen Code intern und kann ohne Programmverlust an eine andere Position gesetzt werden werden. Dies kann bspw. für Steinbrecher sinnvoll sein, da diese regelmäßig weiter gesetzt werden müssen. Der Code läuft automatisch wieder an, man benötigt daher keinen Programmer.
+- Der IOT Sensor speichert seinen Code intern und kann ohne Programmverlust an eine andere Position gesetzt werden werden. Dies kann bspw. für Steinbrecher sinnvoll sein, da diese regelmäßig weiter gesetzt werden müssen. Der Code läuft automatisch wieder an, man benötigt daher keinen Programmer.
 - Um dem IOT Sensor einen Namen geben zu können, unterstützt der Sensor das Schraubenschlüsselmenü . Der eingegebene Name wird dann als Info zum Item im Inventar angezeigt. 
 
 [beduino_iot_sensor|image]

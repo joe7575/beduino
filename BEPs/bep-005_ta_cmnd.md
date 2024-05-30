@@ -13,7 +13,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 
 | Command                  | Topic (num) | Payload (array/string) | Remarks                                                      |
 | ------------------------ | ----------- | ---------------------- | ------------------------------------------------------------ |
-| Turn on/off              | 1           | [num]                  | Turn block (lamp, machine, ...) on/off<br />*num* is the state: 0 = "off", 1 = "on" |
+| Turn on/off              | 1           | [num]                  | Turn block (lamp, machine, button...) on/off<br />*num* is the state: 0 = "off", 1 = "on" |
 | Signal Tower             | 2           | [num]                  | Set Signal Tower color<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
 | Signal Lamp              | 3           | [idx, num]             | Set the lamp color for "TA4 2x" and "TA4 4x" Signal Lamps<br />*idx* is the lamp number (1..4)<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
 | Distri. Filter Slot      | 4           | [idx, num]             | Enable/disable a Distributor filter slot.<br />*idx* is the slot number: 1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />*num* is the state: 0 = "off", 1 = "on" |
@@ -43,6 +43,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | TA4 Pusher Limit         | 20          | [limit]                | Configure a TA4 Pusher with the number of items that are allowed to be pushed ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
 | TA4 Pump Limit           | 21          | [limit]                | Configure a TA4 Pump with the number of liquid units that are allowed to be pumped ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
 | Color                    | 22          | [color]                | Set the color of the TechAge Color Lamp and TechAge Color Lamp 2 (color = 0..255) |
+| Multi Button             | 23          | [num, state]           | Turn button (TA4 2x Button, TA4 4x Button) on/off<br />*num* is the button number (1..4), *state* is the state: 0 = "off", 1 = "on" |
 |                          |             |                        |                                                              |
 |                          |             |                        |                                                              |
 | **=============**        | **====**    | **========**           | **For Topics >=64 the payload is a string**                  |
@@ -70,7 +71,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | State for Techage Machines | 129         | -                      | [num]                   | RUNNING = 1, BLOCKED = 2,<br /> STANDBY = 3, NOPOWER = 4,<br />FAULT = 5, STOPPED = 6,<br />UNLOADED = 7, INACTIVE = 8 |
 | Signal Tower Color         | 130         | -                      | [num]                   | OFF = 0, GREEN = 1, AMBER = 2, RED = 3                       |
 | Chest State                | 131         | -                      | [num]                   | State of a TA3/TA4 chest or Sensor Chest<br />EMPTY = 0, LOADED = 1, FULL = 2 |
-| TA4 Button State           | 131         | -                      | [num]                   | OFF = 0, ON = 1                                              |
+| TA3/TA4 Button State       | 131         | -                      | [num]                   | OFF = 0, ON = 1                                              |
 | Fuel Level                 | 132         | -                      | [num]                   | Fuel level of a fuel consuming block (0..65535)              |
 | Quarry Depth               | 133         | -                      | [num]                   | Current depth value of a quarry block (1..80)                |
 | Load Percent               | 134         | [1]                    | [num]                   | Load value in percent  (0..100) of a tank, silo, accu, fuelcell, or battery block. |
@@ -101,6 +102,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Time Stamp                 | 149         | -                      | [time]                  | Time in system ticks (norm. 100 ms) when the TA4 Button is clicked |
 | TA4 Pusher Counter         | 150         | -                      | [num]                   | Read the number of pushed items for a TA4 Pusher in "flow limiter" mode |
 | TA4 Pump Counter           | 151         | -                      | [num]                   | Read the number of pumped liquid units for a TA4 Pump in "flow limiter" mode |
+| Multi Button State         | 152         | [num]                  | [state]                 | Read the button state (TA4 2x Button, TA4 4x Button)<br />*num* is the button number (1..4), *state* is the state: 0 = "off", 1 = "on" |
 
 
 
@@ -122,6 +124,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | techage:t4_pump | 1, 128, 129, 137 |
 | techage:t4_waterpump | 1, 128, 129 |
 | techage:ta3_akku | 1, 128, 129, 134 |
+| techage:ta3_button_off | 1, 131 |
 | techage:ta3_cartdetector_off | 1, 142 |
 | techage:ta3_cartdetector_off | 142 |
 | techage:ta3_distributor_pas | 1, 4, 67, 128, 129,148 |
@@ -151,7 +154,8 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | techage:ta3_valve_open | 1, 142 |
 | techage:ta3_power_terminal | 134 |
 | techage:ta4_battery | 134 |
-| techage:ta4_button_off | 144, 149 |
+| techage:ta4_button_2x, techage:ta4_button_4x | 23, 152 |
+| techage:ta4_button_off | 1, 131, 144, 149 |
 | techage:ta4_chest | 131, 140 |
 | techage:ta4_collector | 129 |
 | techage:ta4_detector_off | 6, 139 |

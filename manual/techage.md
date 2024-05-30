@@ -38,7 +38,7 @@ The response is return by reference in form of an array or string.
 See [commands](https://github.com/joe7575/beduino/blob/main/BEPs/bep-005_ta_cmnd.md).
 
 - *port* is the I/O module port number
-- **topic* specifies the data to be read and is a numeric value.
+- *topic* specifies the data to be read and is a numeric value.
 - *payload* is an array and is used for additional data.
   If not needed, you can provide `NULL`.
 - *response* is an array for the response data.

@@ -96,7 +96,7 @@ It can be programmed like the Beduino controller. However, there are also differ
 - The IOT Sensor has 5 I/O ports for 5 positions in its environment. The block directly  
   behind the IOT sensor has port number 0, the 4 positions above, below, left and right  
   of the block have port numbers 1 to 4. The numbers are mapped as dots on the IOT sensor.
-- OT sensor stores its code internally and can be set to another position without program loss.  
+- The IOT sensor stores its code internally and can be set to another position without program loss.  
   This can be useful, for example, for quarries, since these must be regularly set further.   
   The code restarts automatically, so you do not need a programmer.
 - To give the IOT sensor a name, the sensor supports the wrench menu .  
