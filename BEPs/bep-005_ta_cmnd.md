@@ -2,6 +2,7 @@
 | ---------- | ------- | -------- | ----------- |
 | J.Stolberg | 0.6     | Proposal | 24 Jan 2023 |
 | J.Stolberg | 0.7     | Proposal | 16 Sep 2023 |
+| J.Stolberg | 0.8     | Proposal | 31 May 2024 |
 
 
 
