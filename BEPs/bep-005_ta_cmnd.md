@@ -68,7 +68,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 
 | Command                    | Topic (num) | Payload (array/string) | Response (array/string) | Remarks to the response                                      |
 | -------------------------- | ----------- | ---------------------- | ----------------------- | ------------------------------------------------------------ |
-| Identify                   | 128         | -                      | "\<node name>"          | Node name as string like "default:dirt"                      |
+| Identify                   | 128         | -                      | "\<node name>"          | Node name as string like "techage:ta3_akku"                  |
 | State for Techage Machines | 129         | -                      | [num]                   | RUNNING = 1, BLOCKED = 2,<br /> STANDBY = 3, NOPOWER = 4,<br />FAULT = 5, STOPPED = 6,<br />UNLOADED = 7, INACTIVE = 8 |
 | Signal Tower Color         | 130         | -                      | [num]                   | OFF = 0, GREEN = 1, AMBER = 2, RED = 3                       |
 | Chest State                | 131         | -                      | [num]                   | State of a TA3/TA4 chest or Sensor Chest<br />EMPTY = 0, LOADED = 1, FULL = 2 |
@@ -80,7 +80,6 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Storage Percent            | 134         | -                      | [num]                   | Read the grid storage amount (state of charge) in percent  (0..100) from a TA3 Power Terminal. |
 | Consumer Current           | 135         | -                      | [num]                   | TA3 Power Terminal: Total power consumption (current) of all consumers |
 | Delivered Power            | 135         | -                      | [num]                   | Current providing power value of a generator block           |
-| Accu Power                 | 136         | -                      | [providing, charging]   | Current providing/charging power value of an accu block<br />(byte 0: providing, byte 1: charging) |
 | Total Flow Rate            | 137         | -                      | [num]                   | Total flow rate in liquid units for TA4 Pumps (0..65535)     |
 | Sensor Chests State 1      | 138         | [1]                    | [num]                   | Last action: NONE = 0 PUT = 1, TAKE = 2                      |
 | Sensor Chests State 2      | 138         | [2]                    | "\<player name>"        | Player name of last action                                   |
@@ -99,7 +98,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Countdown                  | 146         | [1]                    | [num]                   | TA4 Electric Meter: Countdown value for the amount of electrical energy passed through |
 | Current                    | 146         | [2]                    | [num]                   | TA4 Electric Meter: Current flow of electricity (current)    |
 | DC2 Block Name             | 147         | [idx]                  | "\<node name>"          | Name of the placed block<br />*idx* is the inventory slot number (1..n) of the related the block position |
-| Distri. Filter Get         | 148         | "\<slot>"              | "\<item list>"          | *idx* is the slot number: <br />1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />Return a string like: "default:dirt dye:blue" |
+| Distri. Filter Get         | 148         | [idx]                  | "\<item list>"          | *idx* is the slot number: <br />1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />Return a string like: "default:dirt dye:blue" |
 | Time Stamp                 | 149         | -                      | [time]                  | Time in system ticks (norm. 100 ms) when the TA4 Button is clicked |
 | TA4 Pusher Counter         | 150         | -                      | [num]                   | Read the number of pushed items for a TA4 Pusher in "flow limiter" mode |
 | TA4 Pump Counter           | 151         | -                      | [num]                   | Read the number of pumped liquid units for a TA4 Pump in "flow limiter" mode |
