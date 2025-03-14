@@ -12,53 +12,55 @@
 
 See [Techage related functions](https://github.com/joe7575/beduino/blob/main/manual/techage.md).
 
-| Command                  | Topic (num) | Payload (array/string) | Remarks                                                      |
-| ------------------------ | ----------- | ---------------------- | ------------------------------------------------------------ |
-| Turn on/off              | 1           | [num]                  | Turn block (lamp, machine, button...) on/off<br />*num* is the state: 0 = "off", 1 = "on" |
-| Signal Tower             | 2           | [num]                  | Set Signal Tower color<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
-| Signal Lamp              | 3           | [idx, num]             | Set the lamp color for "TA4 2x" and "TA4 4x" Signal Lamps<br />*idx* is the lamp number (1..4)<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
-| Distri. Filter Slot      | 4           | [idx, num]             | Enable/disable a Distributor filter slot.<br />*idx* is the slot number: 1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />*num* is the state: 0 = "off", 1 = "on" |
-| Detector Block Countdown | 5           | [num]                  | Set countdown counter of the TA4 Item Detector block to the given value and<br />start countdown mode. |
-| Detector Block Reset     | 6           | -                      | Reset the item counter of the TA4 Item Detector block        |
-| TA3 Sequenzer            | 7           | [num]                  | Turn the TA3 Sequencer on/off<br />*num* is the state: 0 = "off", 1 = "on", 2 = "pause" |
-| DC2 Exchange Block       | 9           | [0, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Exchange a block<br />*idx* is the inventory slot number (1..n) of/for the block to be exchanged |
-| DC2 Set Block            | 9           | [1, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Set/add a block<br />*idx* is the inventory slot number (1..n) with the block to be set |
-| DC2 Dig Block            | 9           | [2, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Dig/remove a block<br />*idx* is the empty inventory slot number (1..n) for the block |
-| Autocrafter              | 10          | [num1, num2, idx]      | Set the TA4 Autocrafter recipe with a recipe from a TA4 Recipe Block.<br/>*num1/num2* is the TA4 Recipe Block number (num1 * 65536 + num2)<br/>*idx* is the number of the recipe in the TA4 Recipe Block |
-| Autocrafter              | 11          | -                      | Move all items from input inventory to output inventory. Returns 1 if the input inventory was emptied in the process. Otherwise return 0 |
-| Move Contr. 1            | 11          | [1]                    | TA4 Move Controller command to move the block(s) from position A to B |
-| Move Contr. 2            | 11          | [2]                    | TA4 Move Controller command to move the block(s) from position B to A |
-| Move Contr. 3            | 11          | [3]                    | TA4 Move Controller command to move the block(s) to the opposite position |
-| MC move xyz              | 18          | [x, y, z]              | TA4 Move Controller command to move the block(s) by the given<br /> x/y/z-distance. Valid ranges for x, y, and z are -100 to 100. <br />(Note: `65536 - 100 = 65425` with corresponds to `-100`) |
-| MC reset                 | 19          | -                      | Reset TA4 Move Controller (move block(s) to start position)  |
-| Turn Contr. 1            | 12          | [1]                    | TA4 Turn Controller command to turn the block(s) to the left |
-| Turn Contr. 2            | 12          | [2]                    | TA4 Turn Controller command to turn the block(s) to the right |
-| Turn Contr. 3            | 12          | [3]                    | TA4 Turn Controller command to turn the block(s) 180 degrees |
-| TA4 Sequenzer 1          | 13          | [slot]                 | Start/goto command for the TA4 Sequencer. <br />*slot* is the time slot (1..n) where the execution starts. |
-| TA4 Sequenzer 2          | 13          | [0]                    | Stop command for the TA4 Sequencer.                          |
-| Sound 1                  | 14          | [1, volume]            | Set volume of the sound block<br />*volume* is a value from 1 to 5 |
-| Sound 2                  | 14          | [2, index]             | Select sound sample of the sound block<br />*index* is the sound sample number |
-| [PDP-13] 7-Segment       | 15          | [num]                  | Ouput value (0-15) to the 7-segment block (values > 15 will turn off the block) |
-| [PDP-13] 14-Segment      | 16          | [num]                  | Ouput value (0-0x3FFF) to the 14-segment block<br />See: [PDP-13 Manual](https://github.com/joe7575/pdp13/blob/main/manuals/manualXL_EN.md#pdp-13-14-segment) |
-| Display Clear            | 17          | -                      | Clear the display                                            |
-| TA4 Pusher Limit         | 20          | [limit]                | Configure a TA4 Pusher with the number of items that are allowed to be pushed ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
-| TA4 Pump Limit           | 21          | [limit]                | Configure a TA4 Pump with the number of liquid units that are allowed to be pumped ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
-| Color                    | 22          | [color]                | Set the color of the TechAge Color Lamp and TechAge Color Lamp 2 (color = 0..255) |
-| Multi Button             | 23          | [num, state]           | Turn button (TA4 2x Button, TA4 4x Button) on/off<br />*num* is the button number (1..4), *state* is the state: 0 = "off", 1 = "on" |
-|                          |             |                        |                                                              |
-|                          |             |                        |                                                              |
-| **=============**        | **====**    | **========**           | **For Topics >=64 the payload is a string**                  |
-|                          | 64          |                        |                                                              |
-|                          | 65          |                        |                                                              |
-|                          | 66          |                        |                                                              |
-| Display Add Line         | 67          | "text string"          | Add a new line to the display                                |
-| Display Write Line       | 68          | "\<num>text string"    | Overwrite a text line with the given string. <br />The first string character is the line number (1..5)<br />Examples: "1Hello World", "2Minetest" |
-| Config TA4 Pusher        | 65          | "\<item name>"         | Configure the TA4 pusher.<br/>Example: `wool:blue`           |
-| Sensor Chest Text        | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
-| Distri. Filter Config    | 67          | "\<slot> \<item list>" | Configure a Distributor filter slot, like: "red default:dirt dye:blue" |
-|                          |             |                        |                                                              |
-|                          |             |                        |                                                              |
-|                          |             |                        |                                                              |
+| Command                    | Topic (num) | Payload (array/string) | Remarks                                                      |
+| -------------------------- | ----------- | ---------------------- | ------------------------------------------------------------ |
+| Turn on/off                | 1           | [num]                  | Turn block (lamp, machine, button...) on/off<br />*num* is the state: 0 = "off", 1 = "on" |
+| Signal Tower               | 2           | [num]                  | Set Signal Tower color<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
+| Traffic Light              | 2           | [num]                  | Set Traffic Light color<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
+| Signal Lamp                | 3           | [idx, num]             | Set the lamp color for "TA4 2x" and "TA4 4x" Signal Lamps<br />*idx* is the lamp number (1..4)<br />*num* is the color: 0 = "off", 1 = "green", 2 = "amber", 3 = "red" |
+| Distri. Filter Slot        | 4           | [idx, num]             | Enable/disable a Distributor filter slot.<br />*idx* is the slot number: 1 = "red", 2 = "green", 3 = "blue", 4 = "yellow"<br />*num* is the state: 0 = "off", 1 = "on" |
+| Detector Block Countdown   | 5           | [num]                  | Set countdown counter of the TA4 Item Detector block to the given value and<br />start countdown mode. |
+| Detector Block Reset       | 6           | -                      | Reset the item counter of the TA4 Item Detector block        |
+| TA3 Sequenzer              | 7           | [num]                  | Turn the TA3 Sequencer on/off<br />*num* is the state: 0 = "off", 1 = "on", 2 = "pause" |
+| DC2 Exchange Block         | 9           | [0, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Exchange a block<br />*idx* is the inventory slot number (1..n) of/for the block to be exchanged |
+| DC2 Set Block              | 9           | [1, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Set/add a block<br />*idx* is the inventory slot number (1..n) with the block to be set |
+| DC2 Dig Block              | 9           | [2, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Dig/remove a block<br />*idx* is the empty inventory slot number (1..n) for the block |
+| Autocrafter                | 10          | [num1, num2, idx]      | Set the TA4 Autocrafter recipe with a recipe from a TA4 Recipe Block.<br/>*num1/num2* is the TA4 Recipe Block number (num1 * 65536 + num2)<br/>*idx* is the number of the recipe in the TA4 Recipe Block |
+| Autocrafter                | 11          | -                      | Move all items from input inventory to output inventory. Returns 1 if the input inventory was emptied in the process. Otherwise return 0 |
+| Move Contr. 1              | 11          | [1]                    | TA4 Move Controller command to move the block(s) from position A to B |
+| Move Contr. 2              | 11          | [2]                    | TA4 Move Controller command to move the block(s) from position B to A |
+| Move Contr. 3              | 11          | [3]                    | TA4 Move Controller command to move the block(s) to the opposite position |
+| Move Contr.<br /> move xyz | 18          | [x, y, z]              | TA4 Move Controller command to move the block(s) by the given<br /> x/y/z-distance. Valid ranges for x, y, and z are -100 to 100. <br />(Note: `65536 - 100 = 65425` with corresponds to `-100`) |
+| Move Contr. `moveto`       | 24          | [x, y, z]              | TA4 Move Controller / TA4 Move Controller II  command to move the block(s) to the given<br /> absolute x/y/z-position. (Note: `-1000 = 65536 - 1000 = 64536`) |
+| Move Contr. `reset`        | 19          | -                      | Reset TA4 Move Controller / TA4 Move Controller II  (move block(s) to start position)  |
+| Turn Contr. 1              | 12          | [1]                    | TA4 Turn Controller command to turn the block(s) to the left |
+| Turn Contr. 2              | 12          | [2]                    | TA4 Turn Controller command to turn the block(s) to the right |
+| Turn Contr. 3              | 12          | [3]                    | TA4 Turn Controller command to turn the block(s) 180 degrees |
+| TA4 Sequenzer 1            | 13          | [slot]                 | Start/goto command for the TA4 Sequencer. <br />*slot* is the time slot (1..n) where the execution starts. |
+| TA4 Sequenzer 2            | 13          | [0]                    | Stop command for the TA4 Sequencer.                          |
+| Sound 1                    | 14          | [1, volume]            | Set volume of the sound block<br />*volume* is a value from 1 to 5 |
+| Sound 2                    | 14          | [2, index]             | Select sound sample of the sound block<br />*index* is the sound sample number |
+| [PDP-13] 7-Segment         | 15          | [num]                  | Ouput value (0-15) to the 7-segment block (values > 15 will turn off the block) |
+| [PDP-13] 14-Segment        | 16          | [num]                  | Ouput value (0-0x3FFF) to the 14-segment block<br />See: [PDP-13 Manual](https://github.com/joe7575/pdp13/blob/main/manuals/manualXL_EN.md#pdp-13-14-segment) |
+| Display Clear              | 17          | -                      | Clear the display                                            |
+| TA4 Pusher Limit           | 20          | [limit]                | Configure a TA4 Pusher with the number of items that are allowed to be pushed ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
+| TA4 Pump Limit             | 21          | [limit]                | Configure a TA4 Pump with the number of liquid units that are allowed to be pumped ("flow limiter" mode)<br />limit = 0 turns off the "flow limiter" mode |
+| Color                      | 22          | [color]                | Set the color of the TechAge Color Lamp and TechAge Color Lamp 2 (color = 0..255) |
+| Multi Button               | 23          | [num, state]           | Turn button (TA4 2x Button, TA4 4x Button) on/off<br />*num* is the button number (1..4), *state* is the state: 0 = "off", 1 = "on" |
+| Move Contr. `moveto`       | 24          | [x, y, z]              | TA4 Move Controller command to move the block(s) to the given<br /> x/y/z-position. (Note: `-1000 = 65536 - 1000 = 64536`) |
+|                            |             |                        |                                                              |
+| **=============**          | **====**    | **========**           | **For Topics >=64 the payload is a string**                  |
+|                            | 64          |                        |                                                              |
+|                            | 65          |                        |                                                              |
+|                            | 66          |                        |                                                              |
+| Display Add Line           | 67          | "text string"          | Add a new line to the display                                |
+| Display Write Line         | 68          | "\<num>text string"    | Overwrite a text line with the given string. <br />The first string character is the line number (1..5)<br />Examples: "1Hello World", "2Minetest" |
+| Config TA4 Pusher          | 65          | "\<item name>"         | Configure the TA4 pusher.<br/>Example: `wool:blue`           |
+| Sensor Chest Text          | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
+| Distri. Filter Config      | 67          | "\<slot> \<item list>" | Configure a Distributor filter slot, like: "red default:dirt dye:blue" |
+|                            |             |                        |                                                              |
+|                            |             |                        |                                                              |
+|                            |             |                        |                                                              |
 
 
 
@@ -71,6 +73,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Identify                   | 128         | -                      | "\<node name>"          | Node name as string like "techage:ta3_akku"                  |
 | State for Techage Machines | 129         | -                      | [num]                   | RUNNING = 1, BLOCKED = 2,<br /> STANDBY = 3, NOPOWER = 4,<br />FAULT = 5, STOPPED = 6,<br />UNLOADED = 7, INACTIVE = 8 |
 | Signal Tower Color         | 130         | -                      | [num]                   | OFF = 0, GREEN = 1, AMBER = 2, RED = 3                       |
+| Traffic Light Color        | 130         | -                      | [num]                   | OFF = 0, GREEN = 1, AMBER = 2, RED = 3                       |
 | Chest State                | 131         | -                      | [num]                   | State of a TA3/TA4 chest or Sensor Chest<br />EMPTY = 0, LOADED = 1, FULL = 2 |
 | TA3/TA4 Button State       | 131         | -                      | [num]                   | OFF = 0, ON = 1                                              |
 | Fuel Level                 | 132         | -                      | [num]                   | Fuel level of a fuel consuming block (0..65535)              |
@@ -103,6 +106,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | TA4 Pusher Counter         | 150         | -                      | [num]                   | Read the number of pushed items for a TA4 Pusher in "flow limiter" mode |
 | TA4 Pump Counter           | 151         | -                      | [num]                   | Read the number of pumped liquid units for a TA4 Pump in "flow limiter" mode |
 | Multi Button State         | 152         | [num]                  | [state]                 | Read the button state (TA4 2x Button, TA4 4x Button)<br />*num* is the button number (1..4), *state* is the state: 0 = "off", 1 = "on" |
+| Water Remover Depth        | 153         | -                      | [depth}                 | Current depth value of a remover (1..80)                     |
 
 
 
