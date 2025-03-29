@@ -22,9 +22,10 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Detector Block Countdown   | 5           | [num]                  | Set countdown counter of the TA4 Item Detector block to the given value and<br />start countdown mode. |
 | Detector Block Reset       | 6           | -                      | Reset the item counter of the TA4 Item Detector block        |
 | TA3 Sequenzer              | 7           | [num]                  | Turn the TA3 Sequencer on/off<br />*num* is the state: 0 = "off", 1 = "on", 2 = "pause" |
-| DC2 Exchange Block         | 9           | [0, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Exchange a block<br />*idx* is the inventory slot number (1..n) of/for the block to be exchanged |
-| DC2 Set Block              | 9           | [1, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Set/add a block<br />*idx* is the inventory slot number (1..n) with the block to be set |
-| DC2 Dig Block              | 9           | [2, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Dig/remove a block<br />*idx* is the empty inventory slot number (1..n) for the block |
+| DC2 Exchange Block         | 9           | [0, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2)<br />Exchange a block in the world with the block in the inventory.<br />*idx* is the inventory slot number (1..n) of/for the block to be exchanged |
+| DC2 Reset                  | 9           | [3]                    | TA3 Door Controller II (techage:ta3_doorcontroller2). Using the reset command,<br />all blocks are reset to their initial state after learning. |
+| DC2 Set to1                | 9           | [4, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2). Swaps a block in the inventory <br />with the block in the world, provided the position was in state 2 (Exchange state).<br/>`idx` is the inventory slot number (1..n) |
+| DC2 Dig to2                | 9           | [5, idx]               | TA3 Door Controller II (techage:ta3_doorcontroller2). Swaps a block in the inventory <br />with the block in the world, provided the position was in state 1 (Initial state).<b<br />`idx` is the inventory slot number (1..n) |
 | Autocrafter                | 10          | [num1, num2, idx]      | Set the TA4 Autocrafter recipe with a recipe from a TA4 Recipe Block.<br/>*num1/num2* is the TA4 Recipe Block number (num1 * 65536 + num2)<br/>*idx* is the number of the recipe in the TA4 Recipe Block |
 | Autocrafter                | 11          | -                      | Move all items from input inventory to output inventory. Returns 1 if the input inventory was emptied in the process. Otherwise return 0 |
 | Move Contr. 1              | 11          | [1]                    | TA4 Move Controller command to move the block(s) from position A to B |
@@ -32,7 +33,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Move Contr. 3              | 11          | [3]                    | TA4 Move Controller command to move the block(s) to the opposite position |
 | Move Contr.<br /> move xyz | 18          | [x, y, z]              | TA4 Move Controller command to move the block(s) by the given<br /> x/y/z-distance. Valid ranges for x, y, and z are -100 to 100. <br />(Note: `65536 - 100 = 65425` with corresponds to `-100`) |
 | Move Contr. `moveto`       | 24          | [x, y, z]              | TA4 Move Controller / TA4 Move Controller II  command to move the block(s) to the given<br /> absolute x/y/z-position. (Note: `-1000 = 65536 - 1000 = 64536`) |
-| Move Contr. `reset`        | 19          | -                      | Reset TA4 Move Controller / TA4 Move Controller II  (move block(s) to start position)  |
+| Move Contr. `reset`        | 19          | -                      | Reset TA4 Move Controller / TA4 Move Controller II  (move block(s) to start position) |
 | Turn Contr. 1              | 12          | [1]                    | TA4 Turn Controller command to turn the block(s) to the left |
 | Turn Contr. 2              | 12          | [2]                    | TA4 Turn Controller command to turn the block(s) to the right |
 | Turn Contr. 3              | 12          | [3]                    | TA4 Turn Controller command to turn the block(s) 180 degrees |
@@ -107,6 +108,11 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | TA4 Pump Counter           | 151         | -                      | [num]                   | Read the number of pumped liquid units for a TA4 Pump in "flow limiter" mode |
 | Multi Button State         | 152         | [num]                  | [state]                 | Read the button state (TA4 2x Button, TA4 4x Button)<br />*num* is the button number (1..4), *state* is the state: 0 = "off", 1 = "on" |
 | Water Remover Depth        | 153         | -                      | [depth}                 | Current depth value of a remover (1..80)                     |
+|                            |             |                        |                         |                                                              |
+|                            |             |                        |                         |                                                              |
+| **=============**          | **====**    | **========**           | **========**            | **For Topics >= 192 the payload is a string**                |
+| Chest Item Count           | 192         | "\<item name>"         | [num]                   | For TA3/TA4/TA5 chest or shop<br />Read the number of items of the given item name.<br /> `<item name>` can be a substring of the item name. |
+|                            |             |                        |                         |                                                              |
 
 
 
@@ -115,9 +121,9 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Technical Node Name | Supported Commands |
 | ------------------- | ------------------ |
 | techage:chest_cart | 131 |
-| techage:chest_ta2 | 131 |
-| techage:chest_ta3 | 131 |
-| techage:chest_ta4 | 131 |
+| techage:chest_ta2 | 131, 192 |
+| techage:chest_ta3 | 131, 192 |
+| techage:chest_ta4 | 131, 192 |
 | techage:coalfirebox | 128, 129, 132 |
 | techage:furnace_firebox | 128, 129, 132 |
 | techage:generator | 1, 128, 129, 135 |
@@ -203,7 +209,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | techage:ta5_flycontroller | 129 |
 | techage:ta5_fr_controller_pas | 1, 128, 129 |
 | techage:ta5_heatexchanger2 | 1, 128, 129, 135 |
-| techage:ta5_hl_chest | 131 |
+| techage:ta5_hl_chest | 131, 192 |
 | techage:ta5_pump | 1, 128, 129 |
 | techage:ta5_tele_pipe | 1, 128, 129 |
 | techage:ta5_tele_tube | 1, 128, 129 |
