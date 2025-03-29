@@ -124,7 +124,12 @@ local function sys_request_data(cpu_pos, address, regA, regB, regC)
 	local own_num, dest_num = tech.get_node_numbers(cpu_pos, regA)
 	if own_num and dest_num then
 		local topic = regB
-		local payload = vm16.read_mem(cpu_pos, regC, 8)
+		local payload
+		if topic >= 192 then
+			payload = vm16.read_ascii(cpu_pos, regC, 32)
+		else
+			payload = vm16.read_mem(cpu_pos, regC, 8)
+		end
 		local sts, resp = techage.beduino_request_data(own_num, dest_num, topic, payload)
 		local resp_addr = RespAddr[H(cpu_pos)]
 		if sts == 0 and resp and resp_addr and resp_addr ~= 0 then
