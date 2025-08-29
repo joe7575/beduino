@@ -216,6 +216,9 @@ local cpu_def = {
 	},
 	-- Called for each 'input' instruction.
 	on_input = on_input,
+	-- Called for each 'output' instruction.
+	on_output = function(pos, address, val1, val2)
+	end,
 	-- Called for each 'system' instruction.
 	on_system = on_system,
 	-- Called when CPU stops.
