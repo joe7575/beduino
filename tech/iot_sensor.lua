@@ -24,8 +24,6 @@ local tech = beduino.tech
 local RAM_SIZE = 3
 local DESC = "Beduino IOT Sensor"
 
-local Cache = {} -- used for CPU intermediate results
-
 local Info = [[
               Beduino
               =======
@@ -62,7 +60,8 @@ local function on_input(cpu_pos, port)
 end
 
 local function sys_resp_buff(cpu_pos, address, regA, regB, regC)
-	Cache[H(cpu_pos)] = regB
+	local nvm = tech.get_nvm(cpu_pos)
+	nvm.resp_addr = regB
 	return 1
 end
 
@@ -92,12 +91,12 @@ local function sys_request_data(cpu_pos, address, regA, regB, regC)
 		local topic = regB
 		local payload = vm16.read_mem(cpu_pos, regC, 8)
 		local sts, resp = techage.beduino_request_data(own_num, dest_num, topic, payload)
-		local resp_addr = Cache[H(cpu_pos)]
-		if sts == 0 and resp and resp_addr and resp_addr ~= 0 then
+		local nvm = tech.get_nvm(cpu_pos)
+		if sts == 0 and resp and nvm.resp_addr and nvm.resp_addr ~= 0 then
 			if type(resp) == "table" then
-				vm16.write_mem(cpu_pos, resp_addr, resp)
+				vm16.write_mem(cpu_pos, nvm.resp_addr, resp)
 			else
-				vm16.write_ascii_16(cpu_pos, resp_addr, resp .. "\0")
+				vm16.write_ascii_16(cpu_pos, nvm.resp_addr, resp .. "\0")
 			end
 		end
 		return sts

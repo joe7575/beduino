@@ -97,10 +97,10 @@ beduino.tech.register_node({"beduino:io_module"}, {
 ----------------------------------------------------------------------
 -- System calls
 ----------------------------------------------------------------------
-local RespAddr = {}
 
 local function sys_resp_buff(cpu_pos, address, regA, regB, regC)
-	RespAddr[H(cpu_pos)] = regB
+	local mem = tech.get_nvm(cpu_pos)
+	mem.resp_addr = regB
 	return 1
 end
 
@@ -131,15 +131,15 @@ local function sys_request_data(cpu_pos, address, regA, regB, regC)
 			payload = vm16.read_mem(cpu_pos, regC, 8)
 		end
 		local sts, resp = techage.beduino_request_data(own_num, dest_num, topic, payload)
-		local resp_addr = RespAddr[H(cpu_pos)]
-		if sts == 0 and resp and resp_addr and resp_addr ~= 0 then
+		local mem = tech.get_nvm(cpu_pos)
+		if sts == 0 and resp and mem.resp_addr and mem.resp_addr ~= 0 then
 			if type(resp) == "number" then
-				vm16.poke(cpu_pos, resp_addr, resp)
+				vm16.poke(cpu_pos, mem.resp_addr, resp)
 			elseif type(resp) == "table" then
-				vm16.write_mem(cpu_pos, resp_addr, resp)
+				vm16.write_mem(cpu_pos, mem.resp_addr, resp)
 			else
 				resp = string.sub(resp .. "\0", 1, 32)
-				vm16.write_ascii_16(cpu_pos, resp_addr, resp)
+				vm16.write_ascii_16(cpu_pos, mem.resp_addr, resp)
 			end
 		end
 		return sts
