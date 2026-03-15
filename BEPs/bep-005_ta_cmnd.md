@@ -3,6 +3,7 @@
 | J.Stolberg | 0.6     | Proposal | 24 Jan 2023 |
 | J.Stolberg | 0.7     | Proposal | 16 Sep 2023 |
 | J.Stolberg | 0.8     | Proposal | 31 May 2024 |
+| J.Stolberg | 0.9     | Proposal | 15 Mar 2026 |
 
 
 
@@ -59,6 +60,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Config TA4 Pusher          | 65          | "\<item name>"         | Configure the TA4 pusher.<br/>Example: `wool:blue`           |
 | Sensor Chest Text          | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
 | Distri. Filter Config      | 67          | "\<slot> \<item list>" | Configure a Distributor filter slot, like: "red default:dirt dye:blue" |
+| TA5 Digitizer Mode         | 67          | "1" or "2"             | Set TA5 Digitizer operating mode: "1" = pull, "2" = push     |
 |                            |             |                        |                                                              |
 |                            |             |                        |                                                              |
 |                            |             |                        |                                                              |
@@ -108,6 +110,8 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | TA4 Pump Counter           | 151         | -                      | [num]                   | Read the number of pumped liquid units for a TA4 Pump in "flow limiter" mode |
 | Multi Button State         | 152         | [num]                  | [state]                 | Read the button state (TA4 2x Button, TA4 4x Button)<br />*num* is the button number (1..4), *state* is the state: 0 = "off", 1 = "on" |
 | Water Remover Depth        | 153         | -                      | [depth}                 | Current depth value of a remover (1..80)                     |
+| TA5 Digitizer Item Count   | 154         | -                      | [num]                   | Total number of items stored in the TA5 Digitizer            |
+| TA5 Digitizer Item Name    | 155         | -                      | "\<item name>"          | Configured item type of the TA5 Digitizer                    |
 |                            |             |                        |                         |                                                              |
 |                            |             |                        |                         |                                                              |
 | **=============**          | **====**    | **========**           | **========**            | **For Topics >= 192 the payload is a string**                |
@@ -210,6 +214,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | techage:ta5_fr_controller_pas | 1, 128, 129 |
 | techage:ta5_heatexchanger2 | 1, 128, 129, 135 |
 | techage:ta5_hl_chest | 131, 192 |
+| techage:ta5_digitizer_pas | 1, 65, 67, 128, 129, 154, 155 |
 | techage:ta5_pump | 1, 128, 129 |
 | techage:ta5_tele_pipe | 1, 128, 129 |
 | techage:ta5_tele_tube | 1, 128, 129 |
