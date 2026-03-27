@@ -26,7 +26,21 @@ Documentation: [Wiki](https://github.com/joe7575/beduino/wiki)
 
 ## Dependencies
 
-vm16,  
+**vm16** (required): [GitHub](https://github.com/joe7575/vm16)
+
+Download and install vm16 as described in its README. After copying the mod folder,
+change into the `vm16` directory and install the required Lua library via LuaRocks:
+
+```
+sudo luarocks make --lua-version 5.1
+```
+
+Then add `vm16` to the list of trusted mods in `minetest.conf`:
+
+```
+secure.trusted_mods = vm16
+```
+
 Optional: techage
 
 
