@@ -7,6 +7,7 @@
 | J.Stolberg | 1.0     | Proposal | 22 Oct 2026 |
 | J.Stolberg | 1.1     | Proposal | 24 Oct 2026 |
 | J.Stolberg | 1.2     | Proposal | 24 Oct 2026 |
+| J.Stolberg | 1.3     | Proposal | 24 Oct 2026 |
 
 
 
@@ -118,9 +119,9 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | TA4 Recipe Block Selected  | 157         | -                      | [num]                   | Currently selected recipe slot (1..10)                       |
 | TA4 Recipe Block Output Cnt | 158        | [idx]                  | [num]                   | Output item count of recipe *idx* (0 = empty slot)           |
 | TA4 Recipe Adapter Target  | 160         | -                      | [num]                   | Node number of the machine served by a TA4 Recipe Adapter     |
-| TA4 Recipe Adapter Time    | 196         | [idx]                  | [num]                   | Furnace recipe time in cycles; 0 for the electronic fab       |
-| TA4 Recipe Adapter Inp Cnt | 197         | [idx, slot]            | [num]                   | Number of items for input *slot* of recipe *idx*              |
-| TA4 Recipe Adapter Inp Slots | 198       | [idx]                  | [num]                   | Number of input slots of recipe *idx*                         |
+| TA4 Recipe Adapter Time    | 161         | [idx]                  | [num]                   | Furnace recipe time in cycles; 0 for the electronic fab       |
+| TA4 Recipe Adapter Inp Cnt | 162         | [idx, slot]            | [num]                   | Number of items for input *slot* of recipe *idx*              |
+| TA4 Recipe Adapter Inp Slots | 163       | [idx]                  | [num]                   | Number of input slots of recipe *idx*                         |
 |                            |             |                        |                         |                                                              |
 |                            |             |                        |                         |                                                              |
 | **=============**          | **====**    | **========**           | **========**            | **For Topics >= 192 the payload is a string**                |
@@ -207,7 +208,7 @@ used for different commands on different node types.
 | techage:ta4_pumpjack_pas | 134 |
 | techage:ta4_pusher_pas | 1, 20, 65, 68, 150 |
 | techage:ta4_quarry_pas | 1, 128, 129, 133 |
-| techage:ta4_recipe_adapter, techage:ta4_recipe_adapter_floor, techage:ta4_recipe_adapter_ceiling | 64, 156, 158, 160, 193, 194, 195, 196, 197, 198 |
+| techage:ta4_recipe_adapter, techage:ta4_recipe_adapter_floor, techage:ta4_recipe_adapter_ceiling | 64, 156, 158, 160, 161, 162, 163, 193, 194, 195 |
 | techage:ta4_recipeblock | 156, 157, 158, 193, 194 |
 | techage:ta4_recycler_pas | 1, 128, 129 |
 | techage:ta4_rinser_pas | 1, 128, 129 |
