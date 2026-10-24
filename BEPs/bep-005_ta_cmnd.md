@@ -207,7 +207,7 @@ used for different commands on different node types.
 | techage:ta4_pumpjack_pas | 134 |
 | techage:ta4_pusher_pas | 1, 20, 65, 68, 150 |
 | techage:ta4_quarry_pas | 1, 128, 129, 133 |
-| techage:ta4_recipe_adapter | 64, 156, 158, 160, 193, 194, 195, 196, 197, 198 |
+| techage:ta4_recipe_adapter, techage:ta4_recipe_adapter_floor, techage:ta4_recipe_adapter_ceiling | 64, 156, 158, 160, 193, 194, 195, 196, 197, 198 |
 | techage:ta4_recipeblock | 156, 157, 158, 193, 194 |
 | techage:ta4_recycler_pas | 1, 128, 129 |
 | techage:ta4_rinser_pas | 1, 128, 129 |
