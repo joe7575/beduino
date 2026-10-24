@@ -5,6 +5,7 @@
 | J.Stolberg | 0.8     | Proposal | 31 May 2024 |
 | J.Stolberg | 0.9     | Proposal | 15 Mar 2026 |
 | J.Stolberg | 1.0     | Proposal | 22 Oct 2026 |
+| J.Stolberg | 1.1     | Proposal | 24 Oct 2026 |
 
 
 
@@ -111,10 +112,15 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Water Remover Depth        | 153         | -                      | [depth]                 | Current depth value of a remover (1..80)                     |
 | TA5 Digitizer Item Count   | 154         | -                      | [num]                   | Total number of items stored in the TA5 Digitizer            |
 | TA5 Digitizer Item Name    | 155         | -                      | "\<item name>"          | Configured item type of the TA5 Digitizer                    |
+| TA4 Recipe Block Max       | 156         | -                      | [num]                   | Number of recipe slots of a TA4 Recipe Block (10)            |
+| TA4 Recipe Block Selected  | 157         | -                      | [num]                   | Currently selected recipe slot (1..10)                       |
+| TA4 Recipe Block Output Cnt | 158        | [idx]                  | [num]                   | Output item count of recipe *idx* (0 = empty slot)           |
 |                            |             |                        |                         |                                                              |
 |                            |             |                        |                         |                                                              |
 | **=============**          | **====**    | **========**           | **========**            | **For Topics >= 192 the payload is a string**                |
 | Chest Item Count           | 192         | "\<item name>"         | [num]                   | For TA3/TA4/TA5 chest or shop<br />Read the number of items of the given item name.<br /> `<item name>` can be a substring of the item name. |
+| TA4 Recipe Block Output Name | 193       | "idx"                  | "\<item name>"          | Output item name of recipe *idx* (1..10); empty string = empty slot |
+| TA4 Recipe Block Input Name | 194        | "idx,slot"             | "\<item name>"          | Input item name of recipe *idx*, slot *slot* (1..9); empty string = free slot |
 |                            |             |                        |                         |                                                              |
 
 
@@ -194,6 +200,7 @@ used for different commands on different node types.
 | techage:ta4_pumpjack_pas | 134 |
 | techage:ta4_pusher_pas | 1, 20, 65, 68, 150 |
 | techage:ta4_quarry_pas | 1, 128, 129, 133 |
+| techage:ta4_recipeblock | 156, 157, 158, 193, 194 |
 | techage:ta4_recycler_pas | 1, 128, 129 |
 | techage:ta4_rinser_pas | 1, 128, 129 |
 | techage:ta4_sensor_chest | 66, 131, 138 |
