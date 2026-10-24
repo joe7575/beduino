@@ -8,6 +8,7 @@
 | J.Stolberg | 1.1     | Proposal | 24 Oct 2026 |
 | J.Stolberg | 1.2     | Proposal | 24 Oct 2026 |
 | J.Stolberg | 1.3     | Proposal | 24 Oct 2026 |
+| J.Stolberg | 1.4     | Proposal | 24 Oct 2026 |
 
 
 
@@ -35,6 +36,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | DC2 Set to2                | 9           | [5, idx]               | TA3 Door Controller II. Set the block at slot *idx* to state 2 (exchange state). |
 | Autocrafter                | 10          | [num1, num2, idx]      | Set the TA4 Autocrafter recipe with a recipe from a TA4 Recipe Block.<br/>*num1/num2* is the TA4 Recipe Block number (num1 * 65536 + num2)<br/>*idx* is the number of the recipe in the TA4 Recipe Block |
 | Autocrafter                | 11          | -                      | Move all items from input inventory to output inventory. Returns 1 if the input inventory was emptied in the process. Otherwise return 0 |
+| Furnace                    | 11          | -                      | Move all leftover items from the input (`src`) inventory to the output (`dst`) inventory, e.g. after an aborted recipe. Refused while a recipe is running. Returns 1 if the input inventory was emptied, otherwise 0 |
 | Move Contr. 1              | 11          | [1]                    | TA4 Move Controller command to move the block(s) from position A to B |
 | Move Contr. 2              | 11          | [2]                    | TA4 Move Controller command to move the block(s) from position B to A |
 | Move Contr. 3              | 11          | [3]                    | TA4 Move Controller command to move the block(s) to the opposite position |
