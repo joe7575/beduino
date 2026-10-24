@@ -56,7 +56,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Color                      | 22          | [color]                | Set the color of the TechAge Color Lamp and TechAge Color Lamp 2 (color = 0..255) |
 | Multi Button               | 23          | [num, state]           | Turn button (TA4 2x Button, TA4 4x Button) on/off<br />*num* is the button number (1..4), *state* is the state: 0 = "off", 1 = "on" |
 | **=============**          | **====**    | **========**           | **For Topics >=64 the payload is a string**                  |
-| TA4 Recipe Adapter Select  | 64          | "<idx>"                | -                       | Select recipe *idx* on the adapter's target (electronic fab) |
+| TA4 Recipe Adapter Select  | 64          | "<idx>"                | -                       | Select recipe *idx* on the adapter's target (furnace output or electronic fab recipe) |
 | Config TA4 Pusher          | 65          | "\<item name>"         | Configure the TA4 pusher.<br />Example: `wool:blue`          |
 | TA5 Digitizer Config Item  | 65          | "\<item name>"         | Set the configured item type of the TA5 Digitizer            |
 | Sensor Chest Text          | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
