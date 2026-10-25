@@ -9,6 +9,7 @@
 | J.Stolberg | 1.2     | Proposal | 24 Oct 2026 |
 | J.Stolberg | 1.3     | Proposal | 24 Oct 2026 |
 | J.Stolberg | 1.4     | Proposal | 24 Oct 2026 |
+| J.Stolberg | 1.5     | Proposal | 24 Oct 2026 |
 
 
 
@@ -58,7 +59,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Color                      | 22          | [color]                | Set the color of the TechAge Color Lamp and TechAge Color Lamp 2 (color = 0..255) |
 | Multi Button               | 23          | [num, state]           | Turn button (TA4 2x Button, TA4 4x Button) on/off<br />*num* is the button number (1..4), *state* is the state: 0 = "off", 1 = "on" |
 | **=============**          | **====**    | **========**           | **For Topics >=64 the payload is a string**                  |
-| TA4 Recipe Adapter Select  | 64          | "<idx>"                | -                       | Select recipe *idx* on the adapter's target (furnace output or electronic fab recipe) |
+| Recipe Select (Adapter/Fab)| 64          | "<idx>"                | -                       | Select recipe *idx*: on a TA4 Recipe Adapter's target (furnace output or fab recipe) or directly on a TA4 Electronic Fab |
 | Config TA4 Pusher          | 65          | "\<item name>"         | Configure the TA4 pusher.<br />Example: `wool:blue`          |
 | TA5 Digitizer Config Item  | 65          | "\<item name>"         | Set the configured item type of the TA5 Digitizer            |
 | Sensor Chest Text          | 66          | "text string"          | Text to be used for the Sensor Chest menu                    |
@@ -117,20 +118,20 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Water Remover Depth        | 153         | -                      | [depth]                 | Current depth value of a remover (1..80)                     |
 | TA5 Digitizer Item Count   | 154         | -                      | [num]                   | Total number of items stored in the TA5 Digitizer            |
 | TA5 Digitizer Item Name    | 155         | -                      | "\<item name>"          | Configured item type of the TA5 Digitizer                    |
-| TA4 Recipe Block Max       | 156         | -                      | [num]                   | Number of recipe slots of a TA4 Recipe Block (10)            |
+| TA4 Recipe Block Max       | 156         | -                      | [num]                   | Number of recipe slots of a TA4 Recipe Block (10), or number of recipes of a TA4 Electronic Fab / Recipe Adapter |
 | TA4 Recipe Block Selected  | 157         | -                      | [num]                   | Currently selected recipe slot (1..10)                       |
-| TA4 Recipe Block Output Cnt | 158        | [idx]                  | [num]                   | Output item count of recipe *idx* (0 = empty slot)           |
-| TA4 Recipe Adapter Target  | 160         | -                      | [num]                   | Node number of the machine served by a TA4 Recipe Adapter     |
+| TA4 Recipe Block Output Cnt | 158        | [idx]                  | [num]                   | Output item count of recipe *idx* (0 = empty slot); also for electronic fabs |
+| TA4 Recipe Adapter Target  | 160         | -                      | [num]                   | Node number of the machine served by a TA4 Recipe Adapter; for an electronic fab, the fab's own node number |
 | TA4 Recipe Adapter Time    | 161         | [idx]                  | [num]                   | Furnace recipe time in cycles; 0 for the electronic fab       |
-| TA4 Recipe Adapter Inp Cnt | 162         | [idx, slot]            | [num]                   | Number of items for input *slot* of recipe *idx*              |
-| TA4 Recipe Adapter Inp Slots | 163       | [idx]                  | [num]                   | Number of input slots of recipe *idx*                         |
+| TA4 Recipe Adapter Inp Cnt | 162         | [idx, slot]            | [num]                   | Number of items for input *slot* of recipe *idx* (adapter and electronic fab) |
+| TA4 Recipe Adapter Inp Slots | 163       | [idx]                  | [num]                   | Number of input slots of recipe *idx* (adapter and electronic fab) |
 |                            |             |                        |                         |                                                              |
 |                            |             |                        |                         |                                                              |
 | **=============**          | **====**    | **========**           | **========**            | **For Topics >= 192 the payload is a string**                |
 | Chest Item Count           | 192         | "\<item name>"         | [num]                   | For TA3/TA4/TA5 chest or shop<br />Read the number of items of the given item name.<br /> `<item name>` can be a substring of the item name. |
-| TA4 Recipe Block Output Name | 193       | "idx"                  | "\<item name>"          | Output item name of recipe *idx* (1..10); empty string = empty slot |
-| TA4 Recipe Block Input Name | 194        | "idx,slot"             | "\<item name>"          | Input item name of recipe *idx*, slot *slot* (1..9); empty string = free slot. Also used by the TA4 Recipe Adapter. |
-| TA4 Recipe Adapter Find    | 195        | "name"                 | [idx]                   | Recipe index for the given output item name (0 = not found)   |
+| TA4 Recipe Block Output Name | 193       | "idx"                  | "\<item name>"          | Output item name of recipe *idx* (1..10); empty string = empty slot. Also used by the TA4 Electronic Fab / Recipe Adapter. |
+| TA4 Recipe Block Input Name | 194        | "idx,slot"             | "\<item name>"          | Input item name of recipe *idx*, slot *slot* (1..9); empty string = free slot. Also used by the TA4 Electronic Fab / Recipe Adapter. |
+| TA4 Recipe Adapter Find    | 195        | "name"                 | [idx]                   | Recipe index for the given output item name (0 = not found); also for electronic fabs |
 |                            |             |                        |                         |                                                              |
 
 
@@ -162,7 +163,7 @@ used for different commands on different node types.
 | techage:ta3_doorcontroller | 1 |
 | techage:ta3_doorcontroller2 | 1, 9, 147 |
 | techage:ta3_drillbox_pas | 1, 128, 129 |
-| techage:ta3_electronic_fab_pas | 1, 128, 129 |
+| techage:ta3_electronic_fab_pas | 1, 64, 128, 129, 156, 158, 160, 161, 162, 163, 193, 194, 195 |
 | techage:ta3_furnace_pas | 1, 128, 129, 141 |
 | techage:ta3_grinder_pas | 1, 128, 129 |
 | techage:ta3_injector_pas | 1, 128, 129 |
@@ -196,7 +197,7 @@ used for different commands on different node types.
 | techage:ta4_doser | 1, 128, 129 |
 | techage:ta4_electricmeter | 1, 128, 129, 146 |
 | techage:ta4_electrolyzer | 1, 128, 129, 134, 135 |
-| techage:ta4_electronic_fab_pas | 1, 128, 129 |
+| techage:ta4_electronic_fab_pas | 1, 64, 128, 129, 156, 158, 160, 161, 162, 163, 193, 194, 195 |
 | techage:ta4_fuelcell | 1, 128, 129, 134, 135 |
 | techage:ta4_grinder_pas | 1, 128, 129 |
 | techage:ta4_icta_controller | 1, 129 |
