@@ -10,6 +10,7 @@
 | J.Stolberg | 1.3     | Proposal | 24 Oct 2026 |
 | J.Stolberg | 1.4     | Proposal | 24 Oct 2026 |
 | J.Stolberg | 1.5     | Proposal | 24 Oct 2026 |
+| J.Stolberg | 1.6     | Proposal | 24 Oct 2026 |
 
 
 
@@ -66,7 +67,7 @@ See [Techage related functions](https://github.com/joe7575/beduino/blob/main/man
 | Display Add Line           | 67          | "text string"          | Add a new line to the display and scroll if necessary        |
 | Distributor Filter Config  | 67          | "\<slot> \<item list>" | Configure a Distributor filter slot, like: "red default:dirt dye:blue" |
 | TA5 Digitizer Mode         | 67          | "1" or "2"             | Set the TA5 Digitizer operating mode: "1" = pull, "2" = push |
-| Display Write Line         | 68          | "\<num>text string"    | Overwrite a text line with the given string.<br />The first string character is the line number (1..5)<br />Examples: "1Hello World", "2Minetest" |
+| Display Write Line         | 68          | "\<row> \<text>"      | Overwrite a text line with the given string.<br />*row* is the line number (1..n), separated from the text by a space.<br />Examples: "1 Hello World", "2 Minetest" |
 
 The same topic number can mean different commands on different node types; the
 target node decides.
